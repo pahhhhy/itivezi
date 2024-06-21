@@ -1,0 +1,27 @@
+bootstrap
+https://getbootstrap.jp/
+
+vue firebase 連携
+https://qiita.com/zono345/items/27744ef00b97b0cd8886
+https://zenn.dev/fijii_rin/articles/9ee59f6f650102
+firebase test
+https://console.firebase.google.com/u/0/project/itivezi-test/overview
+
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+apiKey: "AIzaSyBBV7mFElRfVl1UH2-eTKf0_T4wQDG1aIY",
+authDomain: "itivezi-test.firebaseapp.com",
+projectId: "itivezi-test",
+storageBucket: "itivezi-test.appspot.com",
+messagingSenderId: "493574009593",
+appId: "1:493574009593:web:161b460a1136ff9111a828",
+measurementId: "G-F6Z603BQKD"
+};
+

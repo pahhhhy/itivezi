@@ -5,7 +5,7 @@ import { createPinia } from 'pinia'
 
 import App from './App.vue'
 import router from './router'
-
+import './firebase/firebase'
 // bootstrapの導入
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-icons/font/bootstrap-icons.css'
