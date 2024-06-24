@@ -8,4 +8,24 @@
       "path": "./tsconfig.app.json"
     }
   ]
+  // "compilerOptions": {
+  //   "target": "esnext",
+  //   "module": "esnext",
+  //   "strict": true,
+  //   "jsx": "preserve",
+  //   "importHelpers": true,
+  //   "moduleResolution": "node",
+  //   "experimentalDecorators": true,
+  //   "skipLibCheck": true,
+  //   "forceConsistentCasingInFileNames": true,
+  //   "resolveJsonModule": true,
+  //   "esModuleInterop": true,
+  //   "noImplicitAny": false,
+  //   "lib": ["esnext", "dom"],
+  //   "baseUrl": ".",
+  //   "paths": {
+  //     "@/*": ["src/*"]
+  //   }
+  // },
+  // "include": ["src/**/*"]
 }
