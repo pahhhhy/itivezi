@@ -32,7 +32,11 @@ const ClickBarger = (): void => {
       </li>
       <li>
         <i class="bi bi-journals"></i>
-        <RouterLink v-bind:to="{ name: 'orderpage' }" class="link">マイページ</RouterLink>
+        <RouterLink v-bind:to="{ name: 'Registration' }" class="link">登録</RouterLink>
+      </li>
+      <li>
+        <i class="bi bi-journals"></i>
+        <RouterLink v-bind:to="{ name: 'mypage' }" class="link">マイページ</RouterLink>
       </li>
     </ul>
   </aside>
