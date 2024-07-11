@@ -37,8 +37,9 @@ onMounted(() => {
   const auth = getAuth()
   // ログインしているユーザーを取得する
   onAuthStateChanged(auth, (user) => {
-    if (user != null) {
+    if (user != null && user.emailVerified) {
       currentUser.value = user
+      console.log('読み込みました')
     } else {
       currentUser.value = null
     }
@@ -49,7 +50,9 @@ onMounted(() => {
 <template>
   <header>
     <img src="..\\assets\\itivezilogo.png" alt="" />
+
     <nav>
+      <p v-if="currentUser != null">{{ currentUser.displayName }}様</p>
       <i v-if="!Isbarger" v-on:click="ClickBarger" class="bi bi-justify barger"></i>
       <i v-if="Isbarger" v-on:click="ClickBarger" class="bi bi-x-lg barger"></i>
     </nav>
@@ -76,9 +79,9 @@ onMounted(() => {
         <i class="bi bi-journals"></i>
         <RouterLink v-bind:to="{ name: 'rogin' }" class="link">ログイン/新規登録</RouterLink>
       </li>
-      <li v-if="currentUser != null">
+      <li v-if="currentUser != null" style="display: flex">
         <i class="bi bi-journals"></i>
-        <p @click="rogout" class="link">ログアウト</p>
+        <p @click="rogout" class="link" style="margin: auto 0">ログアウト</p>
       </li>
     </ul>
   </aside>
