@@ -238,6 +238,7 @@ function updateVegeMoney(value: number, index: number) {
           aria-label="Default select example"
           v-model="VegetankaList[index]"
         >
+          <!-- 選択式ではなく野菜を決めた時点でその野菜に対応した単位を決めてしまった方が良かった -->
           <option selected value="0" disabled hidden>単位</option>
           <option
             v-for="(Vegename, index) in VegetankaTempList"

@@ -186,7 +186,7 @@ function changeMoney(money: number) {
     <h1>注文画面</h1>
   </div>
 
-  <div class="database">
+  <!-- <div class="database">
     <h1>My Firebase</h1>
     <div v-if="vegeData == null">Loading…</div>
     <div v-else>{{ VegeAllData }}</div>
@@ -201,7 +201,7 @@ function changeMoney(money: number) {
   </button>
   <button v-on:click="DeleteVegedata('テスト野菜2')" class="writebutton">
     押すとデータが消されるよ
-  </button>
+  </button> -->
   <!-- 野菜の選択 -->
   <section v-show="Stepnum == 0">
     <h1>野菜を選択してください</h1>

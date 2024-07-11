@@ -3,6 +3,9 @@ import OrderPage from '../views/orderPage.vue'
 import AppTop from '../views/AppTop.vue'
 import RegistrationPage from '../views/RegistrationPage.vue'
 import MyPage from '../views/myPage.vue'
+import Signup from '../views/signupPage.vue'
+import Rogin from '../views/roginPage.vue'
+import FinishRogin from '../views/FinishSignup.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -25,6 +28,21 @@ const router = createRouter({
       path: '/mypage',
       name: 'mypage',
       component: MyPage
+    },
+    {
+      path: '/signup',
+      name: 'signup',
+      component: Signup
+    },
+    {
+      path: '/rogin',
+      name: 'rogin',
+      component: Rogin
+    },
+    {
+      path: '/finishsignup',
+      name: 'finishsignup',
+      component: FinishRogin
     }
   ]
 })

@@ -1,8 +1,16 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
+import {
+  getAuth,
+  signOut,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  type User
+} from 'firebase/auth'
 const Isbarger = ref(false)
-
+const currentUser = ref<User | null>(null)
 const ClickBarger = (): void => {
   if (Isbarger.value) {
     Isbarger.value = false
@@ -10,6 +18,32 @@ const ClickBarger = (): void => {
     Isbarger.value = true
   }
 }
+const auth = getAuth()
+function rogout() {
+  signOut(auth)
+    .then(() => {
+      // Sign-out successful.
+      console.log('ログアウトしました')
+    })
+    .catch((error) => {
+      // An error happened.
+      const errorCode = error.code
+      const errorMessage = error.message
+      console.log(errorCode, errorMessage)
+    })
+}
+
+onMounted(() => {
+  const auth = getAuth()
+  // ログインしているユーザーを取得する
+  onAuthStateChanged(auth, (user) => {
+    if (user != null) {
+      currentUser.value = user
+    } else {
+      currentUser.value = null
+    }
+  })
+})
 </script>
 
 <template>
@@ -37,6 +71,14 @@ const ClickBarger = (): void => {
       <li>
         <i class="bi bi-journals"></i>
         <RouterLink v-bind:to="{ name: 'mypage' }" class="link">マイページ</RouterLink>
+      </li>
+      <li v-if="currentUser == null">
+        <i class="bi bi-journals"></i>
+        <RouterLink v-bind:to="{ name: 'rogin' }" class="link">ログイン/新規登録</RouterLink>
+      </li>
+      <li v-if="currentUser != null">
+        <i class="bi bi-journals"></i>
+        <p @click="rogout" class="link">ログアウト</p>
       </li>
     </ul>
   </aside>

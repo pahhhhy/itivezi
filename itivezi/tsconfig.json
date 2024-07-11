@@ -7,25 +7,23 @@
     {
       "path": "./tsconfig.app.json"
     }
-  ]
-  // "compilerOptions": {
-  //   "target": "esnext",
-  //   "module": "esnext",
-  //   "strict": true,
-  //   "jsx": "preserve",
-  //   "importHelpers": true,
-  //   "moduleResolution": "node",
-  //   "experimentalDecorators": true,
-  //   "skipLibCheck": true,
-  //   "forceConsistentCasingInFileNames": true,
-  //   "resolveJsonModule": true,
-  //   "esModuleInterop": true,
-  //   "noImplicitAny": false,
-  //   "lib": ["esnext", "dom"],
-  //   "baseUrl": ".",
-  //   "paths": {
-  //     "@/*": ["src/*"]
-  //   }
-  // },
-  // "include": ["src/**/*"]
+  ],
+
+  "compilerOptions": {
+    // 他のオプション
+    "strict": true,
+    // 必要に応じて追加のオプションを有効にする
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "types": ["vite/client", "@vue/vue3"]
+  }
 }
