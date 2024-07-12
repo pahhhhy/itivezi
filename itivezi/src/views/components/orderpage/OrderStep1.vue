@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-const Step1error = ref<boolean>(false)
-const selectedVege = ref<number[]>([])
+
 interface Porps {
   vegekeys: string[]
+  SelectVegelist: number[]
 }
 interface Emits {
   (event: 'OnStep', Next: boolean): void
@@ -11,6 +11,8 @@ interface Emits {
 }
 const emit = defineEmits<Emits>()
 const porps = defineProps<Porps>()
+const Step1error = ref<boolean>(false)
+const selectedVege = ref<number[]>(porps.SelectVegelist)
 function onStep(Next: boolean) {
   if (selectedVege.value.length == 0) {
     Step1error.value = true
@@ -45,7 +47,7 @@ function changeVege() {
       </div>
     </div>
 
-    <p>Selected Vegetables: {{ selectedVege }}</p>
+    <p>Selected Vegetables: {{ SelectVegelist }}</p>
     <h1 style="color: red" v-show="Step1error && selectedVege.length == 0">
       野菜を選択してください
     </h1>

@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { initializeApp } from 'firebase/app'
-import { getAnalytics } from 'firebase/analytics'
 import { getDatabase, ref, child, get, onValue, set, remove } from 'firebase/database'
 //Vueとfirebaseで同じrefという関数があって競合しているのでVueの方をVuerefにしている
 import { ref as Vueref, computed } from 'vue'
-import { idText } from 'typescript'
+
 import OrderStep1 from './components/orderpage/OrderStep1.vue'
+import OrderStep2 from './components/orderpage/OrderStep2.vue'
 const vegeData = Vueref<any>(ReadData('テスト野菜2'))
 const VegeAllData = Vueref<any>(ReadData(''))
 
@@ -104,13 +103,8 @@ const Step2Num = Vueref<number>(0)
 const SelectVegelist = Vueref<number[]>([])
 const SelectVege = Vueref<number>(0)
 const SelectMen = Vueref<number>(0)
+const SelectMenlist = Vueref<string[]>([])
 const selectedDate = Vueref<Date | null>(null)
-
-// const now = new Date()
-// const year = now.getFullYear()
-// const month = Number(now.getMonth() + 1) // 月は0から始まるため+1
-// const day = Number(now.getDate() + 1)
-// const currentDate = Vueref<Date>(new Date(year, month, day))
 function OnStep(Next: boolean) {
   console.log('oya')
   if (Next) {
@@ -119,8 +113,12 @@ function OnStep(Next: boolean) {
     Stepnum.value = Stepnum.value - 1
   }
 }
+//子要素からのデータの受け取り
 function changeVege(element: number[]) {
   SelectVegelist.value = element
+}
+function chagemen(element: string[]) {
+  SelectMenlist.value = element
 }
 function onStep(Next: boolean) {
   switch (Stepnum.value) {
@@ -176,37 +174,25 @@ function changeMoney(money: number) {
   <div class="title">
     <h1>注文画面</h1>
   </div>
+  <!-- <h2>{{ VegeAllData }}</h2> -->
+  <h2>{{ SelectVegelist }}</h2>
   <OrderStep1
     v-bind:vegekeys="vegekeys"
+    v-bind:SelectVegelist="SelectVegelist"
     v-on:OnStep="OnStep"
     v-on:changeVege="changeVege"
-    v-show="Stepnum == 0"
+    v-if="Stepnum == 0"
   ></OrderStep1>
 
   <!-- 生産者の設定 -->
-  <section v-show="Stepnum == 1">
-    <h1>Step2</h1>
-    <h1>{{ vegekeys[SelectVege] }}</h1>
-    <select class="form-select" aria-label="Default select example" v-model="Step2Num">
-      <option selected value="0" disabled hidden>生産者の選択してください</option>
-      <option
-        v-for="(Vegeelement, index) in VegeAllData[vegekeys[SelectVege]]"
-        v-bind:key="index"
-        v-bind:value="index + 1"
-      >
-        {{ VegeAllData[vegekeys[SelectVege]][index].s }}
-      </option>
-    </select>
-    <p>SelectMen：{{ SelectMen }}</p>
-    <p>step2Num：{{ Step2Num }}</p>
-    <p>野菜：{{ vegekeys[SelectVege] }}</p>
-    <p>生産者：{{ VegeAllData[vegekeys[SelectVege]][SelectMen].s }}</p>
-    <h3 v-show="Step2Num != 0">単位:{{ VegeAllData[vegekeys[SelectVege]][SelectMen].unit }}</h3>
-    <h3 v-show="Step2Num != 0">単価:{{ VegeAllData[vegekeys[SelectVege]][SelectMen].en }}円</h3>
-    <h1 style="color: red" v-show="Step2error && SelectMen == 0">生産者を選択してください</h1>
-    <button v-on:click="onStep(true)" class="btn btn-primary">次へ</button>
-    <button v-on:click="onStep(false)" class="btn btn-primary">戻る</button>
-  </section>
+  <OrderStep2
+    v-bind:vegealldata="VegeAllData"
+    v-bind:Selectvege="SelectVegelist"
+    v-bind:vegekeys="vegekeys"
+    v-on:OnStep="onStep"
+    v-on:changemen="chagemen"
+    v-if="Stepnum == 1"
+  ></OrderStep2>
   <!-- 日付・個数の指定 -->
   <section v-show="Stepnum == 2">
     <h1>Step3</h1>
