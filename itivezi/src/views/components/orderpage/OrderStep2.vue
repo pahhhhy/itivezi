@@ -4,6 +4,7 @@ interface Porps {
   vegekeys: string[]
   Selectvege: number[]
   vegealldata: { [key: string]: any[] }
+  Selectmen: string[]
 }
 interface Emits {
   (event: 'OnStep', Next: boolean): void
@@ -12,12 +13,15 @@ interface Emits {
 const emit = defineEmits<Emits>()
 const porps = defineProps<Porps>()
 const selectmen = ref<string[]>(new Array(porps.Selectvege.length).fill(''))
+//個と親の変数を同じにしたい。でもこっちはSelectVegeの長さによって初期値が違うのでこのやり方で行う
+for (let i: number = 0; i < porps.Selectmen.length; i++) {
+  selectmen.value[i] = porps.Selectmen[i]
+}
+
 const Step2Num = ref<number[]>(new Array(porps.Selectvege.length).fill(-1))
 const Step2error = ref<boolean>(false)
 function changemen(index: number, SMEN: number, key: string) {
-  console.log(SMEN)
   selectmen.value[index] = porps.vegealldata[key][SMEN].s
-
   emit('changemen', selectmen.value)
 }
 function onStep(Next: boolean) {
@@ -38,6 +42,7 @@ function onStep(Next: boolean) {
   <section>
     <h1>Step2</h1>
     <article v-for="(element, index) in porps.Selectvege" v-bind:key="element">
+      <!-- 戻ってきたときにformに選択されていないバグがあるが治し方がわからん -->
       <h1>{{ porps.vegekeys[element] }}</h1>
       <select
         class="form-select"

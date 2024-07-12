@@ -175,7 +175,7 @@ function changeMoney(money: number) {
     <h1>注文画面</h1>
   </div>
   <!-- <h2>{{ VegeAllData }}</h2> -->
-  <h2>{{ SelectVegelist }}</h2>
+  <!-- <h2>{{ SelectVegelist }}</h2> -->
   <OrderStep1
     v-bind:vegekeys="vegekeys"
     v-bind:SelectVegelist="SelectVegelist"
@@ -188,8 +188,9 @@ function changeMoney(money: number) {
   <OrderStep2
     v-bind:vegealldata="VegeAllData"
     v-bind:Selectvege="SelectVegelist"
+    v-bind:-selectmen="SelectMenlist"
     v-bind:vegekeys="vegekeys"
-    v-on:OnStep="onStep"
+    v-on:OnStep="OnStep"
     v-on:changemen="chagemen"
     v-if="Stepnum == 1"
   ></OrderStep2>
