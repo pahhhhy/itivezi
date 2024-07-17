@@ -195,12 +195,15 @@ function changeMoney(money: number) {
     v-if="Stepnum == 1"
   ></OrderStep2>
   <!-- 日付・個数の指定 -->
-  <section v-show="Stepnum == 2">
+  <section v-if="Stepnum == 2">
     <h1>Step3</h1>
-    <h1>{{ vegekeys[SelectVege] }}</h1>
-    <p>生産者：{{ VegeAllData[vegekeys[SelectVege]][SelectMen].s }}</p>
-    <h3 v-show="Step2Num != 0">単位:{{ VegeAllData[vegekeys[SelectVege]][SelectMen].unit }}</h3>
-    <h3 v-show="Step2Num != 0">単価:{{ VegeAllData[vegekeys[SelectVege]][SelectMen].en }}円</h3>
+    <article v-for="(element, index) in SelectVege" v-bind:key="index">
+      <h1>{{ vegekeys[element] }}</h1>
+      <p>生産者：{{ VegeAllData[vegekeys[SelectVege]][SelectMen].s }}</p>
+      <h3 v-show="Step2Num != 0">単位:{{ VegeAllData[vegekeys[SelectVege]][SelectMen].unit }}</h3>
+      <h3 v-show="Step2Num != 0">単価:{{ VegeAllData[vegekeys[SelectVege]][SelectMen].en }}円</h3>
+    </article>
+
     <!-- スクロールで値が変わるのと０以下を書くことができるのがまずい -->
     <input
       class="form-control"
@@ -229,8 +232,8 @@ function changeMoney(money: number) {
     <button v-on:click="onStep(true)" class="btn btn-primary">次へ</button>
     <button v-on:click="onStep(false)" class="btn btn-primary">戻る</button>
   </section>
+  <!-- 確認・送信画面 -->
   <section v-show="Stepnum == 3">
-    <!-- 確認・送信画面 -->
     <h1>Step4</h1>
     <h1>{{ vegekeys[SelectVege] }}</h1>
     <h1>生産者：{{ VegeAllData[vegekeys[SelectVege]][SelectMen].s }}</h1>

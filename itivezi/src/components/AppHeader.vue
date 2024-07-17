@@ -63,15 +63,15 @@ onMounted(() => {
         <i class="bi bi-journals"></i>
         <RouterLink v-bind:to="{ name: 'AppTop' }" class="link">Top</RouterLink>
       </li>
-      <li>
+      <li v-if="currentUser != null">
         <i class="bi bi-journals"></i>
         <RouterLink v-bind:to="{ name: 'orderpage' }" class="link">注文</RouterLink>
       </li>
-      <li>
+      <li v-if="currentUser != null">
         <i class="bi bi-journals"></i>
         <RouterLink v-bind:to="{ name: 'Registration' }" class="link">登録</RouterLink>
       </li>
-      <li>
+      <li v-if="currentUser != null">
         <i class="bi bi-journals"></i>
         <RouterLink v-bind:to="{ name: 'mypage' }" class="link">マイページ</RouterLink>
       </li>

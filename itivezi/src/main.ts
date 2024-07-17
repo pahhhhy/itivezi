@@ -2,7 +2,7 @@ import './assets/main.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-
+import { getAuth, signOut, onAuthStateChanged, type User } from 'firebase/auth'
 import App from './App.vue'
 import router from './router'
 import './firebase/firebase'

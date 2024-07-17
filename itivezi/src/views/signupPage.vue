@@ -131,7 +131,9 @@ onMounted(() => {
     登録する
   </button>
   <section class="popup" v-show="Ispopup">
-    <h1>メールアドレスの確認メールをおくりました。<br />メールを確認してください</h1>
+    <h1>
+      メールアドレスの確認メールをおくりました。<br />メールを確認してください<br />認証しないとログインできません
+    </h1>
     <button><RouterLink v-bind:to="{ name: 'rogin' }">戻る</RouterLink></button>
   </section>
 </template>

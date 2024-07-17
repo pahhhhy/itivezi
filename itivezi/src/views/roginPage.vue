@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
+import router from '../router'
 import {
   getAuth,
   signOut,
@@ -9,14 +10,25 @@ import {
   sendEmailVerification,
   type User
 } from 'firebase/auth'
-import { ref, onMounted } from 'vue'
-
+import { getDatabase, ref as Fireref, child, get, onValue, set, remove } from 'firebase/database'
+import { ref as Vueref, onMounted } from 'vue'
 import rogin_form from './components/rogin_form.vue'
 // ログインしているユーザーデータ
-const currentUser = ref<User | null>(null)
-const Email = ref<string>('')
-const Password = ref<string>('')
-const errorMes = ref<string>('')
+const currentUser = Vueref<User | null>()
+const Email = Vueref<string>('')
+const Password = Vueref<string>('')
+const errorMes = Vueref<string>('')
+const UserData = Vueref<any>(ReadUserData(''))
+
+// 読み込むデータの指定
+function ReadUserData(element: string) {
+  const CountRef = Fireref(getDatabase(), 'testUser/' + element)
+  const Data = Vueref<any>(null)
+  onValue(CountRef, (snapshot) => {
+    Data.value = snapshot.val()
+  })
+  return Data
+}
 // サインイン処理
 function signin(email: string, password: string) {
   // メールアドレスとパスワードが入力されているかを確認
@@ -30,6 +42,15 @@ function signin(email: string, password: string) {
         // メールアドレスが認証済みの場合の処理
         console.log('User signed in:', user)
         errorMes.value = ''
+        if (currentUser.value != null) {
+          let CUserData: User = currentUser.value
+          if (UserData.value[CUserData.uid] == null) {
+            router.push('/Add_Info')
+          }
+        } else {
+          console.log('currentUserがnull')
+          router.push('/')
+        }
       } else {
         // メールアドレスが未認証の場合の処理
         console.log('Email not verified')
@@ -77,10 +98,12 @@ onMounted(() => {
     }
   })
 })
+console.log(UserData.value)
 </script>
 <template>
   <div class="title">
     <h1>ログイン</h1>
+    <h2></h2>
   </div>
   <rogin_form v-on:OnInput="OnInput"></rogin_form>
   <h1>{{ Email }}</h1>

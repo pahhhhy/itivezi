@@ -5,7 +5,7 @@ import RegistrationPage from '../views/RegistrationPage.vue'
 import MyPage from '../views/myPage.vue'
 import Signup from '../views/signupPage.vue'
 import Rogin from '../views/roginPage.vue'
-import FinishRogin from '../views/FinishSignup.vue'
+import Addinfo from '../views/Add_Info.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -40,9 +40,9 @@ const router = createRouter({
       component: Rogin
     },
     {
-      path: '/finishsignup',
-      name: 'finishsignup',
-      component: FinishRogin
+      path: '/Add_Info',
+      name: 'Add_Info',
+      component: Addinfo
     }
   ]
 })
