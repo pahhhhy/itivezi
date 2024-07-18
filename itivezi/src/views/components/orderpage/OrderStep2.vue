@@ -5,24 +5,26 @@ interface Porps {
   Selectvege: number[]
   vegealldata: { [key: string]: any[] }
   Selectmen: string[]
+  Selectmennum: number[]
 }
 interface Emits {
   (event: 'OnStep', Next: boolean): void
-  (event: 'changemen', element: string[]): void
+  (event: 'changemen', element: string[], number: number[]): void
 }
 const emit = defineEmits<Emits>()
 const porps = defineProps<Porps>()
 const selectmen = ref<string[]>(new Array(porps.Selectvege.length).fill(''))
+const Step2Num = ref<number[]>(new Array(porps.Selectvege.length).fill(-1))
+const Step2error = ref<boolean>(false)
 //個と親の変数を同じにしたい。でもこっちはSelectVegeの長さによって初期値が違うのでこのやり方で行う
 for (let i: number = 0; i < porps.Selectmen.length; i++) {
   selectmen.value[i] = porps.Selectmen[i]
+  Step2Num.value[i] = porps.Selectmennum[i]
 }
 
-const Step2Num = ref<number[]>(new Array(porps.Selectvege.length).fill(-1))
-const Step2error = ref<boolean>(false)
 function changemen(index: number, SMEN: number, key: string) {
   selectmen.value[index] = porps.vegealldata[key][SMEN].s
-  emit('changemen', selectmen.value)
+  emit('changemen', selectmen.value, Step2Num.value)
 }
 function onStep(Next: boolean) {
   if (!Next) {

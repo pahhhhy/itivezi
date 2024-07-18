@@ -5,6 +5,7 @@ import { ref as Vueref, computed } from 'vue'
 
 import OrderStep1 from './components/orderpage/OrderStep1.vue'
 import OrderStep2 from './components/orderpage/OrderStep2.vue'
+import OrderStep3 from './components/orderpage/OrderStep3.vue'
 const vegeData = Vueref<any>(ReadData('テスト野菜2'))
 const VegeAllData = Vueref<any>(ReadData(''))
 
@@ -104,6 +105,7 @@ const SelectVegelist = Vueref<number[]>([])
 const SelectVege = Vueref<number>(0)
 const SelectMen = Vueref<number>(0)
 const SelectMenlist = Vueref<string[]>([])
+const SelectMenlistnum = Vueref<number[]>([])
 const selectedDate = Vueref<Date | null>(null)
 function OnStep(Next: boolean) {
   console.log('oya')
@@ -117,24 +119,17 @@ function OnStep(Next: boolean) {
 function changeVege(element: number[]) {
   SelectVegelist.value = element
 }
-function chagemen(element: string[]) {
+function chagemen(element: string[], num: number[]) {
   SelectMenlist.value = element
+  SelectMenlistnum.value = num
+}
+function changecount(count: number[], money: number) {
+  vegeCountList.value = count
+  AllTotalmoney.value = money
+  console.log('親は受け取った')
 }
 function onStep(Next: boolean) {
   switch (Stepnum.value) {
-    //Step2
-    case 1:
-      if (!Next) {
-        Stepnum.value = Stepnum.value - 1
-      } else if (Step2Num.value == 0) {
-        Step2error.value = true
-      } else {
-        Step2error.value = false
-        if (Next) {
-          Stepnum.value = Stepnum.value + 1
-        }
-      }
-      break
     //Step3
     case 2:
       //戻る時は何も分岐なし
@@ -164,10 +159,10 @@ function onStep(Next: boolean) {
 
 //金額の計算とか
 const vegetableCount = Vueref<number>(0)
+const vegeCountList = Vueref<number[]>([])
 const Totalmoney = Vueref<number>(0)
-function changeMoney(money: number) {
-  Totalmoney.value = vegetableCount.value * money
-}
+const TotalmoneyList = Vueref<number[]>([])
+const AllTotalmoney = Vueref<number>(0)
 </script>
 
 <template>
@@ -185,53 +180,32 @@ function changeMoney(money: number) {
   ></OrderStep1>
 
   <!-- 生産者の設定 -->
+  <h1 v-if="Stepnum == 1">{{ SelectMenlistnum }}</h1>
   <OrderStep2
     v-bind:vegealldata="VegeAllData"
     v-bind:Selectvege="SelectVegelist"
     v-bind:-selectmen="SelectMenlist"
     v-bind:vegekeys="vegekeys"
+    v-bind:-selectmennum="SelectMenlistnum"
     v-on:OnStep="OnStep"
     v-on:changemen="chagemen"
     v-if="Stepnum == 1"
   ></OrderStep2>
   <!-- 日付・個数の指定 -->
-  <section v-if="Stepnum == 2">
-    <h1>Step3</h1>
-    <article v-for="(element, index) in SelectVege" v-bind:key="index">
-      <h1>{{ vegekeys[element] }}</h1>
-      <p>生産者：{{ VegeAllData[vegekeys[SelectVege]][SelectMen].s }}</p>
-      <h3 v-show="Step2Num != 0">単位:{{ VegeAllData[vegekeys[SelectVege]][SelectMen].unit }}</h3>
-      <h3 v-show="Step2Num != 0">単価:{{ VegeAllData[vegekeys[SelectVege]][SelectMen].en }}円</h3>
-    </article>
+  <h1 v-if="Stepnum == 2">oya:{{ AllTotalmoney }}</h1>
+  <OrderStep3
+    v-bind:-select-date="selectedDate"
+    v-bind:vege-count="vegeCountList"
+    v-bind:vegealldata="VegeAllData"
+    v-bind:vegekeys="vegekeys"
+    v-bind:-select-mennum="SelectMenlistnum"
+    v-bind:-selectvege="SelectVegelist"
+    v-bind:-totalmoney="TotalmoneyList"
+    v-on:changecount="changecount"
+    v-on:OnStep="OnStep"
+    v-if="Stepnum == 2"
+  ></OrderStep3>
 
-    <!-- スクロールで値が変わるのと０以下を書くことができるのがまずい -->
-    <input
-      class="form-control"
-      type="number"
-      placeholder="何組買いますか？"
-      aria-label="default input example"
-      v-model="vegetableCount"
-      v-on:change="changeMoney(VegeAllData[vegekeys[SelectVege]][SelectMen].en)"
-    />
-    <h1>何組：{{ vegetableCount }}組</h1>
-    <h1>合計：{{ Totalmoney }}円</h1>
-    <h1 style="color: red" v-show="Step3error && vegetableCount == 0">個数を指定してください</h1>
-    <!-- 今日より前を選択不可にしないと -->
-    <VueDatePicker
-      v-model="selectedDate"
-      format="yyyy/MM/dd"
-      locale="ja"
-      model-type="yyyy-MM-dd"
-      week-start="0"
-      :enable-time-picker="false"
-      auto-apply
-      no-today
-    />
-    <h1>{{ selectedDate }}</h1>
-    <h1 style="color: red" v-show="Step3error && selectedDate == null">日付を選択してください</h1>
-    <button v-on:click="onStep(true)" class="btn btn-primary">次へ</button>
-    <button v-on:click="onStep(false)" class="btn btn-primary">戻る</button>
-  </section>
   <!-- 確認・送信画面 -->
   <section v-show="Stepnum == 3">
     <h1>Step4</h1>
