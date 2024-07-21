@@ -2,7 +2,8 @@
 import { RouterLink } from 'vue-router'
 import { getDatabase, ref, child, get, onValue, set, remove } from 'firebase/database'
 //Vueとfirebaseで同じrefという関数があって競合しているのでVueの方をVuerefにしている
-import { ref as Vueref, computed } from 'vue'
+import { ref as Vueref, computed, onMounted } from 'vue'
+import { getAuth, onAuthStateChanged, type User } from 'firebase/auth'
 const vegeData = Vueref<any>(ReadData('テスト野菜2'))
 const VegeAllData = Vueref<any>(ReadData(''))
 
@@ -18,9 +19,21 @@ function ReadData(element: string) {
   })
   return Data
 }
+const currentUser = Vueref<User | null>(null)
 //指定したデータを書き込むようにしている。Vegeに該当の野菜
 const FinishSend = Vueref<boolean>(false)
-
+onMounted(() => {
+  const auth = getAuth()
+  // ログインしているユーザーを取得する
+  onAuthStateChanged(auth, (user) => {
+    if (user != null && user.emailVerified) {
+      currentUser.value = user
+      console.log('読み込みました')
+    } else {
+      currentUser.value = null
+    }
+  })
+})
 async function writeVege(
   Vege: string[],
   selectvege: number[],
@@ -189,6 +202,20 @@ function updateVegeMoney(value: number, index: number) {
   }
   console.log()
 }
+function handlewritevege() {
+  if (currentUser.value?.displayName != null) {
+    writeVege(
+      vegekeys.value,
+      VegeList.value,
+      VegeMoneyList.value,
+      VegeamoutList.value,
+      currentUser.value.displayName,
+      VegetankaList.value
+    )
+  } else {
+    console.log('名前がない')
+  }
+}
 </script>
 
 <template>
@@ -272,18 +299,12 @@ function updateVegeMoney(value: number, index: number) {
   <section v-show="Stepnum == 2">
     <div v-for="(Vegename, index) in VegeList" :key="Vegename + index" class="confirm">
       <h1>{{ vegekeys[VegeList[index]] }}</h1>
+      <h1>名前：{{ currentUser?.displayName }}</h1>
       <h1>単価：{{ VegeamoutList[index] }} {{ VegetankaTempList[VegetankaList[index]] }}</h1>
       <h1>価格：{{ VegeMoneyList[index] }}円</h1>
     </div>
     <button v-on:click="onStep(false)" class="btn btn-primary">戻る</button>
-    <button
-      v-on:click="
-        writeVege(vegekeys, VegeList, VegeMoneyList, VegeamoutList, '三浦涼太郎', VegetankaList)
-      "
-      class="btn btn-primary"
-    >
-      送信
-    </button>
+    <button v-on:click="handlewritevege" class="btn btn-primary">送信</button>
   </section>
   <div class="card popup" style="width: 30rem" v-show="FinishSend">
     <div class="card-body">

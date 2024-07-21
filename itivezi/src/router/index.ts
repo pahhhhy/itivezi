@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import OrderPage from '../views/orderPage.vue'
+import OrderPage from '../views/OrderPage.vue'
 import AppTop from '../views/AppTop.vue'
 import RegistrationPage from '../views/RegistrationPage.vue'
 import MyPage from '../views/myPage.vue'

@@ -68,8 +68,6 @@ function reloadData() {
   <div class="title">
     <h1>マイページ</h1>
   </div>
-
-  <p><RouterLink v-bind:to="{ name: 'orderpage' }">注文</RouterLink></p>
   {{ vegeAllData }}
   <h1>{{ targetList }}</h1>
   <h1>{{ targetname }}</h1>

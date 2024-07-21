@@ -111,6 +111,7 @@ function handleOrder() {
 <template>
   <section>
     <h1>Step4</h1>
+    <!-- v-for使うところって全部コンポーネント化した方がいいのか？ -->
     <article v-for="(element, index) in porps.Selectvege" v-bind:key="index" class="Step4_element">
       <h1>{{ porps.vegekeys[porps.Selectvege[index]] }}</h1>
       <h1>
