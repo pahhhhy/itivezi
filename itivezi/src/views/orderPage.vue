@@ -6,9 +6,20 @@ import { ref as Vueref, computed } from 'vue'
 import OrderStep1 from './components/orderpage/OrderStep1.vue'
 import OrderStep2 from './components/orderpage/OrderStep2.vue'
 import OrderStep3 from './components/orderpage/OrderStep3.vue'
+import OrderStep4 from './components/orderpage/OrderStep4.vue'
+import OrderPopup from './components/orderpage/OrderPopup.vue'
+//変数の定義
 const vegeData = Vueref<any>(ReadData('テスト野菜2'))
 const VegeAllData = Vueref<any>(ReadData(''))
-
+const Stepnum = Vueref<number>(0)
+const SelectVegelist = Vueref<number[]>([])
+const SelectMenlist = Vueref<string[]>([])
+const SelectMenlistnum = Vueref<number[]>([])
+const selectedDate = Vueref<Date | null>(null)
+const vegeCountList = Vueref<number[]>([])
+const TotalmoneyList = Vueref<number[]>([])
+const AllTotalmoney = Vueref<number>(0)
+const FinishSend = Vueref<boolean>(false)
 const vegekeys = computed(() => {
   return VegeAllData.value ? Object.keys(VegeAllData.value) : []
 })
@@ -40,7 +51,7 @@ function writeVegedata(path: string, Vege: string, en: number, s: string, unit: 
     unit: unit
   })
 }
-const FinishSend = Vueref<boolean>(false)
+
 function writeVegeorder(
   Vege: string,
   money: number,
@@ -76,9 +87,6 @@ function writeVegeorder(
 }
 //変数すべてをリセットする
 
-const refreshPage = () => {
-  location.reload() // 現在のページをリロード
-}
 // 今は一番後ろのデータをけすようにしている
 function DeleteVegedata(Vege: string) {
   let count = 0
@@ -95,18 +103,6 @@ function DeleteVegedata(Vege: string) {
 }
 
 //Stepの管理
-//ここら辺かなり無駄なことをしていそう。
-const Stepnum = Vueref<number>(0)
-
-const Step2error = Vueref<boolean>(false)
-const Step3error = Vueref<boolean>(false)
-const Step2Num = Vueref<number>(0)
-const SelectVegelist = Vueref<number[]>([])
-const SelectVege = Vueref<number>(0)
-const SelectMen = Vueref<number>(0)
-const SelectMenlist = Vueref<string[]>([])
-const SelectMenlistnum = Vueref<number[]>([])
-const selectedDate = Vueref<Date | null>(null)
 function OnStep(Next: boolean) {
   console.log('oya')
   if (Next) {
@@ -114,6 +110,9 @@ function OnStep(Next: boolean) {
   } else {
     Stepnum.value = Stepnum.value - 1
   }
+}
+function OnSend(Issend: boolean) {
+  FinishSend.value = Issend
 }
 //子要素からのデータの受け取り
 function changeVege(element: number[]) {
@@ -126,43 +125,10 @@ function chagemen(element: string[], num: number[]) {
 function changecount(count: number[], money: number) {
   vegeCountList.value = count
   AllTotalmoney.value = money
-  console.log('親は受け取った')
 }
-function onStep(Next: boolean) {
-  switch (Stepnum.value) {
-    //Step3
-    case 2:
-      //戻る時は何も分岐なし
-      if (!Next) {
-        Stepnum.value = Stepnum.value - 1
-      }
-      //何か選択してないものがある時にエラー文を出すようにしたい
-      if (vegetableCount.value == 0 || selectedDate.value == null) {
-        Step3error.value = true
-      } else {
-        Step3error.value = false
-        if (Next) {
-          Stepnum.value = Stepnum.value + 1
-        }
-      }
-      break
-    //Step4
-    case 3:
-      if (!Next) {
-        Stepnum.value = Stepnum.value - 1
-      }
-      break
-  }
-
-  console.log(Stepnum.value)
+function chagedate(date: Date | null) {
+  selectedDate.value = date
 }
-
-//金額の計算とか
-const vegetableCount = Vueref<number>(0)
-const vegeCountList = Vueref<number[]>([])
-const Totalmoney = Vueref<number>(0)
-const TotalmoneyList = Vueref<number[]>([])
-const AllTotalmoney = Vueref<number>(0)
 </script>
 
 <template>
@@ -192,7 +158,7 @@ const AllTotalmoney = Vueref<number>(0)
     v-if="Stepnum == 1"
   ></OrderStep2>
   <!-- 日付・個数の指定 -->
-  <h1 v-if="Stepnum == 2">oya:{{ AllTotalmoney }}</h1>
+  <h1 v-if="Stepnum == 2">oya:{{ selectedDate }}</h1>
   <OrderStep3
     v-bind:-select-date="selectedDate"
     v-bind:vege-count="vegeCountList"
@@ -203,50 +169,28 @@ const AllTotalmoney = Vueref<number>(0)
     v-bind:-totalmoney="TotalmoneyList"
     v-on:changecount="changecount"
     v-on:OnStep="OnStep"
+    v-on:changedate="chagedate"
     v-if="Stepnum == 2"
   ></OrderStep3>
 
   <!-- 確認・送信画面 -->
-  <section v-show="Stepnum == 3">
-    <h1>Step4</h1>
-    <h1>{{ vegekeys[SelectVege] }}</h1>
-    <h1>生産者：{{ VegeAllData[vegekeys[SelectVege]][SelectMen].s }}</h1>
-    <h3 v-show="Step2Num != 0">単位:{{ VegeAllData[vegekeys[SelectVege]][SelectMen].unit }}</h3>
-    <h3 v-show="Step2Num != 0">単価:{{ VegeAllData[vegekeys[SelectVege]][SelectMen].en }}円</h3>
-    <h1>何組：{{ vegetableCount }}組</h1>
-    <h1>希望日：{{ selectedDate }}</h1>
-    <h1>合計：{{ Totalmoney }}円</h1>
-    <button
-      v-on:click="
-        writeVegeorder(
-          vegekeys[SelectVege],
-          Totalmoney,
-          selectedDate,
-          vegetableCount,
-          VegeAllData[vegekeys[SelectVege]][SelectMen].s,
-          VegeAllData[vegekeys[SelectVege]][SelectMen].unit
-        )
-      "
-      class="btn btn-primary"
-    >
-      送信
-    </button>
-    <button v-on:click="onStep(false)" class="btn btn-primary">戻る</button>
-  </section>
-  <div class="card popup" style="width: 30rem" v-show="FinishSend">
-    <div class="card-body">
-      <h5 class="card-title">送信が完了しました</h5>
-      <button v-on:click="refreshPage" class="btn btn-primary">初めに戻る</button>
-    </div>
-  </div>
+  <OrderStep4
+    v-bind:-select-date="selectedDate"
+    v-bind:vege-count="vegeCountList"
+    v-bind:vegealldata="VegeAllData"
+    v-bind:vegekeys="vegekeys"
+    v-bind:-select-mennum="SelectMenlistnum"
+    v-bind:-select-men="SelectMenlist"
+    v-bind:-selectvege="SelectVegelist"
+    v-bind:-totalmoney="TotalmoneyList"
+    v-bind:all-totalmoney="AllTotalmoney"
+    v-on:-on-step="OnStep"
+    v-on:-on-send="OnSend"
+    v-if="Stepnum == 3"
+  ></OrderStep4>
+  <OrderPopup v-if="FinishSend"></OrderPopup>
 </template>
 <style>
-.popup {
-  position: absolute !important;
-  top: 30%;
-  left: 30%;
-  z-index: 1;
-}
 .title {
   text-align: center;
 }

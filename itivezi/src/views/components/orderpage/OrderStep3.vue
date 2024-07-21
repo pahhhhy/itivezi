@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 interface Porps {
   vegekeys: string[]
   vegealldata: { [key: string]: any[] }
@@ -12,6 +12,7 @@ interface Porps {
 interface Emits {
   (event: 'OnStep', Next: boolean): void
   (event: 'changecount', count: number[], money: number): void
+  (event: 'changedate', date: Date | null): void
 }
 const emit = defineEmits<Emits>()
 const porps = defineProps<Porps>()
@@ -29,9 +30,12 @@ function changeMoney(money: number, index: number) {
   for (let i: number = 0; i < totalmoney.value.length; i++) {
     alltotalmony.value += totalmoney.value[i]
   }
-  console.log('こは送った')
   emit('changecount', vegeCountList.value, alltotalmony.value)
 }
+function chagedate() {
+  emit('changedate', Selectdate.value)
+}
+
 const Step3error = ref<boolean>(false)
 function onStep(Next: boolean) {
   if (!Next) {
@@ -45,6 +49,9 @@ function onStep(Next: boolean) {
     }
   }
 }
+watch(Selectdate, (): void => {
+  chagedate()
+})
 </script>
 
 <template>
