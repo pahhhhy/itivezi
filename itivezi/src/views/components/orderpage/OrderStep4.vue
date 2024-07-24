@@ -50,8 +50,10 @@ function writeVegeorder(
   date: Date | null,
   alltotalmoney: number
 ) {
-  const now = new Date().toISOString().replace(/[:.]/g, '-')
-  console.log(now)
+  const now = parseTimestamp(getJSTTimestamp())
+  const currentTime =
+    now.year + '-' + now.month + '-' + now.day + '-' + now.hours + '-' + now.day + '-' + now.seconds
+  console.log(currentTime)
   const db = getDatabase()
   let unitlist: string[] = []
   for (let i: number = 0; i < Vege.length; i++) {
@@ -63,7 +65,7 @@ function writeVegeorder(
     return
   }
 
-  set(Fireref(db, 'testOrders/' + currentUser.uid + '/' + now), {
+  set(Fireref(db, 'testOrders/' + currentUser.uid + '/' + currentTime), {
     ordername: currentUser.displayName,
     email: currentUser.email,
     selectDate: date,
@@ -76,7 +78,7 @@ function writeVegeorder(
       console.error('注文の最後の保存中にエラーが発生しました:', error)
     })
   for (let i: number = 0; i < Vege.length; i++) {
-    set(Fireref(db, 'testOrders/' + currentUser.uid + '/' + now + '/' + i), {
+    set(Fireref(db, 'testOrders/' + currentUser.uid + '/' + currentTime + '/' + i), {
       amout: num[i],
       farmername: farmername[i],
       price: money[i],
@@ -106,6 +108,36 @@ function handleOrder() {
   } else {
     console.error('ユーザーが認証されていません。注文を保存できません。')
   }
+}
+//タイムスタンプ文字列を変換
+function parseTimestamp(timestamp: string) {
+  const datePart = timestamp.split('T')[0]
+  const timePart = timestamp.split('T')[1].replace('Z', '')
+
+  const [year, month, day] = datePart.split('-').map(Number)
+  const [hours, minutes, seconds, milliseconds] = timePart.split('-').map(Number)
+
+  return {
+    year,
+    month,
+    day,
+    hours,
+    minutes,
+    seconds,
+    milliseconds
+  }
+}
+function getJSTTimestamp() {
+  const date = new Date()
+
+  // JSTのオフセットはUTC+9時間
+  const jstOffset = 9 * 60 * 60 * 1000
+
+  // JSTに変換
+  const jstDate = new Date(date.getTime() + jstOffset)
+
+  // ISO 8601フォーマットに変換し、無効な文字を置き換える
+  return jstDate.toISOString().replace(/[:.]/g, '-')
 }
 </script>
 <template>

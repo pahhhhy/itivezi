@@ -1,66 +1,43 @@
 <script setup lang="ts">
-import { RouterLink, useRoute } from 'vue-router'
-
-import { getDatabase, ref, child, get, onValue, set, remove } from 'firebase/database'
+import { getDatabase, ref as Fireref, onValue } from 'firebase/database'
 //Vueとfirebaseで同じrefという関数があって競合しているのでVueの方をVuerefにしている
-import { ref as Vueref, computed, onMounted, watch } from 'vue'
+import { ref as Vueref, computed, onMounted } from 'vue'
+import { getAuth, onAuthStateChanged, type User } from 'firebase/auth'
+import mypage_order from './components/mypage/mypage_order.vue'
+import mypage_update from './components/mypage/mypage_update.vue'
+import mypage_myvege from './components/mypage/mypage_myvege.vue'
+
+onMounted(() => {
+  const auth = getAuth()
+  // ログインしているユーザーを取得する
+  onAuthStateChanged(auth, (user) => {
+    if (user != null && user.emailVerified) {
+      currentUser.value = user
+      console.log('読み込みました')
+    } else {
+      currentUser.value = null
+    }
+  })
+})
+const currentUser = Vueref<User | null>(null)
+const comkey = Vueref<number>(0)
 function ReadData(element: string) {
-  const CountRef = ref(getDatabase(), 'testVege/' + element)
+  const CountRef = Fireref(getDatabase(), 'testVege/' + element)
   const Data = Vueref<any>(null)
   onValue(CountRef, (snapshot) => {
     Data.value = snapshot.val()
   })
   return Data
 }
-const targetname = Vueref<string>('三浦涼太郎')
 const vegeAllData = Vueref<any>(ReadData(''))
 const vegekeys = computed(() => {
   return vegeAllData.value ? Object.keys(vegeAllData.value) : []
 })
-watch(vegeAllData, (newVal) => {
-  if (newVal) {
-    FindMyData(targetname.value, newVal)
-  }
-})
-// 今は一番後ろのデータをけすようにしている
-function DeleteVegedata(Vege: string, count: number) {
-  const db = getDatabase()
-  remove(ref(db, 'testVege/' + Vege + '/' + count))
-}
-const countKeys = (obj: object): number => {
-  return Object.keys(obj).length
-}
-const targetList = Vueref<any>(null)
-const targetListKeys = Vueref<string[]>()
-//自分のデータを取得する。全探索を使うから時間がかかる
-function FindMyData(element: string, AllData: any) {
-  const CountKey = countKeys(vegeAllData.value)
-  console.log(vegeAllData)
-  let resultList: { [key: string]: number[] } = {}
-  //iはkey(ほうれん草とか)の順番のこと
-  for (let i: number = 0; i < CountKey; i++) {
-    let Countelement = AllData[vegekeys.value[i]].length
-    let key: string = vegekeys.value[i]
-    //jはkeyの中にある要素の順番のこと
-    for (let j: number = 0; j < Countelement; j++) {
-      const item = AllData[key][j]
-      if (item && item.s === element) {
-        if (!resultList[key]) {
-          resultList[key] = []
-        }
-        console.log(key)
-        resultList[key].push(j)
-      }
-    }
-  }
-  targetList.value = resultList
-  targetListKeys.value = Object.keys(resultList)
-}
-
 // データを再読み込みする関数
 function reloadData() {
   vegeAllData.value = ReadData('')
-  FindMyData(targetname.value, vegeAllData)
+  comkey.value += 1
+  console.log('更新されたはず')
 }
 </script>
 
@@ -68,32 +45,20 @@ function reloadData() {
   <div class="title">
     <h1>マイページ</h1>
   </div>
-  {{ vegeAllData }}
-  <h1>{{ targetList }}</h1>
-  <h1>{{ targetname }}</h1>
-  <h1>{{ targetListKeys }}</h1>
-  <div v-for="(elements, key) in targetList" :key="key" class="element">
-    <h2>{{ key }}</h2>
-    <ul>
-      <li v-for="index in elements.length" :key="index" class="py-2 px-2">
-        key:{{ key }} index:{{ index }}element:{{ elements[index - 1] }}
-        <h3>
-          何円：{{ vegeAllData[key][elements[index - 1]].en }}円
-          <button @click="() => DeleteVegedata(String(key), elements[index - 1])">
-            <i class="bi bi-trash3"></i>
-          </button>
-        </h3>
-        <h3>何組：{{ vegeAllData[key][elements[index - 1]].unit }}</h3>
-      </li>
-    </ul>
-  </div>
+
+  <mypage_order v-bind:current-user="currentUser" v-if="currentUser != null"></mypage_order>
+  <mypage_update v-bind:current-user="currentUser" v-if="currentUser != null"></mypage_update>
+  <mypage_myvege
+    v-bind:current-user="currentUser"
+    v-bind:vegealldata="vegeAllData"
+    v-bind:vegekeys="vegekeys"
+    v-on:reload-data="reloadData"
+    v-bind:key="comkey"
+    v-if="currentUser != null && vegeAllData != null"
+  ></mypage_myvege>
 </template>
 <style>
 .title {
   text-align: center;
-}
-.element {
-  border: 1px solid black;
-  padding-top: 20px;
 }
 </style>

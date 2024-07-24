@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getDatabase, ref, child, get, onValue, set, remove } from 'firebase/database'
+import { getDatabase, ref, onValue, remove } from 'firebase/database'
 //Vueとfirebaseで同じrefという関数があって競合しているのでVueの方をVuerefにしている
 import { ref as Vueref, computed } from 'vue'
 
@@ -32,60 +32,6 @@ function ReadData(element: string) {
   })
   return Data
 }
-
-//指定したデータを書き込むようにしている。Vegeに該当の野菜
-function writeVegedata(path: string, Vege: string, en: number, s: string, unit: string) {
-  let count = 0
-  const CountRef = ref(getDatabase(), path + '/' + Vege)
-  onValue(CountRef, (snapshot) => {
-    vegeData.value = snapshot.val()
-
-    count = vegeData.value ? Object.keys(vegeData.value).length : 0
-    console.log(count)
-  })
-  const db = getDatabase()
-
-  set(ref(db, 'testVege/' + Vege + '/' + count), {
-    en: en,
-    s: s,
-    unit: unit
-  })
-}
-
-function writeVegeorder(
-  Vege: string,
-  money: number,
-  date: Date | null,
-  num: number,
-  farmername: string,
-  unit: number
-) {
-  let count = 0
-  const CountRef = ref(getDatabase(), 'testOrders/')
-  onValue(CountRef, (snapshot) => {
-    vegeData.value = snapshot.val()
-
-    count = vegeData.value ? Object.keys(vegeData.value).length : 0
-    console.log(count)
-  })
-  const db = getDatabase()
-
-  set(ref(db, 'testOrders/' + count), {
-    amout: num,
-    farmername: farmername,
-    price: money,
-    unit: unit,
-    vegeName: Vege,
-    SelectDate: date
-  })
-    .then(() => {
-      FinishSend.value = true
-    })
-    .catch((error) => {
-      console.error('注文の保存中にエラーが発生しました:', error)
-    })
-}
-//変数すべてをリセットする
 
 // 今は一番後ろのデータをけすようにしている
 function DeleteVegedata(Vege: string) {
@@ -135,8 +81,6 @@ function chagedate(date: Date | null) {
   <div class="title">
     <h1>注文画面</h1>
   </div>
-  <!-- <h2>{{ VegeAllData }}</h2> -->
-  <!-- <h2>{{ SelectVegelist }}</h2> -->
   <OrderStep1
     v-bind:vegekeys="vegekeys"
     v-bind:SelectVegelist="SelectVegelist"

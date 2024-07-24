@@ -1,18 +1,8 @@
 <script setup lang="ts">
-import { computed, ref as Vueref, onMounted } from 'vue'
-import { getDatabase, ref as Fireref, child, get, onValue, set, remove } from 'firebase/database'
+import { ref as Vueref, onMounted } from 'vue'
+import { getDatabase, ref as Fireref, onValue, set } from 'firebase/database'
 
-import {
-  getAuth,
-  signOut,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  sendEmailVerification,
-  updateProfile,
-  type User
-} from 'firebase/auth'
-import { RouterLink } from 'vue-router'
+import { getAuth, onAuthStateChanged, updateProfile, type User } from 'firebase/auth'
 import router from '@/router'
 const currentUser = Vueref<User | null>(null)
 const UserData = Vueref<any>(ReadUserData(''))
