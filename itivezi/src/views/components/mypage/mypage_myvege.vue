@@ -26,6 +26,7 @@ const Isnull = Vueref<boolean>(false)
 function Pushtoggle() {
   if (IsToggle.value) IsToggle.value = false
   else IsToggle.value = true
+  console.log(Isnull.value)
 }
 const countKeys = (obj: object): number => {
   return Object.keys(obj).length
@@ -35,13 +36,11 @@ const targetList = Vueref<any>(null)
 const targetListKeys = Vueref<string[]>([])
 //自分のデータを取得する。全探索を使うから時間がかかる
 function FindMyData(element: string) {
-  console.log(porps.vegealldata)
   const CountKey: number = countKeys(porps.vegealldata)
   let resultList: { [key: string]: number[] } = {}
-  console.log('Countkey' + CountKey)
   //iはkey(ほうれん草とか)の順番のこと
   for (let i: number = 0; i < CountKey; i++) {
-    let Countelement = 0
+    let Countelement: number = 0
     if (porps.vegealldata[porps.vegekeys[i]].length == undefined) Countelement = 0
     else Countelement = porps.vegealldata[porps.vegekeys[i]].length
     let key: string = porps.vegekeys[i]
@@ -57,9 +56,8 @@ function FindMyData(element: string) {
       }
     }
   }
-
-  console.log(resultList)
-  console.log(Isnull.value)
+  if (Object.keys(resultList).length === 0) Isnull.value = true
+  else Isnull.value = false
   targetList.value = resultList
   targetListKeys.value = Object.keys(resultList)
 }
@@ -77,12 +75,13 @@ watch(
 </script>
 <template>
   {{ porps.vegealldata }}
+  <h2>{{ targetList }}</h2>
   <button v-on:click="Pushtoggle()" class="Tbutton">
     <i class="bi bi-caret-down-fill" v-show="!IsToggle"></i>
     <i class="bi bi-caret-up-fill" v-show="IsToggle"></i>
     <h2>自分の野菜</h2>
   </button>
-  <div class="nullvege" v-if="IsToggle && Isnull == true">
+  <div class="nullvege" v-if="IsToggle && Isnull">
     <h1>登録した野菜はありません</h1>
   </div>
   <div v-for="(elements, key) in targetList" :key="key" class="element" v-show="IsToggle">
