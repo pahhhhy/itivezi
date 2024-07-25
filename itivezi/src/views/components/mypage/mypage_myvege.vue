@@ -1,23 +1,24 @@
 <script setup lang="ts">
 import { getDatabase, ref as Fireref, remove } from 'firebase/database'
-import { ref as Vueref } from 'vue'
+import { ref as Vueref, watch } from 'vue'
 import { type User } from 'firebase/auth'
 interface Porps {
   currentUser: User
   vegekeys: string[]
   vegealldata: { [key: string]: any[] }
 }
-interface Emits {
-  (event: 'reloadData'): void
-}
-const emit = defineEmits<Emits>()
 const porps = defineProps<Porps>()
 function DeleteVegedata(Vege: string, count: number) {
   const db = getDatabase()
   const path = 'testVege/' + Vege + '/' + count
   console.log(path)
   remove(Fireref(db, path))
-  emit('reloadData')
+    .then(() => {
+      console.log('削除が完了しました。')
+    })
+    .catch((error) => {
+      console.error('削除中にエラーが発生しました:', error)
+    })
 }
 
 const IsToggle = Vueref<boolean>(false)
@@ -34,12 +35,15 @@ const targetList = Vueref<any>(null)
 const targetListKeys = Vueref<string[]>([])
 //自分のデータを取得する。全探索を使うから時間がかかる
 function FindMyData(element: string) {
+  console.log(porps.vegealldata)
   const CountKey: number = countKeys(porps.vegealldata)
   let resultList: { [key: string]: number[] } = {}
-
+  console.log('Countkey' + CountKey)
   //iはkey(ほうれん草とか)の順番のこと
   for (let i: number = 0; i < CountKey; i++) {
-    let Countelement = porps.vegealldata[porps.vegekeys[i]].length
+    let Countelement = 0
+    if (porps.vegealldata[porps.vegekeys[i]].length == undefined) Countelement = 0
+    else Countelement = porps.vegealldata[porps.vegekeys[i]].length
     let key: string = porps.vegekeys[i]
     //jはkeyの中にある要素の順番のこと
     for (let j: number = 0; j < Countelement; j++) {
@@ -48,21 +52,31 @@ function FindMyData(element: string) {
         if (!resultList[key]) {
           resultList[key] = []
         }
-        console.log(key)
+        console.log('key' + key)
         resultList[key].push(j)
       }
     }
   }
-  if (resultList.length == undefined) Isnull.value = true
-  else Isnull.value = false
+
+  console.log(resultList)
   console.log(Isnull.value)
   targetList.value = resultList
   targetListKeys.value = Object.keys(resultList)
 }
-if (porps.currentUser.displayName != null) FindMyData(porps.currentUser.displayName)
+if (porps.currentUser.displayName != null && porps.vegealldata != undefined)
+  FindMyData(porps.currentUser.displayName)
 else console.error('ミスってる')
+watch(
+  () => porps.vegealldata,
+  (newData, oldData) => {
+    if (porps.currentUser.displayName != null) {
+      FindMyData(porps.currentUser.displayName)
+    }
+  }
+)
 </script>
 <template>
+  {{ porps.vegealldata }}
   <button v-on:click="Pushtoggle()" class="Tbutton">
     <i class="bi bi-caret-down-fill" v-show="!IsToggle"></i>
     <i class="bi bi-caret-up-fill" v-show="IsToggle"></i>

@@ -20,7 +20,6 @@ onMounted(() => {
   })
 })
 const currentUser = Vueref<User | null>(null)
-const comkey = Vueref<number>(0)
 function ReadData(element: string) {
   const CountRef = Fireref(getDatabase(), 'testVege/' + element)
   const Data = Vueref<any>(null)
@@ -33,12 +32,6 @@ const vegeAllData = Vueref<any>(ReadData(''))
 const vegekeys = computed(() => {
   return vegeAllData.value ? Object.keys(vegeAllData.value) : []
 })
-// データを再読み込みする関数
-function reloadData() {
-  vegeAllData.value = ReadData('')
-  comkey.value += 1
-  console.log('更新されたはず')
-}
 </script>
 
 <template>
@@ -46,16 +39,14 @@ function reloadData() {
     <h1>マイページ</h1>
   </div>
 
-  <mypage_order v-bind:current-user="currentUser" v-if="currentUser != null"></mypage_order>
   <mypage_update v-bind:current-user="currentUser" v-if="currentUser != null"></mypage_update>
   <mypage_myvege
     v-bind:current-user="currentUser"
     v-bind:vegealldata="vegeAllData"
     v-bind:vegekeys="vegekeys"
-    v-on:reload-data="reloadData"
-    v-bind:key="comkey"
-    v-if="currentUser != null && vegeAllData != null"
+    v-if="currentUser != null && vegeAllData != undefined"
   ></mypage_myvege>
+  <mypage_order v-bind:current-user="currentUser" v-if="currentUser != null"></mypage_order>
 </template>
 <style>
 .title {
