@@ -74,8 +74,8 @@ watch(
 )
 </script>
 <template>
-  {{ porps.vegealldata }}
-  <h2>{{ targetList }}</h2>
+  <!-- {{ porps.vegealldata }} -->
+  <!-- <h2>{{ targetList }}</h2> -->
   <button v-on:click="Pushtoggle()" class="Tbutton">
     <i class="bi bi-caret-down-fill" v-show="!IsToggle"></i>
     <i class="bi bi-caret-up-fill" v-show="IsToggle"></i>

@@ -25,6 +25,8 @@ const MyOrderDate = Vueref<any>(ReadData())
 const MyOrderkeys = computed(() => {
   return MyOrderDate.value ? Object.keys(MyOrderDate.value) : []
 })
+//これがすべての注文データから野菜のデータだけ抜いたやつ。注文の時間で昇順に並べてある。
+//指定するときはMydateKeysNum[何番目の][何個目]でやる
 const MyOrderkeysNum = computed(() => {
   return UpdateKeysnum()
 })
@@ -47,25 +49,32 @@ function Pushtoggle() {
   else IsToggle.value = true
   console.log(IsToggle.value)
 }
+//MyOrderkeysNumが更新されたらこれを更新するようにしたい
+const OrderTimeList = Vueref<string[]>([])
+function SetOrderTime(timeList: string[]) {
+  let resultList: any = 0
+  if (timeList.length == 0) {
+    console.error('きーが無いぞ')
+  } else {
+    for (let i: number = 0; i < timeList.length; i++) {
+      resultList[i] = parseTimestamp(timeList[i])
+    }
+  }
+  OrderTimeList.value = resultList
+}
+
 function parseTimestamp(timestamp: string) {
   // 各要素を分割して取得
   const [year, month, day, hours, minutes, seconds] = timestamp.split('-').map(Number)
-
-  return {
-    year: `${year}年`,
-    month: `${month}月`,
-    day: `${day}日`,
-    hours: `${hours}時`,
-    minutes: `${minutes}分`,
-    seconds: `${seconds}秒`
-  }
+  let time = year + '年' + month + '月' + day + '日' + hours + '時' + minutes + '分'
+  return time
 }
 </script>
 <template>
-  <h1>{{ MyOrderkeys }}</h1>
+  <!-- <h1>{{ MyOrderkeys }}</h1>
   <p>{{ MyOrderDate }}</p>
-  <h3>{{ MyOrderkeysNum }}</h3>
-  <!-- <h3>{{ MyOrderkeysNum[0][0] }}</h3> -->
+  <h3>{{ MyOrderkeysNum }}</h3> -->
+  <!-- <h3>{{ OrderTimeList }}</h3> -->
   <button v-on:click="Pushtoggle()" class="Tbutton">
     <i class="bi bi-caret-down-fill" v-show="!IsToggle"></i>
     <i class="bi bi-caret-up-fill" v-show="IsToggle"></i>
@@ -73,15 +82,15 @@ function parseTimestamp(timestamp: string) {
   </button>
   <article v-show="IsToggle">
     <div>
-      <div v-for="(order, key) in MyOrderDate" :key="key" class="order">
-        <h3>希望日: {{ order.selectDate }}</h3>
-        <p>合計金額: {{ order.totalmoney }}円</p>
-      </div>
       <div v-for="(item, index) in MyOrderkeysNum" :key="index" class="order-item">
-        {{ item }}
-        {{ index }}
+        <!-- {{ item }}
+        {{ index }} -->
+
+        <h2>注文日：{{ MyOrderkeys[index] }}</h2>
+        <h3>希望日: {{ MyOrderDate[MyOrderkeys[index]].selectDate }}</h3>
+        <p>合計金額: {{ MyOrderDate[MyOrderkeys[index]].totalmoney }}円</p>
         <div v-for="(element, num) in item" :key="num">
-          <p>野菜名: {{ item[num].vegeName }}</p>
+          <h3>野菜名: {{ item[num].vegeName }}</h3>
           <p>生産者名: {{ item[num].farmername }}</p>
           <p>単価: {{ item[num].unit }}</p>
           <p>個数: {{ item[num].amout }}</p>
@@ -98,7 +107,8 @@ function parseTimestamp(timestamp: string) {
   display: flex;
   align-items: center;
 }
-.mydate {
+
+.order-item {
   border: 1px solid gray;
 }
 </style>
