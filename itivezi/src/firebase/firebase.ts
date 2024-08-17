@@ -18,5 +18,5 @@ const app = initializeApp(firebaseConfig)
 getAnalytics(app)
 // Realtime Database の参照を取得
 const database = getDatabase(app)
-
-export { database }
+const analytics = getAnalytics(app)
+export { database, analytics }

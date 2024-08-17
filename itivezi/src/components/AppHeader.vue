@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref as Vueref, onMounted, watchEffect } from 'vue'
 import { RouterLink } from 'vue-router'
 import {
   getAuth,
@@ -9,14 +9,31 @@ import {
   createUserWithEmailAndPassword,
   type User
 } from 'firebase/auth'
-const Isbarger = ref(false)
-const currentUser = ref<User | null>(null)
+import { getDatabase, ref, child, get, onValue, set, remove } from 'firebase/database'
+const Isbarger = Vueref(false)
+const currentUser = Vueref<User | null>(null)
+const MyRole = Vueref<any>('')
 const ClickBarger = (): void => {
   if (Isbarger.value) {
     Isbarger.value = false
   } else {
     Isbarger.value = true
   }
+}
+//読みこむデータの指定
+async function ReadUserData(element: string): Promise<any> {
+  const CountRef = ref(getDatabase(), 'testUser/' + element)
+  return new Promise((resolve, reject) => {
+    onValue(
+      CountRef,
+      (snapshot) => {
+        resolve(snapshot.val())
+      },
+      (error) => {
+        reject(error)
+      }
+    )
+  })
 }
 const auth = getAuth()
 function rogout() {
@@ -33,13 +50,18 @@ function rogout() {
     })
 }
 
-onMounted(() => {
+onMounted(async () => {
   const auth = getAuth()
-  // ログインしているユーザーを取得する
-  onAuthStateChanged(auth, (user) => {
+  onAuthStateChanged(auth, async (user) => {
     if (user != null && user.emailVerified) {
       currentUser.value = user
-      console.log('読み込みました')
+      try {
+        const userData = await ReadUserData(currentUser.value!.uid)
+        MyRole.value = userData.role
+        console.log('読みこんだ')
+      } catch (error) {
+        console.error('Error fetching user data:', error)
+      }
     } else {
       currentUser.value = null
     }
@@ -88,6 +110,12 @@ onMounted(() => {
         <button v-on:click="ClickBarger" class="sidebar_element">
           <i class="bi bi-journals"></i>
           <RouterLink v-bind:to="{ name: 'rogin' }" class="link">ログイン/新規登録</RouterLink>
+        </button>
+      </li>
+      <li v-if="currentUser != null">
+        <button v-on:click="ClickBarger" class="sidebar_element">
+          <i class="bi bi-journals"></i>
+          <RouterLink v-bind:to="{ name: 'Owner' }" class="link">管理画面</RouterLink>
         </button>
       </li>
       <li v-if="currentUser != null">
