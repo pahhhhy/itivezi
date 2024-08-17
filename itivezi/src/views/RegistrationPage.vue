@@ -4,6 +4,9 @@ import { getDatabase, ref, child, get, onValue, set, remove } from 'firebase/dat
 //Vueとfirebaseで同じrefという関数があって競合しているのでVueの方をVuerefにしている
 import { ref as Vueref, computed, onMounted } from 'vue'
 import { getAuth, onAuthStateChanged, type User } from 'firebase/auth'
+import RegistrationStep1 from './components/Registration/RegistrationStep1.vue'
+import RegistrationStep2 from './components/Registration/RegistrationStep2.vue'
+import RegistrationStep3 from './components/Registration/RegistrationStep3.vue'
 const vegeData = Vueref<any>(ReadData('テスト野菜2'))
 const VegeAllData = Vueref<any>(ReadData(''))
 
@@ -34,44 +37,6 @@ onMounted(() => {
     }
   })
 })
-async function writeVege(
-  Vege: string[],
-  selectvege: number[],
-  money: number[],
-  num: number[],
-  farmername: string,
-  tannka: number[]
-) {
-  let Finishnum: number = 0
-  const db = getDatabase()
-  const tankaTempList = ['g', 'kg', '本', '個']
-  for (let i: number = 0; i < Vege.length; i++) {
-    let count = 0
-    const CountRef = ref(getDatabase(), 'testVege/' + Vege[selectvege[i]] + '/')
-    onValue(CountRef, (snapshot) => {
-      vegeData.value = snapshot.val()
-
-      count = vegeData.value ? Object.keys(vegeData.value).length : 0
-      console.log(count)
-    })
-    const unit: string = num[i] + tankaTempList[tannka[i]]
-    set(ref(db, 'testVege/' + Vege[selectvege[i]] + '/' + count), {
-      en: money[i],
-      s: farmername,
-      unit: unit
-    })
-      .then(() => {
-        Finishnum++
-
-        if (Finishnum == selectvege.length) {
-          FinishSend.value = true
-        }
-      })
-      .catch((error) => {
-        console.error('注文の保存中にエラーが発生しました:', error)
-      })
-  }
-}
 
 //変数すべてをリセットする
 
@@ -81,44 +46,17 @@ const refreshPage = () => {
 //Stepの管理
 //ここら辺かなり無駄なことをしていそう。
 const Stepnum = Vueref<number>(0)
-const Step1error = Vueref<boolean>(false)
-const Step2error = Vueref<boolean>(false)
 const Step3error = Vueref<boolean>(false)
-const Step1Num = Vueref<number>(0)
-const Step2Num = Vueref<number>(0)
-const SelectVege = Vueref<number>(0)
-const SelectMen = Vueref<number>(0)
 const selectedDate = Vueref<Date | null>(null)
+function OnStep(Next: boolean) {
+  if (Next) Stepnum.value = Stepnum.value + 1
+  else Stepnum.value = Stepnum.value - 1
+}
+function ChangeSelect(element: number[]) {
+  VegeList.value = element
+}
 function onStep(Next: boolean) {
   switch (Stepnum.value) {
-    //Step1
-    case 0:
-      if (VegeList.value.length == 0) {
-        Step1error.value = true
-      } else {
-        Step1error.value = false
-        if (Next) {
-          Stepnum.value = Stepnum.value + 1
-
-          VegeMoneyList.value = new Array(VegeList.value.length).fill(0)
-          VegetankaList.value = new Array(VegeList.value.length).fill(0)
-          VegeamoutList.value = new Array(VegeList.value.length).fill(0)
-        }
-      }
-      break
-    //Step2
-    case 1:
-      if (!Next) {
-        Stepnum.value = Stepnum.value - 1
-      } else if (ErrorFind()) {
-        Step2error.value = true
-      } else {
-        Step2error.value = false
-        if (Next) {
-          Stepnum.value = Stepnum.value + 1
-        }
-      }
-      break
     //Step3
     case 2:
       //戻る時は何も分岐なし
@@ -145,184 +83,61 @@ function onStep(Next: boolean) {
 
   console.log(Stepnum.value)
 }
-
+function UpdateStep2list(
+  vegeMoneyList: number[],
+  vegeAmoutList: number[],
+  vegeTankaList: number[]
+) {
+  VegeMoneyList.value = vegeMoneyList
+  VegeamoutList.value = vegeAmoutList
+  VegetankaList.value = vegeTankaList
+}
 const VegeList = Vueref<number[]>([])
-function changeSelectNum() {
-  switch (Stepnum.value) {
-    case 0:
-      SelectVege.value = Step1Num.value - 1
-      if (!VegeList.value.includes(SelectVege.value)) {
-        VegeList.value.push(SelectVege.value)
-      }
-      break
-    case 1:
-      SelectMen.value = Step2Num.value - 1
-      break
-  }
-}
-function DeleteSelecetNum(Vegename: number) {
-  switch (Stepnum.value) {
-    case 0:
-      VegeList.value = VegeList.value.filter((item) => item !== Vegename)
-      break
-    case 1:
-      SelectMen.value = Step2Num.value - 1
-      break
-  }
-}
-function ErrorFind() {
-  const IsMoneyList: boolean =
-    VegeMoneyList.value.length != VegeList.value.length ||
-    VegeMoneyList.value.some((item) => item === '') || //inputで値を打った後に消すと空文字ができてしまうからそれを判定するため
-    VegeMoneyList.value.some((item) => item === 0)
-  const IsVegeamoutList: boolean =
-    VegeamoutList.value.length != VegeList.value.length ||
-    VegeamoutList.value.some((item) => item === '') ||
-    VegeamoutList.value.some((item) => item === 0)
-  const IsVegetankaList: boolean = VegeamoutList.value.some((item) => item === 0)
-
-  const Iserror = IsMoneyList || IsVegeamoutList || IsVegetankaList
-  console.log(
-    IsMoneyList + ' :amout' + IsVegeamoutList + ' :tanka' + IsVegetankaList + ' :error' + Iserror
-  )
-  return Iserror
-}
 const VegeMoneyList = Vueref<number[]>([])
 const VegeamoutList = Vueref<number[]>([])
 const VegetankaList = Vueref<number[]>([])
 const VegetankaTempList = Vueref<string[]>(['g', 'kg', '本', '個'])
-function updateVegeMoney(value: number, index: number) {
-  // マイナスの値になることを防ぐ
-  if (value < 0) {
-    VegeMoneyList.value[index] = 0
-  } else if (VegeMoneyList.value.some((item) => item === '')) {
-    VegeMoneyList.value[index] = 0
-  } else {
-    VegeMoneyList.value[index] = value
-  }
-  console.log()
-}
-function handlewritevege() {
-  if (currentUser.value?.displayName != null) {
-    writeVege(
-      vegekeys.value,
-      VegeList.value,
-      VegeMoneyList.value,
-      VegeamoutList.value,
-      currentUser.value.displayName,
-      VegetankaList.value
-    )
-  } else {
-    console.log('名前がない')
-  }
-}
 </script>
 
 <template>
   <div class="title">
     <h1>登録</h1>
   </div>
-
-  <p><RouterLink v-bind:to="{ name: 'orderpage' }">注文</RouterLink></p>
   <h1>Stepnum:{{ Stepnum }}</h1>
-  <section v-show="Stepnum == 0">
-    <select
-      class="form-select"
-      aria-label="Default select example"
-      v-model="Step1Num"
-      v-on:change="changeSelectNum"
-    >
-      <option selected value="0" disabled hidden>野菜の選択してください</option>
-      <option
-        v-for="(Vegeelement, index) in vegekeys"
-        v-bind:key="Vegeelement"
-        v-bind:value="index + 1"
-      >
-        {{ Vegeelement }}
-      </option>
-    </select>
-    <h1>{{ VegeList }}</h1>
-    <h1 v-for="Vegename in VegeList" v-bind:key="Vegename">
-      {{ vegekeys[Vegename] }}
-      <button v-on:click="DeleteSelecetNum(Vegename)"><i class="bi bi-trash3"></i></button>
-    </h1>
-    <h1 style="color: red" v-show="Step1error && VegeList.length == 0">野菜を選択してください</h1>
-    <button v-on:click="onStep(true)" class="btn btn-primary">次へ</button>
-  </section>
-  <section v-show="Stepnum == 1">
-    <h1 v-for="(Vegename, index) in VegeList" :key="Vegename + index">
-      {{ vegekeys[Vegename] }}
-      <div class="tanka">
-        <input
-          class="form-control"
-          type="number"
-          placeholder="単価"
-          aria-label="default input example"
-          v-model="VegeamoutList[index]"
-        />
-        <select
-          class="form-select"
-          aria-label="Default select example"
-          v-model="VegetankaList[index]"
-        >
-          <!-- 選択式ではなく野菜を決めた時点でその野菜に対応した単位を決めてしまった方が良かった -->
-          <option selected value="0" disabled hidden>単位</option>
-          <option
-            v-for="(Vegename, index) in VegetankaTempList"
-            :key="Vegename"
-            v-bind:value="index + 1"
-          >
-            {{ VegetankaTempList[index] }}
-          </option>
-        </select>
-      </div>
-
-      <input
-        class="form-control"
-        type="number"
-        placeholder="何円にしますか？"
-        aria-label="default input example"
-        v-model="VegeMoneyList[index]"
-        @input="updateVegeMoney(VegeMoneyList[index], index)"
-      />
-    </h1>
-    <h3>vegelist{{ VegeList.length }}</h3>
-    <h4>money{{ VegeMoneyList.length }}</h4>
-    <h1>{{ VegeMoneyList }}</h1>
-    <h1>単価：{{ VegeamoutList }}</h1>
-    <h1>単位：{{ VegetankaList }}</h1>
-    <h1 style="color: red" v-show="ErrorFind()">全ての価格を設定してください</h1>
-    <button v-on:click="onStep(false)" class="btn btn-primary">戻る</button>
-    <button v-on:click="onStep(true)" class="btn btn-primary">次へ</button>
-  </section>
+  <RegistrationStep1
+    v-bind:vegeList="VegeList"
+    v-bind:vegekeys="vegekeys"
+    v-on:-on-step="OnStep"
+    v-on:change-select="ChangeSelect"
+    v-if="Stepnum == 0 && vegekeys != null"
+  ></RegistrationStep1>
+  <!-- {{ VegeMoneyList }}
+  {{ VegeamoutList }}
+  {{ VegetankaList }} -->
+  <RegistrationStep2
+    v-bind:vegeList="VegeList"
+    v-bind:vegekeys="vegekeys"
+    v-bind:-vege-amout-list="VegeamoutList"
+    v-bind:-vege-money-list="VegeMoneyList"
+    v-bind:-vege-tanka-list="VegetankaList"
+    v-on:-on-step="OnStep"
+    v-on:-update-step2-list="UpdateStep2list"
+    v-if="Stepnum == 1 && vegekeys != null"
+  ></RegistrationStep2>
   <!-- 送信と確認画面 -->
-  <section v-show="Stepnum == 2">
-    <div v-for="(Vegename, index) in VegeList" :key="Vegename + index" class="confirm">
-      <h1>{{ vegekeys[VegeList[index]] }}</h1>
-      <h1>名前：{{ currentUser?.displayName }}</h1>
-      <h1>単価：{{ VegeamoutList[index] }} {{ VegetankaTempList[VegetankaList[index]] }}</h1>
-      <h1>価格：{{ VegeMoneyList[index] }}円</h1>
-    </div>
-    <button v-on:click="onStep(false)" class="btn btn-primary">戻る</button>
-    <button v-on:click="handlewritevege" class="btn btn-primary">送信</button>
-  </section>
-  <div class="card popup" style="width: 30rem" v-show="FinishSend">
-    <div class="card-body">
-      <h5 class="card-title">送信が完了しました</h5>
-      <button v-on:click="refreshPage" class="btn btn-primary">初めに戻る</button>
-    </div>
-  </div>
+  <RegistrationStep3
+    v-bind:vegeList="VegeList"
+    v-bind:vegekeys="vegekeys"
+    v-bind:-vege-amout-list="VegeamoutList"
+    v-bind:-vege-money-list="VegeMoneyList"
+    v-bind:-vege-tanka-list="VegetankaList"
+    v-bind:current-user="currentUser"
+    v-on:-on-step="OnStep"
+    v-if="Stepnum == 2 && vegekeys != null"
+  ></RegistrationStep3>
 </template>
 <style>
 .title {
   text-align: center;
-}
-.tanka {
-  display: flex;
-}
-.confirm {
-  border: 1px solid gray;
-  border-radius: 10px;
-  margin: 0 55px;
 }
 </style>
