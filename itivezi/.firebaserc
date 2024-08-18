@@ -1,5 +1,9 @@
 {
   "projects": {
-    "default": "itivezi-test"
-  }
+    "default": "blaze-lab-75c62",
+    "production": "blaze-lab-75c62"
+  },
+  "targets": {},
+  "etags": {},
+  "dataconnectEmulatorConfig": {}
 }

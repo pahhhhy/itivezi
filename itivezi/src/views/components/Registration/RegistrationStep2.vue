@@ -33,8 +33,6 @@ function updateVegeMoney(value: number, index: number) {
   // マイナスの値になることを防ぐ
   if (value < 0) {
     VegemoneyList.value[index] = 0
-  } else if (VegemoneyList.value.some((item) => item === '')) {
-    VegemoneyList.value[index] = 0
   } else {
     VegemoneyList.value[index] = value
   }
@@ -43,11 +41,11 @@ function updateVegeMoney(value: number, index: number) {
 function ErrorFind() {
   const IsMoneyList: boolean =
     VegemoneyList.value.length != porps.vegeList.length ||
-    VegemoneyList.value.some((item) => item === '') || //inputで値を打った後に消すと空文字ができてしまうからそれを判定するため
+    // VegemoneyList.value.some((item) => item === '') || //inputで値を打った後に消すと空文字ができてしまうからそれを判定するため
     VegemoneyList.value.some((item) => item === 0)
   const IsVegeamoutList: boolean =
     VegeamoutList.value.length != porps.vegeList.length ||
-    VegeamoutList.value.some((item) => item === '') ||
+    // VegeamoutList.value.some((item) => item === '') ||
     VegeamoutList.value.some((item) => item === 0)
   const IsVegetankaList: boolean = VegeamoutList.value.some((item) => item === -1)
 
