@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref as Vueref, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import {
   getAuth,
@@ -9,14 +9,11 @@ import {
   createUserWithEmailAndPassword,
   type User
 } from 'firebase/auth'
-const Isbarger = ref(false)
-const currentUser = ref<User | null>(null)
+import { getDatabase, ref, onValue } from 'firebase/database'
+const Isbarger = Vueref(false)
+const currentUser = Vueref<User | null>(null)
 const ClickBarger = (): void => {
-  if (Isbarger.value) {
-    Isbarger.value = false
-  } else {
-    Isbarger.value = true
-  }
+  Isbarger.value = !Isbarger.value
 }
 const auth = getAuth()
 function rogout() {
@@ -32,19 +29,39 @@ function rogout() {
       console.log(errorCode, errorMessage)
     })
 }
-
-onMounted(() => {
+const MyRole = Vueref<any>()
+onMounted(async () => {
   const auth = getAuth()
-  // ログインしているユーザーを取得する
-  onAuthStateChanged(auth, (user) => {
+  onAuthStateChanged(auth, async (user) => {
     if (user != null && user.emailVerified) {
       currentUser.value = user
-      console.log('読み込みました')
+      try {
+        const userData = await ReadUserData(currentUser.value!.uid)
+        MyRole.value = userData.role
+        console.log('読みこんだ')
+      } catch (error) {
+        console.error('Error fetching user data:', error)
+      }
     } else {
       currentUser.value = null
     }
   })
 })
+//読みこむデータの指定
+async function ReadUserData(element: string): Promise<any> {
+  const CountRef = ref(getDatabase(), 'testUser/' + element)
+  return new Promise((resolve, reject) => {
+    onValue(
+      CountRef,
+      (snapshot) => {
+        resolve(snapshot.val())
+      },
+      (error) => {
+        reject(error)
+      }
+    )
+  })
+}
 </script>
 
 <template>
@@ -57,7 +74,7 @@ onMounted(() => {
       <i v-if="Isbarger" v-on:click="ClickBarger" class="bi bi-x-lg barger"></i>
     </nav>
   </header>
-  <aside v-show="Isbarger">
+  <aside v-if="Isbarger">
     <ul>
       <li>
         <button v-on:click="ClickBarger" class="sidebar_element">
@@ -88,6 +105,12 @@ onMounted(() => {
         <button v-on:click="ClickBarger" class="sidebar_element">
           <i class="bi bi-journals"></i>
           <RouterLink v-bind:to="{ name: 'rogin' }" class="link">ログイン/新規登録</RouterLink>
+        </button>
+      </li>
+      <li v-if="currentUser != null && MyRole == '管理者'">
+        <button v-on:click="ClickBarger" class="sidebar_element">
+          <i class="bi bi-journals"></i>
+          <RouterLink v-bind:to="{ name: 'Owner' }" class="link">管理者画面</RouterLink>
         </button>
       </li>
       <li v-if="currentUser != null">

@@ -29,6 +29,35 @@ function ReadUserData(element: string) {
   })
   return Data
 }
+function checkMydate() {
+  let IsOk = true
+  if (currentUser.value != null) {
+    if (UserData.value[currentUser.value.uid] == null) {
+      IsOk = false
+    } else {
+      if (UserData.value[currentUser.value.uid].Gender == null) {
+        IsOk = false
+      }
+      if (
+        UserData.value[currentUser.value.uid].place == null ||
+        UserData.value[currentUser.value.uid].place == ''
+      ) {
+        IsOk = false
+      }
+      if (UserData.value[currentUser.value.uid].role == null) {
+        IsOk = false
+      }
+      if (
+        UserData.value[currentUser.value.uid].PhoneNumber == null ||
+        UserData.value[currentUser.value.uid].place == ''
+      ) {
+        IsOk = false
+      }
+    }
+  }
+  console.log('check:' + IsOk)
+  return IsOk
+}
 // サインイン処理
 function signin(email: string, password: string) {
   // メールアドレスとパスワードが入力されているかを確認
@@ -43,9 +72,10 @@ function signin(email: string, password: string) {
         console.log('User signed in:', user)
         errorMes.value = ''
         if (currentUser.value != null) {
-          let CUserData: User = currentUser.value
-          if (UserData.value[CUserData.uid] == null) {
+          if (!checkMydate()) {
             router.push('/Add_Info')
+          } else {
+            router.push('/')
           }
         } else {
           console.log('currentUserがnull')

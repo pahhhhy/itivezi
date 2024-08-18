@@ -6,6 +6,7 @@ import MyPage from '../views/myPage.vue'
 import Signup from '../views/signupPage.vue'
 import Rogin from '../views/roginPage.vue'
 import Addinfo from '../views/Add_Info.vue'
+import Owner from '../views/OwnerPage.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -43,6 +44,11 @@ const router = createRouter({
       path: '/Add_Info',
       name: 'Add_Info',
       component: Addinfo
+    },
+    {
+      path: '/Owner',
+      name: 'Owner',
+      component: Owner
     }
   ]
 })

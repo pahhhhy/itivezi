@@ -1,15 +1,13 @@
 <script setup lang="ts">
 import { ref as Vueref, computed, onMounted, watchEffect } from 'vue'
 import { getAuth, onAuthStateChanged, updateProfile, type User } from 'firebase/auth'
-import { getDatabase, ref as Fireref, child, get, onValue, set, remove } from 'firebase/database'
+import { getDatabase, ref as Fireref, child, get, onValue, update } from 'firebase/database'
 interface Porps {
   currentUser: User | null
 }
 
 const porps = defineProps<Porps>()
 const IsToggle = Vueref<boolean>(false)
-
-console.log('USer' + porps.currentUser)
 function Pushtoggle() {
   if (IsToggle.value) IsToggle.value = false
   else IsToggle.value = true
@@ -18,6 +16,12 @@ function Pushtoggle() {
 const MyData = Vueref<any>()
 const Myrole = Vueref<string>('')
 const Myplace = Vueref<string>('')
+const MyGender = Vueref<string>('')
+const MyNumber = Vueref<number>(0)
+const Upname = Vueref<string>('')
+const Upplace = Vueref<string>('')
+const Uprole = Vueref<string>(Myrole.value)
+const UpNumber = Vueref<number>(0)
 watchEffect(() => {
   // currentUserがnullでない場合のみデータを読み込む
   if (porps.currentUser) {
@@ -26,6 +30,8 @@ watchEffect(() => {
       MyData.value = snapshot.val()
       Myrole.value = MyData.value.role
       Myplace.value = MyData.value.place
+      MyGender.value = MyData.value.Gender
+      MyNumber.value = MyData.value.PhoneNumber
     })
   }
 })
@@ -49,14 +55,16 @@ function PushUpdate(element: string, Bool: boolean) {
         console.log('何もないぞ')
         return
       }
-      if (porps.currentUser != null) updateDisname(porps.currentUser, Upname.value)
+      if (porps.currentUser != null) {
+        updateDisname(porps.currentUser, Upname.value)
+        writeUserdata(porps.currentUser.uid, { name: Upname.value })
+      }
     }
   }
   if (element == '役職') {
     elementsBool.value[2] = Bool
     if (Bool == false) {
-      if (porps.currentUser != null)
-        writeUserdata(porps.currentUser.uid, Uprole.value, Myplace.value)
+      if (porps.currentUser != null) writeUserdata(porps.currentUser.uid, { role: Uprole.value })
     }
   }
   if (element == '住所') {
@@ -66,23 +74,38 @@ function PushUpdate(element: string, Bool: boolean) {
         console.log('お前に住所はないんか')
         return
       }
-      if (porps.currentUser != null)
-        writeUserdata(porps.currentUser.uid, Myrole.value, Upplace.value)
+      if (porps.currentUser != null) writeUserdata(porps.currentUser.uid, { place: Upplace.value })
     }
   }
 }
-//指定したデータを書き込むようにしている。Vegeに該当の野菜
-function writeUserdata(uid: string, role: string, place: string) {
+function writeUserdata(
+  uid: string,
+  data: { role?: string; place?: string; PhoneNumber?: number; Gender?: string; name?: string }
+) {
   const db = getDatabase()
+  const updates: { [key: string]: any } = {}
+  // roleが存在する場合、roleをアップデートする
+  if (data.role !== undefined) {
+    updates['role'] = data.role
+  }
+  if (data.place !== undefined) {
+    updates['place'] = data.place
+  }
+  if (data.PhoneNumber !== undefined) {
+    updates['PhoneNumber'] = data.PhoneNumber
+  }
+  if (data.Gender !== undefined) {
+    updates['Gender'] = data.Gender
+  }
+  if (data.name !== undefined) {
+    updates['name'] = data.name
+  }
 
-  set(Fireref(db, 'testUser/' + uid), {
-    role: role,
-    place: place
-  })
+  // いずれかのデータがあればデータベースに書き込む
+  if (Object.keys(updates).length > 0) {
+    update(Fireref(db, 'testUser/' + uid), updates)
+  }
 }
-const Upname = Vueref<string>('')
-const Upplace = Vueref<string>('')
-const Uprole = Vueref<string>(Myrole.value)
 </script>
 <template>
   <button v-on:click="Pushtoggle()" class="Tbutton">
@@ -105,11 +128,18 @@ const Uprole = Vueref<string>(Myrole.value)
       />
       <button v-on:click="PushUpdate('名前', false)" class="btn btn-primary">更新する</button>
     </div>
-
+    <h2>性別:{{ MyGender }}</h2>
+    <h2>電話番号:{{ MyNumber }}</h2>
     <h2>email:{{ currentUser?.email }}</h2>
     <div class="UP_elements" v-show="!elementsBool[2]">
       <h2>役職:{{ Myrole }}</h2>
-      <button v-on:click="PushUpdate('役職', true)" class="btn btn-primary">更新する</button>
+      <button
+        v-on:click="PushUpdate('役職', true)"
+        class="btn btn-primary"
+        v-if="Myrole != '管理者'"
+      >
+        更新する
+      </button>
     </div>
     <div class="UP_radio" v-show="elementsBool[2]">
       <div class="form-check">
