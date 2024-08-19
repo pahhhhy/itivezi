@@ -93,8 +93,8 @@ watch(userData, (): void => {
   if (currentUser.value != null) {
     selectRole.value = userData.value[currentUser.value.uid].role
     placeData.value = userData.value[currentUser.value.uid].place
-    gender.value = userData.value[currentUser.value.uid].Gender
-    phoneNumber.value = userData.value[currentUser.value.uid].PhoneNumber
+    gender.value = userData.value[currentUser.value.uid].gender
+    phoneNumber.value = userData.value[currentUser.value.uid].phoneNumber
   }
 })
 </script>

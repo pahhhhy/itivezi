@@ -83,10 +83,10 @@ function writeUserdata(
     updates['place'] = data.place
   }
   if (data.PhoneNumber !== undefined) {
-    updates['PhoneNumber'] = data.PhoneNumber
+    updates['phoneNumber'] = data.PhoneNumber
   }
   if (data.Gender !== undefined) {
-    updates['Gender'] = data.Gender
+    updates['gender'] = data.Gender
   }
   if (data.name !== undefined) {
     updates['name'] = data.name

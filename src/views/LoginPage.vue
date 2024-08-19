@@ -34,7 +34,7 @@ function checkMyData() {
     if (userData.value[currentUser.value.uid] == null) {
       isOk = false
     } else {
-      if (userData.value[currentUser.value.uid].Gender == null) {
+      if (userData.value[currentUser.value.uid].gender == null) {
         isOk = false
       }
       if (
@@ -47,7 +47,7 @@ function checkMyData() {
         isOk = false
       }
       if (
-        userData.value[currentUser.value.uid].PhoneNumber == null ||
+        userData.value[currentUser.value.uid].phoneNumber == null ||
         userData.value[currentUser.value.uid].place == ''
       ) {
         isOk = false
