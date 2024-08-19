@@ -47,8 +47,8 @@ function writeUserdata(
     name: name,
     role: role,
     place: place,
-    PhoneNumber: number,
-    Gender: gender
+    phoneNumber: number,
+    gender: gender
   })
 }
 //一度にすべての入力を元に更新する
