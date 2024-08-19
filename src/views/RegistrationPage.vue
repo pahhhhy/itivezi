@@ -1,26 +1,26 @@
 <script setup lang="ts">
-import { getDatabase, ref,  onValue } from 'firebase/database'
-//Vueとfirebaseで同じrefという関数があって競合しているのでVueの方をVuerefにしている
-import { ref as vueRef, computed, onMounted } from 'vue'
+import { getDatabase, ref as fireRef,  onValue } from 'firebase/database'
+//Vueとfirebaseで同じrefという関数があって競合しているのでfirebaseの方をfireRefにしている
+import { ref, computed, onMounted } from 'vue'
 import { getAuth, onAuthStateChanged, type User } from 'firebase/auth'
 import RegistrationStep1 from './components/Registration/RegistrationStep1.vue'
 import RegistrationStep2 from './components/Registration/RegistrationStep2.vue'
 import RegistrationStep3 from './components/Registration/RegistrationStep3.vue'
-const vegeAllData = vueRef<any>(readData(''))
+const vegeAllData = ref<any>(readData(''))
 
 const vegeKeys = computed(() => {
   return vegeAllData.value ? Object.keys(vegeAllData.value) : []
 })
 //読みこむデータの指定
 function readData(element: string) {
-  const countRef = ref(getDatabase(), 'testVege/' + element)
-  const data = vueRef<any>(null)
+  const countRef = fireRef(getDatabase(), 'testVege/' + element)
+  const data = ref<any>(null)
   onValue(countRef, (snapshot) => {
     data.value = snapshot.val()
   })
   return data
 }
-const currentUser = vueRef<User | null>(null)
+const currentUser = ref<User | null>(null)
 //指定したデータを書き込むようにしている。Vegeに該当の野菜
 onMounted(() => {
   const auth = getAuth()
@@ -36,7 +36,7 @@ onMounted(() => {
 })
 
 
-const stepNum = vueRef<number>(0)
+const stepNum = ref<number>(0)
 function onStep(next: boolean) {
   if (next) stepNum.value = stepNum.value + 1
   else stepNum.value = stepNum.value - 1
@@ -46,18 +46,18 @@ function changeSelect(element: number[]) {
 }
 
 function updateStep2List(
-  vegeMoneyList: number[],
-  vegeAmountList: number[],
-  vegeTankaList: number[]
+  newVegeMoneyList: number[],
+  newVegeAmountList: number[],
+  newVegeUnitList: number[]
 ) {
-  vegeMoneyList.value = vegeMoneyList
-  vegeAmountList.value = vegeAmountList
-  vegeTankaList.value = vegeTankaList
+  vegeMoneyList.value = newVegeMoneyList
+  vegeAmountList.value = newVegeAmountList
+  vegeUnitList.value = newVegeUnitList
 }
-const vegeList = vueRef<number[]>([])
-const vegeMoneyList = vueRef<number[]>([])
-const vegeAmountList = vueRef<number[]>([])
-const vegeTankaList = vueRef<number[]>([])
+const vegeList = ref<number[]>([])
+const vegeMoneyList = ref<number[]>([])
+const vegeAmountList = ref<number[]>([])
+const vegeUnitList = ref<number[]>([])
 </script>
 
 <template>
@@ -74,13 +74,13 @@ const vegeTankaList = vueRef<number[]>([])
   ></RegistrationStep1>
   <!-- {{ VegeMoneyList }}
   {{ vegeAmountList }}
-  {{ vegeTankaList }} -->
+  {{ vegeUnitList }} -->
   <RegistrationStep2
     v-bind:vege-list="vegeList"
     v-bind:vege-keys="vegeKeys"
     v-bind:vege-amount-list="vegeAmountList"
     v-bind:vege-money-list="vegeMoneyList"
-    v-bind:vege-tanka-list="vegeTankaList"
+    v-bind:vege-unit-list="vegeUnitList"
     v-on:on-step="onStep"
     v-on:update-step2-list="updateStep2List"
     v-if="stepNum == 1 && vegeKeys != null"
@@ -91,7 +91,7 @@ const vegeTankaList = vueRef<number[]>([])
     v-bind:vege-keys="vegeKeys"
     v-bind:vege-amount-list="vegeAmountList"
     v-bind:vege-money-list="vegeMoneyList"
-    v-bind:vege-tanka-list="vegeTankaList"
+    v-bind:vege-unit-list="vegeUnitList"
     v-bind:current-user="currentUser"
     v-on:on-step="onStep"
     v-if="stepNum == 2 && vegeKeys != null"

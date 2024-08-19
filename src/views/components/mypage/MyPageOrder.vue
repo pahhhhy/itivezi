@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { getDatabase, ref as Fireref, onValue,  } from 'firebase/database'
-import { ref as vueRef, computed } from 'vue'
+import { getDatabase, ref as fireRef, onValue,  } from 'firebase/database'
+import { ref, computed } from 'vue'
 import { type User } from 'firebase/auth'
 interface Props {
   currentUser: User | null
@@ -10,15 +10,15 @@ const props = defineProps<Props>()
 
 function readData() {
   if (props.currentUser == null) return
-  const countRef = Fireref(getDatabase(), 'testOrders/' + props.currentUser.uid)
+  const countRef = fireRef(getDatabase(), 'testOrders/' + props.currentUser.uid)
   
-  const data = vueRef<any>(null)
+  const data = ref<any>(null)
   onValue(countRef, (snapshot) => {
     data.value = snapshot.val()
   })
   return data
 }
-const myOrderDate = vueRef<any>(readData())
+const myOrderDate = ref<any>(readData())
 const myOrderKeys = computed(() => {
   return myOrderDate.value ? Object.keys(myOrderDate.value) : []
 })
@@ -39,7 +39,7 @@ function updateKeysNum() {
   }
   return resultList
 }
-const isToggle = vueRef<boolean>(false)
+const isToggle = ref<boolean>(false)
 function pushToggle() {
   isToggle.value = !isToggle.value;
   
@@ -51,7 +51,7 @@ function pushToggle() {
   <p>{{ nyOrderData }}</p>
   <h3>{{ nyOrderKeysNum }}</h3> -->
   <!-- <h3>{{ OrderTimeList }}</h3> -->
-  <button v-on:click="pushToggle()" class="Tbutton">
+  <button v-on:click="pushToggle()" class="toggle-button">
     <i class="bi bi-caret-down-fill" v-show="!isToggle"></i>
     <i class="bi bi-caret-up-fill" v-show="isToggle"></i>
     <h2>自分の注文</h2>
@@ -77,7 +77,7 @@ function pushToggle() {
   </article>
 </template>
 <style>
-.Tbutton {
+.toggle-button {
   border: none;
   background-color: white;
   display: flex;

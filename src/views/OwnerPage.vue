@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { getAuth, onAuthStateChanged, type User } from 'firebase/auth'
-import { ref as vueRef,  onMounted } from 'vue'
-import { getDatabase, ref,  onValue } from 'firebase/database'
+import { ref,  onMounted } from 'vue'
+import { getDatabase, ref as fireRef,  onValue } from 'firebase/database'
 
-const currentUser = vueRef<User | null>(null)
-const myRole = vueRef<string>('')
+const currentUser = ref<User | null>(null)
+const myRole = ref<string>('')
 
 onMounted(async () => {
   const auth = getAuth()
@@ -25,7 +25,7 @@ onMounted(async () => {
 })
 
 async function readUserData(element: string): Promise<any> {
-  const countRef = ref(getDatabase(), 'testUser/' + element)
+  const countRef = fireRef(getDatabase(), 'testUser/' + element)
   return new Promise((resolve, reject) => {
     onValue(
       countRef,

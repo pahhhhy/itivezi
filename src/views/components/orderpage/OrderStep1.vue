@@ -12,7 +12,7 @@ interface Emits {
 const emit = defineEmits<Emits>()
 const props = defineProps<Props>()
 const step1Error = ref<boolean>(false)
-const selectedVege = ref<number[]>(props.SelectVegelist)
+const selectedVege = ref<number[]>(props.selectVegeList)
 function onStep(next: boolean) {
   if (selectedVege.value.length == 0) {
     step1Error.value = true
@@ -47,7 +47,7 @@ function changeVege() {
       </div>
     </div>
 
-    <p>Selected Vegetables: {{ SelectVegelist }}</p>
+    <p>Selected Vegetables: {{ selectVegeList }}</p>
     <h1 style="color: red" v-show="step1Error && selectedVege.length == 0">
       野菜を選択してください
     </h1>

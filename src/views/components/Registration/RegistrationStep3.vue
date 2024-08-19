@@ -1,21 +1,21 @@
 <script setup lang="ts">
-import { ref as vueRef } from 'vue'
+import { ref } from 'vue'
 import { type User } from 'firebase/auth'
-import { getDatabase, ref, onValue, set } from 'firebase/database'
-interface Porps {
+import { getDatabase, ref as fireRef, onValue, set } from 'firebase/database'
+interface Props {
   vegeKeys: string[]
   vegeList: number[]
   vegeMoneyList: number[]
   vegeAmountList: number[]
-  vegeTankaList: number[]
+  vegeUnitList: number[]
   currentUser: User | null
 }
 interface Emits {
   (event: 'onStep', Next: boolean): void
 }
 const emit = defineEmits<Emits>()
-const props = defineProps<Porps>()
-//この登録アルゴリズムでは上書き保存されてしまう可能性が多いにあるので直したい
+const props = defineProps<Props>()
+//この登録アルゴリズムでは上書き保存されてしまう可能性が大いにあるので直したい
 function vegeWriteHandler() {
   if (props.currentUser?.displayName != null) {
     writeVege(
@@ -24,43 +24,43 @@ function vegeWriteHandler() {
       props.vegeMoneyList,
       props.vegeAmountList,
       props.currentUser.displayName,
-      props.vegeTankaList
+      props.vegeUnitList
     )
   } 
 }
 function onStep(next: boolean) {
   if (!next) emit('onStep', false)
 }
-const vegeData = vueRef<any>()
-const finishSend = vueRef<boolean>(false)
-const vegeTankaTempList = vueRef<string[]>(['g', 'kg', '本', '個'])
+const vegeData = ref<any>()
+const finishSend = ref<boolean>(false)
+const vegeUnitTempList = ref<string[]>(['g', 'kg', '本', '個'])
 async function writeVege(
   vege: string[],
   selectedVege: number[],
   money: number[],
   num: number[],
   farmerVege: string,
-  tannka: number[]
+  unit: number[]
 ) {
   let finishNum: number = 0
   const db = getDatabase()
-  const tankaTempList = ['g', 'kg', '本', '個']
+  const unitTempList = ['g', 'kg', '本', '個']
 
   for (let i: number = 0; i < vege.length; i++) {
     let count = 0
-    const countRef = ref(getDatabase(), 'testVege/' + vege[selectedVege[i]] + '/')
+    const countRef = fireRef(getDatabase(), 'testVege/' + vege[selectedVege[i]] + '/')
     onValue(countRef, (snapshot) => {
       vegeData.value = snapshot.val()
 
       count = vegeData.value ? Object.keys(vegeData.value).length : 0
       
     })
-    const unit: string = num[i] + tankaTempList[tannka[i]]
+    const numWithUnit: string = num[i] + unitTempList[unit[i]]
     
-    set(ref(db, 'testVege/' + vege[selectedVege[i]] + '/' + count), {
+    set(fireRef(db, 'testVege/' + vege[selectedVege[i]] + '/' + count), {
       en: money[i],
       s: farmerVege,
-      unit: unit
+      unit: numWithUnit
     })
       .then(() => {
         finishNum++
@@ -79,14 +79,14 @@ const refreshPage = () => {
 <template>
   <p>{{ props.vegeAmountList }}</p>
   <p>{{ props.vegeList }}</p>
-  <p>{{ props.vegeTankaList }}</p>
+  <p>{{ props.vegeUnitList }}</p>
 
   <section>
     <div v-for="(vegeName, index) in props.vegeList" :key="vegeName + index" class="confirm">
       <h1>{{ vegeKeys[props.vegeList[index]] }}</h1>
       <h1>名前：{{ props.currentUser?.displayName }}</h1>
       <h1>
-        単価：{{ props.vegeAmountList[index] }} {{ vegeTankaTempList[props.vegeTankaList[index]] }}
+        単価：{{ props.vegeAmountList[index] }} {{ vegeUnitTempList[props.vegeUnitList[index]] }}
       </h1>
       <h1>価格：{{ vegeMoneyList[index] }}円</h1>
     </div>

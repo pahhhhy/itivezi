@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref as vueRef} from 'vue'
+import { ref } from 'vue'
 interface Props {
   vegeList: number[]
   vegeKeys: string[]
@@ -10,8 +10,8 @@ interface Emits {
 }
 const emit = defineEmits<Emits>()
 const props = defineProps<Props>()
-const selectVegeList = vueRef<number[]>(props.vegeList)
-const step1Error = vueRef<boolean>(false)
+const selectVegeList = ref<number[]>(props.vegeList)
+const step1Error = ref<boolean>(false)
 
 function onStep() {
   if (selectVegeList.value.length == 0) {

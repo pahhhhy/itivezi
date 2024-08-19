@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { getDatabase, ref, remove } from 'firebase/database'
-import { ref as vueRef, watch } from 'vue'
+import { getDatabase, ref as fireRef, remove } from 'firebase/database'
+import { ref, watch } from 'vue'
 import { type User } from 'firebase/auth'
 interface Props {
   currentUser: User
@@ -11,15 +11,15 @@ const props = defineProps<Props>()
 function deleteVegeData(vege: string, count: number) {
   const db = getDatabase()
   const path = 'testVege/' + vege + '/' + count
-  remove(ref(db, path))
+  remove(fireRef(db, path))
     .then(() => {
       
     })
     
 }
 
-const isToggle = vueRef<boolean>(false)
-const isNull = vueRef<boolean>(false)
+const isToggle = ref<boolean>(false)
+const isNull = ref<boolean>(false)
 function pushToggle() {
   isToggle.value = !isToggle.value;
  
@@ -28,8 +28,8 @@ const countKeys = (obj: object): number => {
   return Object.keys(obj).length
 }
 
-const targetList = vueRef<any>(null)
-const targetListKeys = vueRef<string[]>([])
+const targetList = ref<any>(null)
+const targetListKeys = ref<string[]>([])
 //自分のデータを取得する。全探索を使うから時間がかかる
 function findMyData(element: string) {
   const countKey: number = countKeys(props.vegeAllData)
@@ -71,7 +71,7 @@ watch(
 <template>
   <!-- {{ props.vegeAllData }} -->
   <!-- <h2>{{ targetList }}</h2> -->
-  <button v-on:click="pushToggle()" class="Tbutton">
+  <button v-on:click="pushToggle()" class="toggle-button">
     <i class="bi bi-caret-down-fill" v-show="!isToggle"></i>
     <i class="bi bi-caret-up-fill" v-show="isToggle"></i>
     <h2>自分の野菜</h2>
@@ -101,7 +101,7 @@ watch(
   border: 1px solid black;
   padding-top: 20px;
 }
-.Tbutton {
+.toggle-button {
   border: none;
   background-color: white;
   display: flex;

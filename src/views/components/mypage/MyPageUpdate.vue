@@ -1,30 +1,28 @@
 <script setup lang="ts">
-import { ref as vueRef,  watchEffect } from 'vue'
+import { ref,  watchEffect } from 'vue'
 import {  updateProfile, type User } from 'firebase/auth'
-import { getDatabase, ref,  onValue, update } from 'firebase/database'
+import { getDatabase, ref as fireRef,  onValue, update } from 'firebase/database'
 interface Props {
   currentUser: User | null
 }
 
 const props = defineProps<Props>()
-const isToggle = vueRef<boolean>(false)
+const isToggle = ref<boolean>(false)
 function pushToggle() {
-  if (isToggle.value) isToggle.value = false
-  else isToggle.value = true
-  
+  isToggle.value = !isToggle.value;
 }
-const myData = vueRef<any>()
-const myRole = vueRef<string>('')
-const myPlace = vueRef<string>('')
-const myGender = vueRef<string>('')
-const myNumber = vueRef<number>(0)
-const upName = vueRef<string>('')
-const upPlace = vueRef<string>('')
-const upRole = vueRef<string>(myRole.value)
+const myData = ref<any>()
+const myRole = ref<string>('')
+const myPlace = ref<string>('')
+const myGender = ref<string>('')
+const myNumber = ref<number>(0)
+const upName = ref<string>('')
+const upPlace = ref<string>('')
+const upRole = ref<string>(myRole.value)
 watchEffect(() => {
   // currentUserがnullでない場合のみデータを読み込む
   if (props.currentUser) {
-    const countRef = ref(getDatabase(), `testUser/${props.currentUser.uid}`)
+    const countRef = fireRef(getDatabase(), `testUser/${props.currentUser.uid}`)
     onValue(countRef, (snapshot) => {
       myData.value = snapshot.val()
       myRole.value = myData.value.role
@@ -41,7 +39,7 @@ function updateDisName(user: User, name: string) {
       
     })
 }
-const elementsBool = vueRef<boolean[]>(new Array(4).fill(false))
+const elementsBool = ref<boolean[]>(new Array(4).fill(false))
 function pushUpdate(element: string, bool: boolean) {
   if (element == '名前') {
     elementsBool.value[0] = bool
@@ -96,12 +94,12 @@ function writeUserdata(
 
   // いずれかのデータがあればデータベースに書き込む
   if (Object.keys(updates).length > 0) {
-    update(ref(db, 'testUser/' + uid), updates)
+    update(fireRef(db, 'testUser/' + uid), updates)
   }
 }
 </script>
 <template>
-  <button v-on:click="pushToggle()" class="Tbutton">
+  <button v-on:click="pushToggle()" class="toggle-button">
     <i class="bi bi-caret-down-fill" v-show="!isToggle"></i>
     <i class="bi bi-caret-up-fill" v-show="isToggle"></i>
     <h2>自分の情報更新</h2>
@@ -176,7 +174,7 @@ function writeUserdata(
   </article>
 </template>
 <style>
-.Tbutton {
+.toggle-button {
   border: none;
   background-color: white;
   display: flex;

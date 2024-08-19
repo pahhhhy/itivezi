@@ -9,20 +9,20 @@ import {
   sendEmailVerification,
   type User
 } from 'firebase/auth'
-import { getDatabase, ref,  onValue} from 'firebase/database'
-import { ref as vueRef, onMounted } from 'vue'
+import { getDatabase, ref as fireRef, onValue} from 'firebase/database'
+import { ref, onMounted } from 'vue'
 import LoginForm from './components/LoginForm.vue'
 // ログインしているユーザーデータ
-const currentUser = vueRef<User | null>()
-const email = vueRef<string>('')
-const password = vueRef<string>('')
-const errorMes = vueRef<string>('')
-const userData = vueRef<any>(readUserData(''))
+const currentUser = ref<User | null>()
+const email = ref<string>('')
+const password = ref<string>('')
+const errorMes = ref<string>('')
+const userData = ref<any>(readUserData(''))
 
 // 読み込むデータの指定
 function readUserData(element: string) {
-  const countRef = ref(getDatabase(), 'testUser/' + element)
-  const data = vueRef<any>(null)
+  const countRef = fireRef(getDatabase(), 'testUser/' + element)
+  const data = ref<any>(null)
   onValue(countRef, (snapshot) => {
     data.value = snapshot.val()
   })
@@ -72,7 +72,7 @@ function signin(email: string, password: string) {
         errorMes.value = ''
         if (currentUser.value != null) {
           if (!checkMyData()) {
-            router.push('/Add_Info')
+            router.push('/add-info')
           } else {
             router.push('/')
           }

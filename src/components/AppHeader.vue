@@ -1,16 +1,15 @@
 <script setup lang="ts">
-import {  ref as Vueref, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import {
   getAuth,
   signOut,
   onAuthStateChanged,
-
   type User
 } from 'firebase/auth'
-import { getDatabase, ref, onValue } from 'firebase/database'
-const isBurger = Vueref(false)
-const currentUser = Vueref<User | null>(null)
+import { getDatabase, ref as fireRef, onValue } from 'firebase/database'
+const isBurger = ref(false)
+const currentUser = ref<User | null>(null)
 const onClickBurger = (): void => {
   isBurger.value = !isBurger.value
 }
@@ -22,7 +21,7 @@ function logout() {
       
     })
 }
-const myRole = Vueref<any>()
+const myRole = ref<any>()
 onMounted(async () => {
   const auth = getAuth()
   onAuthStateChanged(auth, async (user) => {
@@ -42,7 +41,7 @@ onMounted(async () => {
 })
 //読みこむデータの指定
 async function readUserData(element: string): Promise<any> {
-  const countRef = ref(getDatabase(), 'testUser/' + element)
+  const countRef = fireRef(getDatabase(), 'testUser/' + element)
   return new Promise((resolve, reject) => {
     onValue(
       countRef,
@@ -63,8 +62,8 @@ async function readUserData(element: string): Promise<any> {
 
     <nav>
       <p v-if="currentUser != null">{{ currentUser.displayName }}様</p>
-      <i v-if="!isBurger" v-on:click="onClickBurger" class="bi bi-justify barger"></i>
-      <i v-if="isBurger" v-on:click="onClickBurger" class="bi bi-x-lg barger"></i>
+      <i v-if="!isBurger" v-on:click="onClickBurger" class="bi bi-justify burger"></i>
+      <i v-if="isBurger" v-on:click="onClickBurger" class="bi bi-x-lg burger"></i>
     </nav>
   </header>
   <aside v-if="isBurger">
@@ -72,26 +71,26 @@ async function readUserData(element: string): Promise<any> {
       <li>
         <button v-on:click="onClickBurger" class="sidebar_element">
           <i class="bi bi-journals"></i>
-          <RouterLink v-bind:to="{ name: 'AppTop' }" class="link">Top</RouterLink>
+          <RouterLink v-bind:to="{ name: 'top' }" class="link">Top</RouterLink>
         </button>
       </li>
 
       <li v-if="currentUser != null">
         <button v-on:click="onClickBurger" class="sidebar_element">
           <i class="bi bi-journals"></i>
-          <RouterLink v-bind:to="{ name: 'orderpage' }" class="link">注文</RouterLink>
+          <RouterLink v-bind:to="{ name: 'order' }" class="link">注文</RouterLink>
         </button>
       </li>
       <li v-if="currentUser != null">
         <button v-on:click="onClickBurger" class="sidebar_element">
           <i class="bi bi-journals"></i>
-          <RouterLink v-bind:to="{ name: 'Registration' }" class="link">登録</RouterLink>
+          <RouterLink v-bind:to="{ name: 'registration' }" class="link">登録</RouterLink>
         </button>
       </li>
       <li v-if="currentUser != null">
         <button v-on:click="onClickBurger" class="sidebar_element">
           <i class="bi bi-journals"></i>
-          <RouterLink v-bind:to="{ name: 'mypage' }" class="link">マイページ</RouterLink>
+          <RouterLink v-bind:to="{ name: 'my-page' }" class="link">マイページ</RouterLink>
         </button>
       </li>
       <li v-if="currentUser == null">
@@ -103,7 +102,7 @@ async function readUserData(element: string): Promise<any> {
       <li v-if="currentUser != null && myRole == '管理者'">
         <button v-on:click="onClickBurger" class="sidebar_element">
           <i class="bi bi-journals"></i>
-          <RouterLink v-bind:to="{ name: 'Owner' }" class="link">管理者画面</RouterLink>
+          <RouterLink v-bind:to="{ name: 'owner' }" class="link">管理者画面</RouterLink>
         </button>
       </li>
       <li v-if="currentUser != null">
@@ -133,7 +132,7 @@ nav {
   justify-content: center;
   padding: 10px;
 }
-.barger {
+.burger {
   font-size: 40px;
   color: greenyellow;
 }

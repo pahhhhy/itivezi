@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { getAuth, onAuthStateChanged, type User } from 'firebase/auth'
-import { getDatabase, ref as Fireref,  set } from 'firebase/database'
-interface Porps {
+import { getDatabase, ref as fireRef,  set } from 'firebase/database'
+interface Props {
   vegeKeys: string[]
   vegeAllData: { [key: string]: any[] }
   selectVege: number[]
@@ -23,7 +23,7 @@ function onStep(next: boolean) {
   }
 }
 const emit = defineEmits<Emits>()
-const props = defineProps<Porps>()
+const props = defineProps<Props>()
 const currentUser = ref<User | null>(null)
 const vegeNameList = ref<string[]>([])
 for (let i: number = 0; i < props.selectVege.length; i++) {
@@ -65,7 +65,7 @@ function writeVegeOrder(
     return
   }
 
-  set(Fireref(db, 'testOrders/' + currentUser.uid + '/' + currentTime), {
+  set(fireRef(db, 'testOrders/' + currentUser.uid + '/' + currentTime), {
     orderName: currentUser.displayName,
     email: currentUser.email,
     selectDate: date,
@@ -75,7 +75,7 @@ function writeVegeOrder(
       
     })
   for (let i: number = 0; i < vege.length; i++) {
-    set(Fireref(db, 'testOrders/' + currentUser.uid + '/' + currentTime + '/' + i), {
+    set(fireRef(db, 'testOrders/' + currentUser.uid + '/' + currentTime + '/' + i), {
       amount: num[i],
       farmerName: farmerName[i],
       price: money[i],

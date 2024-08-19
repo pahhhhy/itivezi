@@ -1,21 +1,21 @@
 <script setup lang="ts">
-import { ref as vueRef, onMounted, watch } from 'vue'
-import { getDatabase, ref , onValue, set } from 'firebase/database'
-
+import { ref, onMounted, watch } from 'vue'
+import { getDatabase, ref as fireRef , onValue, set } from 'firebase/database'
 import { getAuth, onAuthStateChanged, updateProfile, type User } from 'firebase/auth'
 import router from '@/router'
-const currentUser = vueRef<User | null>(null)
-const userData = vueRef<any>(readUserData(''))
-const userName = vueRef<string>('')
-const selectRole = vueRef<string>('')
-const placeData = vueRef<string>('')
-const gender = vueRef<string>('')
-const phoneNumber = vueRef<number>()
+
+const currentUser = ref<User | null>(null)
+const userData = ref<any>(readUserData(''))
+const userName = ref<string>('')
+const selectRole = ref<string>('')
+const placeData = ref<string>('')
+const gender = ref<string>('')
+const phoneNumber = ref<number>()
 
 // 読み込むデータの指定
 function readUserData(element: string) {
-  const countRef = ref(getDatabase(), 'testUser/' + element)
-  const data = vueRef<any>(null)
+  const countRef = fireRef(getDatabase(), 'testUser/' + element)
+  const data = ref<any>(null)
   onValue(countRef, (snapshot) => {
     data.value = snapshot.val()
   })
@@ -43,7 +43,7 @@ function writeUserdata(
 ) {
   const db = getDatabase()
 
-  set(ref(db, 'testUser/' + uid), {
+  set(fireRef(db, 'testUser/' + uid), {
     name: name,
     role: role,
     place: place,

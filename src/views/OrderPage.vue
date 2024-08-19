@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { getDatabase, ref, onValue} from 'firebase/database'
-//Vueとfirebaseで同じrefという関数があって競合しているのでVueの方をVuerefにしている
-import { ref as vueRef, computed } from 'vue'
+import { getDatabase, ref as fireRef, onValue} from 'firebase/database'
+//Vueとfirebaseで同じrefという関数があって競合しているのでfirebaseの方をfireRefにしている
+import { ref, computed } from 'vue'
 
 import OrderStep1 from './components/orderpage/OrderStep1.vue'
 import OrderStep2 from './components/orderpage/OrderStep2.vue'
@@ -9,23 +9,23 @@ import OrderStep3 from './components/orderpage/OrderStep3.vue'
 import OrderStep4 from './components/orderpage/OrderStep4.vue'
 import OrderPopup from './components/orderpage/OrderPopup.vue'
 //変数の定義
-const vegeAllData = vueRef<any>(readData(''))
-const stepNum = vueRef<number>(0)
-const selectVegeList = vueRef<number[]>([])
-const selectMenList = vueRef<string[]>([])
-const selectMenListNum = vueRef<number[]>([])
-const selectDate = vueRef<Date | null>(null)
-const vegeCountList = vueRef<number[]>([])
-const totalMoneyList = vueRef<number[]>([])
-const allTotalMoney = vueRef<number>(0)
-const finishSend = vueRef<boolean>(false)
+const vegeAllData = ref<any>(readData(''))
+const stepNum = ref<number>(0)
+const selectVegeList = ref<number[]>([])
+const selectMenList = ref<string[]>([])
+const selectMenListNum = ref<number[]>([])
+const selectDate = ref<Date | null>(null)
+const vegeCountList = ref<number[]>([])
+const totalMoneyList = ref<number[]>([])
+const allTotalMoney = ref<number>(0)
+const finishSend = ref<boolean>(false)
 const vegeKeys = computed(() => {
   return vegeAllData.value ? Object.keys(vegeAllData.value) : []
 })
 //読みこむデータの指定
 function readData(element: string) {
-  const countRef = ref(getDatabase(), 'testVege/' + element)
-  const data = vueRef<any>(null)
+  const countRef = fireRef(getDatabase(), 'testVege/' + element)
+  const data = ref<any>(null)
   onValue(countRef, (snapshot) => {
     data.value = snapshot.val()
   })
@@ -129,7 +129,7 @@ function changeDate(date: Date | null) {
   align-items: center;
   justify-content: center;
 }
-.writebutton {
+.write-button {
   width: 200px;
   height: 100px;
   margin: auto;

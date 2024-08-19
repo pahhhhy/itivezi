@@ -12,22 +12,22 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'AppTop',
+      name: 'top',
       component: AppTop
     },
     {
-      path: '/orderpage',
-      name: 'orderpage',
+      path: '/order',
+      name: 'order',
       component: OrderPage
     },
     {
-      path: '/Registration',
-      name: 'Registration',
+      path: '/registration',
+      name: 'registration',
       component: RegistrationPage
     },
     {
-      path: '/mypage',
-      name: 'mypage',
+      path: '/my-page',
+      name: 'my-page',
       component: MyPage
     },
     {
@@ -41,8 +41,8 @@ const router = createRouter({
       component: Login
     },
     {
-      path: '/Add_Info',
-      name: 'Add_Info',
+      path: '/add-info',
+      name: 'add-info',
       component: Addinfo
     },
     {

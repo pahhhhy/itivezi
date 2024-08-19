@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { getDatabase, ref, onValue } from 'firebase/database'
-//Vueとfirebaseで同じrefという関数があって競合しているのでVueの方をVuerefにしている
-import { ref as vueRef, computed, onMounted } from 'vue'
+import { getDatabase, ref as fireRef, onValue } from 'firebase/database'
+//Vueとfirebaseで同じrefという関数があって競合しているのでfirebaseの方をfireRefにしている
+import { ref, computed, onMounted } from 'vue'
 import { getAuth, onAuthStateChanged, type User } from 'firebase/auth'
 import MyPageOrder from './components/mypage/MyPageOrder.vue'
 import MyPageUpdate from './components/mypage/MyPageUpdate.vue'
@@ -19,16 +19,16 @@ onMounted(() => {
     }
   })
 })
-const currentUser = vueRef<User | null>(null)
+const currentUser = ref<User | null>(null)
 function readData(element: string) {
-  const countRef = ref(getDatabase(), 'testVege/' + element)
-  const data = vueRef<any>(null)
+  const countRef = fireRef(getDatabase(), 'testVege/' + element)
+  const data = ref<any>(null)
   onValue(countRef, (snapshot) => {
     data.value = snapshot.val()
   })
   return data
 }
-const vegeAllData = vueRef<any>(readData(''))
+const vegeAllData = ref<any>(readData(''))
 const vegeKeys = computed(() => {
   return vegeAllData.value ? Object.keys(vegeAllData.value) : []
 })
