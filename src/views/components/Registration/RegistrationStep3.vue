@@ -69,9 +69,7 @@ async function writeVege(
           FinishSend.value = true
         }
       })
-      .catch((error) => {
-        
-      })
+      
   }
 }
 const refreshPage = () => {

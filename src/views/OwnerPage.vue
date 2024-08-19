@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { getAuth, onAuthStateChanged, type User } from 'firebase/auth'
-import { ref as VueRef, computed, onMounted, watchEffect } from 'vue'
-import { getDatabase, ref, child, get, onValue, set, remove } from 'firebase/database'
+import { ref as VueRef,  onMounted } from 'vue'
+import { getDatabase, ref,  onValue } from 'firebase/database'
 
 const currentUser = VueRef<User | null>(null)
 const MyRole = VueRef<string>('')

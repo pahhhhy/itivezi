@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { computed, ref as Vueref, onMounted } from 'vue'
+import {  ref as Vueref, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import {
   getAuth,
   signOut,
   onAuthStateChanged,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
+
   type User
 } from 'firebase/auth'
 import { getDatabase, ref, onValue } from 'firebase/database'
@@ -20,12 +19,6 @@ function rogout() {
   signOut(auth)
     .then(() => {
       // Sign-out successful.
-      
-    })
-    .catch((error) => {
-      // An error happened.
-      const errorCode = error.code
-      const errorMessage = error.message
       
     })
 }

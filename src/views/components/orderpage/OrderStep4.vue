@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { getAuth, onAuthStateChanged, type User } from 'firebase/auth'
-import { getDatabase, ref as Fireref, child, get, onValue, set, remove } from 'firebase/database'
+import { getDatabase, ref as Fireref,  set } from 'firebase/database'
 interface Porps {
   vegekeys: string[]
   vegealldata: { [key: string]: any[] }
@@ -74,9 +74,6 @@ function writeVegeorder(
     .then(() => {
       
     })
-    .catch((error) => {
-      
-    })
   for (let i: number = 0; i < Vege.length; i++) {
     set(Fireref(db, 'testOrders/' + currentUser.uid + '/' + currentTime + '/' + i), {
       amout: num[i],
@@ -87,9 +84,6 @@ function writeVegeorder(
     })
       .then(() => {
         
-      })
-      .catch((error) => {
-       
       })
   }
   emit('OnSend', true)

@@ -1,14 +1,11 @@
 <script setup lang="ts">
-import { getDatabase, ref as Fireref, child, get, onValue, set, remove } from 'firebase/database'
-import { ref as Vueref, computed, onMounted, watch } from 'vue'
-import { getAuth, onAuthStateChanged, type User } from 'firebase/auth'
+import { getDatabase, ref as Fireref, onValue,  } from 'firebase/database'
+import { ref as Vueref, computed } from 'vue'
+import { type User } from 'firebase/auth'
 interface Porps {
   currentUser: User | null
 }
-interface Emits {
-  (event: 'OnStep', Next: boolean): void
-}
-const emit = defineEmits<Emits>()
+
 const porps = defineProps<Porps>()
 
 function ReadData() {
@@ -48,26 +45,7 @@ function Pushtoggle() {
   else IsToggle.value = true
   
 }
-//MyOrderkeysNumが更新されたらこれを更新するようにしたい
-const OrderTimeList = Vueref<string[]>([])
-function SetOrderTime(timeList: string[]) {
-  let resultList: any = 0
-  if (timeList.length != 0) {
-    console.error('きーが無いぞ')
-  } else {
-    for (let i: number = 0; i < timeList.length; i++) {
-      resultList[i] = parseTimestamp(timeList[i])
-    }
-  }
-  OrderTimeList.value = resultList
-}
 
-function parseTimestamp(timestamp: string) {
-  // 各要素を分割して取得
-  const [year, month, day, hours, minutes, seconds] = timestamp.split('-').map(Number)
-  let time = year + '年' + month + '月' + day + '日' + hours + '時' + minutes + '分'
-  return time
-}
 </script>
 <template>
   <!-- <h1>{{ MyOrderkeys }}</h1>

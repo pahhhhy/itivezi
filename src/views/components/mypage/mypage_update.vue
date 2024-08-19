@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref as Vueref, computed, onMounted, watchEffect } from 'vue'
-import { getAuth, onAuthStateChanged, updateProfile, type User } from 'firebase/auth'
-import { getDatabase, ref as Fireref, child, get, onValue, update } from 'firebase/database'
+import { ref as Vueref,  watchEffect } from 'vue'
+import {  updateProfile, type User } from 'firebase/auth'
+import { getDatabase, ref as Fireref,  onValue, update } from 'firebase/database'
 interface Porps {
   currentUser: User | null
 }
@@ -21,7 +21,6 @@ const MyNumber = Vueref<number>(0)
 const Upname = Vueref<string>('')
 const Upplace = Vueref<string>('')
 const Uprole = Vueref<string>(Myrole.value)
-const UpNumber = Vueref<number>(0)
 watchEffect(() => {
   // currentUserがnullでない場合のみデータを読み込む
   if (porps.currentUser) {
@@ -39,10 +38,6 @@ function updateDisname(user: User, name: string) {
   updateProfile(user, { displayName: name })
     .then(() => {
       // 成功時の処理
-      
-    })
-    .catch((error) => {
-      // 失敗時の処理
       
     })
 }

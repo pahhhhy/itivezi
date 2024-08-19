@@ -15,9 +15,7 @@ function DeleteVegedata(Vege: string, count: number) {
     .then(() => {
       
     })
-    .catch((error) => {
-      
-    })
+    
 }
 
 const IsToggle = Vueref<boolean>(false)
@@ -65,7 +63,7 @@ if (porps.currentUser.displayName != null && porps.vegealldata != undefined)
 
 watch(
   () => porps.vegealldata,
-  (newData, oldData) => {
+  () => {
     if (porps.currentUser.displayName != null) {
       FindMyData(porps.currentUser.displayName)
     }

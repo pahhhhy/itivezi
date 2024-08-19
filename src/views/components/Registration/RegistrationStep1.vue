@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref as Vueref, watch } from 'vue'
+import { ref as Vueref} from 'vue'
 interface Porps {
   vegeList: number[]
   vegekeys: string[]

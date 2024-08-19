@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getDatabase, ref, onValue, remove } from 'firebase/database'
+import { getDatabase, ref, onValue} from 'firebase/database'
 //Vueとfirebaseで同じrefという関数があって競合しているのでVueの方をVuerefにしている
 import { ref as Vueref, computed } from 'vue'
 
@@ -9,7 +9,6 @@ import OrderStep3 from './components/orderpage/OrderStep3.vue'
 import OrderStep4 from './components/orderpage/OrderStep4.vue'
 import OrderPopup from './components/orderpage/OrderPopup.vue'
 //変数の定義
-const vegeData = Vueref<any>(ReadData('テスト野菜2'))
 const VegeAllData = Vueref<any>(ReadData(''))
 const Stepnum = Vueref<number>(0)
 const SelectVegelist = Vueref<number[]>([])
@@ -33,20 +32,7 @@ function ReadData(element: string) {
   return Data
 }
 
-// 今は一番後ろのデータをけすようにしている
-function DeleteVegedata(Vege: string) {
-  let count = 0
-  const CountRef = ref(getDatabase(), 'testVege/' + Vege)
-  onValue(CountRef, (snapshot) => {
-    vegeData.value = snapshot.val()
 
-    count = vegeData.value ? Object.keys(vegeData.value).length : 0
-    
-  })
-  const db = getDatabase()
-  count = count - 1
-  remove(ref(db, 'testVege/' + Vege + '/' + count))
-}
 
 //Stepの管理
 function OnStep(Next: boolean) {

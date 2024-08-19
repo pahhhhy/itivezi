@@ -6,11 +6,10 @@ import {
   signOut,
   onAuthStateChanged,
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
   sendEmailVerification,
   type User
 } from 'firebase/auth'
-import { getDatabase, ref as Fireref, child, get, onValue, set, remove } from 'firebase/database'
+import { getDatabase, ref as Fireref,  onValue} from 'firebase/database'
 import { ref as Vueref, onMounted } from 'vue'
 import rogin_form from './components/rogin_form.vue'
 // ログインしているユーザーデータ
@@ -92,16 +91,10 @@ function signin(email: string, password: string) {
             
             // 必要に応じて未認証のユーザーに通知する処理を追加
           })
-          .catch((error) => {
-            
-          })
       }
     })
-    .catch((error) => {
+    .catch(() => {
       // 失敗時処理
-      const errorCode = error.code
-      const errorMessage = error.message
-      
       errorMes.value = 'パスワードかメールアドレスが間違っています'
     })
 }

@@ -2,9 +2,7 @@
 import { RouterLink } from 'vue-router'
 import {
   getAuth,
-  signOut,
   onAuthStateChanged,
-  signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   sendEmailVerification,
   updateProfile,
@@ -39,11 +37,7 @@ function sendEmailVerifi(User: User) {
       // Email verification sent!
       
     })
-    .catch((error) => {
-      // 失敗時処理
-      const errorCode = error.code
-      const errorMessage = error.message
-    })
+    
 }
 
 // サインアップ処理
@@ -69,7 +63,7 @@ function createAccount(email: string, password: string, name: string) {
 
     .catch((error) => {
       // エラー処理
-      const errorCode = error.code
+      
       const errorMessage = error.message
       
       ErrorMes(errorMessage)
@@ -81,7 +75,7 @@ function ErrorMes(element: string) {
       errorMes.value = '正しいメールアドレスをいれてください'
       break
     case ' Firebase: Password should be at least 6 characters (auth/weak-password).':
-      errorMes.value = '6～20文字以内でパスワードを作ってください'
+      errorMes.value = '6~20文字以内でパスワードを作ってください'
       break
     case 'Firebase: Error (auth/email-already-in-use).':
       errorMes.value = 'メールアドレスはもうつかわれています'
