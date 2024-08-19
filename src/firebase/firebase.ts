@@ -11,7 +11,7 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_MEASUREMENT_ID,
   databaseURL: import.meta.env.VITE_URL
 }
-console.log(firebaseConfig)
+
 // firebaseConfigの値を元にfirebaseの初期化
 const app = initializeApp(firebaseConfig)
 // アナリティクスの初期化

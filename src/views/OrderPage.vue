@@ -41,7 +41,7 @@ function DeleteVegedata(Vege: string) {
     vegeData.value = snapshot.val()
 
     count = vegeData.value ? Object.keys(vegeData.value).length : 0
-    console.log(count)
+    
   })
   const db = getDatabase()
   count = count - 1
@@ -50,7 +50,7 @@ function DeleteVegedata(Vege: string) {
 
 //Stepの管理
 function OnStep(Next: boolean) {
-  console.log('oya')
+  
   if (Next) {
     Stepnum.value = Stepnum.value + 1
   } else {

@@ -21,7 +21,7 @@ const Ispopup = ref<boolean>(false)
 const errorMes = ref<string>('')
 const Name = ref<string>('')
 const OnInput = (email: string, password: string, name: string): void => {
-  console.log('uketotta')
+  
   if (email != '') {
     Email.value = email
   }
@@ -37,13 +37,12 @@ function sendEmailVerifi(User: User) {
   sendEmailVerification(User)
     .then(() => {
       // Email verification sent!
-      console.log('確認メールをおくりました')
+      
     })
     .catch((error) => {
       // 失敗時処理
       const errorCode = error.code
       const errorMessage = error.message
-      console.log(errorCode, errorMessage)
     })
 }
 
@@ -51,7 +50,6 @@ function sendEmailVerifi(User: User) {
 function createAccount(email: string, password: string, name: string) {
   const auth = getAuth()
   if (email == '' || email == '') {
-    console.log('何もない何もない私何もない')
     return
   }
 
@@ -59,21 +57,21 @@ function createAccount(email: string, password: string, name: string) {
     .then((userCredential) => {
       // 成功時処理
       const user = userCredential.user
-      console.log(user)
+      
       Ispopup.value = true
       sendEmailVerifi(user)
       return updateProfile(user, { displayName: name })
     })
     .then(() => {
       // プロファイル更新成功
-      console.log('User profile updated with name')
+      
     })
 
     .catch((error) => {
       // エラー処理
       const errorCode = error.code
       const errorMessage = error.message
-      console.log(errorCode + '  :  ' + errorMessage)
+      
       ErrorMes(errorMessage)
     })
 }
@@ -98,10 +96,10 @@ onMounted(() => {
     if (user) {
       if (user.emailVerified) {
         // メール確認済み、ログイン許可
-        console.log('Email verified, login allowed')
+        
       } else {
         // メール未確認、ログイン不許可
-        console.log('Email not verified, login not allowed')
+        
       }
     } else {
       // ユーザーがサインアウトしている状態
@@ -111,7 +109,7 @@ onMounted(() => {
   onAuthStateChanged(auth, (user) => {
     if (user != null && user.emailVerified) {
       currentUser.value = user
-      console.log('読み込みました')
+      
     } else {
       currentUser.value = null
     }

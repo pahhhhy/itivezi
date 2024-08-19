@@ -31,7 +31,7 @@ onMounted(() => {
   onAuthStateChanged(auth, (user) => {
     if (user != null && user.emailVerified) {
       currentUser.value = user
-      console.log('読み込みました')
+      
     } else {
       currentUser.value = null
     }
@@ -81,7 +81,7 @@ function onStep(Next: boolean) {
       break
   }
 
-  console.log(Stepnum.value)
+ 
 }
 function UpdateStep2list(
   vegeMoneyList: number[],

@@ -11,13 +11,12 @@ const porps = defineProps<Porps>()
 function DeleteVegedata(Vege: string, count: number) {
   const db = getDatabase()
   const path = 'testVege/' + Vege + '/' + count
-  console.log(path)
   remove(Fireref(db, path))
     .then(() => {
-      console.log('削除が完了しました。')
+      
     })
     .catch((error) => {
-      console.error('削除中にエラーが発生しました:', error)
+      
     })
 }
 
@@ -26,7 +25,7 @@ const Isnull = Vueref<boolean>(false)
 function Pushtoggle() {
   if (IsToggle.value) IsToggle.value = false
   else IsToggle.value = true
-  console.log(Isnull.value)
+ 
 }
 const countKeys = (obj: object): number => {
   return Object.keys(obj).length
@@ -51,7 +50,7 @@ function FindMyData(element: string) {
         if (!resultList[key]) {
           resultList[key] = []
         }
-        console.log('key' + key)
+        
         resultList[key].push(j)
       }
     }
@@ -63,7 +62,7 @@ function FindMyData(element: string) {
 }
 if (porps.currentUser.displayName != null && porps.vegealldata != undefined)
   FindMyData(porps.currentUser.displayName)
-else console.error('ミスってる')
+
 watch(
   () => porps.vegealldata,
   (newData, oldData) => {

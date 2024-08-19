@@ -55,7 +55,7 @@ function checkMydate() {
       }
     }
   }
-  console.log('check:' + IsOk)
+  
   return IsOk
 }
 // サインイン処理
@@ -69,7 +69,7 @@ function signin(email: string, password: string) {
       const user = userCredential.user
       if (user.emailVerified) {
         // メールアドレスが認証済みの場合の処理
-        console.log('User signed in:', user)
+        
         errorMes.value = ''
         if (currentUser.value != null) {
           if (!checkMydate()) {
@@ -78,22 +78,22 @@ function signin(email: string, password: string) {
             router.push('/')
           }
         } else {
-          console.log('currentUserがnull')
+          
           router.push('/')
         }
       } else {
         // メールアドレスが未認証の場合の処理
-        console.log('Email not verified')
+        
         sendEmailVerification(user)
         errorMes.value =
           'メールアドレス認証ができていません。もう一度送るのでメールを確認してください'
         signOut(auth)
           .then(() => {
-            console.log('User signed out')
+            
             // 必要に応じて未認証のユーザーに通知する処理を追加
           })
           .catch((error) => {
-            console.error('Sign out error:', error)
+            
           })
       }
     })
@@ -101,13 +101,13 @@ function signin(email: string, password: string) {
       // 失敗時処理
       const errorCode = error.code
       const errorMessage = error.message
-      console.log(errorCode, errorMessage)
+      
       errorMes.value = 'パスワードかメールアドレスが間違っています'
     })
 }
 
 const OnInput = (email: string, password: string): void => {
-  console.log('uketotta')
+  
   if (email != '') {
     Email.value = email
   }
@@ -122,13 +122,13 @@ onMounted(() => {
   onAuthStateChanged(auth, (user) => {
     if (user != null && user.emailVerified) {
       currentUser.value = user
-      console.log('読み込みました')
+      
     } else {
       currentUser.value = null
     }
   })
 })
-console.log(UserData.value)
+
 </script>
 <template>
   <div class="title">

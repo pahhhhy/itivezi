@@ -5,7 +5,7 @@ interface Emits {
 const emit = defineEmits<Emits>()
 function Emitemail(event: Event) {
   const element = event.target as HTMLInputElement
-  console.log(element.value)
+  
   emit('OnInput', element.value, '')
 }
 function EmitPassword(event: Event) {

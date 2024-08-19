@@ -14,7 +14,7 @@ onMounted(async () => {
       try {
         const userData = await ReadUserData(currentUser.value!.uid)
         MyRole.value = userData.role
-        console.log('読みこんだ')
+        
       } catch (error) {
         console.error('Error fetching user data:', error)
       }

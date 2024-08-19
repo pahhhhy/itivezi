@@ -26,9 +26,7 @@ function handlewritevege() {
       porps.currentUser.displayName,
       porps.VegeTankaList
     )
-  } else {
-    console.log('名前がない')
-  }
+  } 
 }
 function onStep(Next: boolean) {
   if (!Next) emit('OnStep', false)
@@ -55,19 +53,10 @@ async function writeVege(
       vegeData.value = snapshot.val()
 
       count = vegeData.value ? Object.keys(vegeData.value).length : 0
-      console.log(count)
+      
     })
     const unit: string = num[i] + tankaTempList[tannka[i]]
-    console.log(
-      'unit' +
-        unit +
-        '  num:' +
-        num[i] +
-        '  tanka:' +
-        tankaTempList[tannka[i]] +
-        '   tankakakaka:' +
-        tannka[i]
-    )
+    
     set(ref(db, 'testVege/' + Vege[selectvege[i]] + '/' + count), {
       en: money[i],
       s: farmername,
@@ -81,7 +70,7 @@ async function writeVege(
         }
       })
       .catch((error) => {
-        console.error('注文の保存中にエラーが発生しました:', error)
+        
       })
   }
 }

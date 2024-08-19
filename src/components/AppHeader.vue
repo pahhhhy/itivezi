@@ -20,13 +20,13 @@ function rogout() {
   signOut(auth)
     .then(() => {
       // Sign-out successful.
-      console.log('ログアウトしました')
+      
     })
     .catch((error) => {
       // An error happened.
       const errorCode = error.code
       const errorMessage = error.message
-      console.log(errorCode, errorMessage)
+      
     })
 }
 const MyRole = Vueref<any>()
@@ -38,7 +38,7 @@ onMounted(async () => {
       try {
         const userData = await ReadUserData(currentUser.value!.uid)
         MyRole.value = userData.role
-        console.log('読みこんだ')
+       
       } catch (error) {
         console.error('Error fetching user data:', error)
       }

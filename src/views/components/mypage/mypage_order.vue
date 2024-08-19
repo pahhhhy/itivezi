@@ -10,11 +10,11 @@ interface Emits {
 }
 const emit = defineEmits<Emits>()
 const porps = defineProps<Porps>()
-console.log('user:' + porps.currentUser)
+
 function ReadData() {
   if (porps.currentUser == null) return
   const CountRef = Fireref(getDatabase(), 'testOrders/' + porps.currentUser.uid)
-  console.log(porps.currentUser.uid)
+  
   const Data = Vueref<any>(null)
   onValue(CountRef, (snapshot) => {
     Data.value = snapshot.val()
@@ -38,7 +38,6 @@ function UpdateKeysnum() {
       if (!MyOrderDate.value || !MyOrderDate.value[MyOrderkeys.value[i]]) break
       if (MyOrderDate.value[MyOrderkeys.value[i]][j] === undefined) break
       resultlist[i][j] = MyOrderDate.value[MyOrderkeys.value[i]][j]
-      console.log(i)
     }
   }
   return resultlist
@@ -47,13 +46,13 @@ const IsToggle = Vueref<boolean>(false)
 function Pushtoggle() {
   if (IsToggle.value) IsToggle.value = false
   else IsToggle.value = true
-  console.log(IsToggle.value)
+  
 }
 //MyOrderkeysNumが更新されたらこれを更新するようにしたい
 const OrderTimeList = Vueref<string[]>([])
 function SetOrderTime(timeList: string[]) {
   let resultList: any = 0
-  if (timeList.length == 0) {
+  if (timeList.length != 0) {
     console.error('きーが無いぞ')
   } else {
     for (let i: number = 0; i < timeList.length; i++) {

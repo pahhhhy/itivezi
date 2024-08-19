@@ -25,11 +25,11 @@ function updateDisname(user: User, name: string) {
   updateProfile(user, { displayName: name })
     .then(() => {
       // 成功時の処理
-      console.log('Display name updated successfully.' + name)
+      
     })
     .catch((error) => {
       // 失敗時の処理
-      console.error('Error updating display name:', error)
+      
     })
 }
 //指定したデータを書き込むようにしている。Vegeに該当の野菜
@@ -72,9 +72,7 @@ function UpdateInfo() {
 
       router.push('/')
     }
-  } else {
-    console.log('入力をしてください')
-  }
+  } 
 }
 onMounted(() => {
   const auth = getAuth()
@@ -82,7 +80,7 @@ onMounted(() => {
   onAuthStateChanged(auth, (user) => {
     if (user != null && user.emailVerified) {
       currentUser.value = user
-      console.log('読み込みました')
+      
       if (currentUser.value.displayName != null) {
         UserName.value = currentUser.value.displayName
       }

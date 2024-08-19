@@ -24,7 +24,7 @@ const VegetankaList = Vueref<number[]>(porps.VegeTankaList)
 const VegetankaTempList = Vueref<string[]>(['g', 'kg', '本', '個'])
 if (VegemoneyList.value.length == 0) {
   //これをしないとエラー検知ができなかったはず。初回だけvegelistに合わせて０埋め
-  console.log('成功したはず')
+  
   VegemoneyList.value = new Array(porps.vegeList.length).fill(0)
   VegetankaList.value = new Array(porps.vegeList.length).fill(0)
   VegeamoutList.value = new Array(porps.vegeList.length).fill(0)
@@ -50,9 +50,7 @@ function ErrorFind() {
   const IsVegetankaList: boolean = VegeamoutList.value.some((item) => item === -1)
 
   const Iserror = IsMoneyList || IsVegeamoutList || IsVegetankaList
-  console.log(
-    IsMoneyList + ' :amout' + IsVegeamoutList + ' :tanka' + IsVegetankaList + ' :error' + Iserror
-  )
+ 
   return Iserror
 }
 const Step2error = Vueref<boolean>(false)

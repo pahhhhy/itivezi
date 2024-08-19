@@ -11,7 +11,7 @@ const IsToggle = Vueref<boolean>(false)
 function Pushtoggle() {
   if (IsToggle.value) IsToggle.value = false
   else IsToggle.value = true
-  console.log(IsToggle.value)
+  
 }
 const MyData = Vueref<any>()
 const Myrole = Vueref<string>('')
@@ -39,11 +39,11 @@ function updateDisname(user: User, name: string) {
   updateProfile(user, { displayName: name })
     .then(() => {
       // 成功時の処理
-      console.log('Display name updated successfully.' + name)
+      
     })
     .catch((error) => {
       // 失敗時の処理
-      console.error('Error updating display name:', error)
+      
     })
 }
 const elementsBool = Vueref<boolean[]>(new Array(4).fill(false))
@@ -52,7 +52,6 @@ function PushUpdate(element: string, Bool: boolean) {
     elementsBool.value[0] = Bool
     if (Bool == false) {
       if (Upname.value == '') {
-        console.log('何もないぞ')
         return
       }
       if (porps.currentUser != null) {
@@ -71,7 +70,6 @@ function PushUpdate(element: string, Bool: boolean) {
     elementsBool.value[3] = Bool
     if (Bool == false) {
       if (Upplace.value == '') {
-        console.log('お前に住所はないんか')
         return
       }
       if (porps.currentUser != null) writeUserdata(porps.currentUser.uid, { place: Upplace.value })

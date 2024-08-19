@@ -35,7 +35,7 @@ onMounted(() => {
   onAuthStateChanged(auth, (user) => {
     if (user != null && user.emailVerified) {
       currentUser.value = user
-      console.log('読み込みました')
+     
     } else {
       currentUser.value = null
     }
@@ -53,15 +53,15 @@ function writeVegeorder(
   const now = parseTimestamp(getJSTTimestamp())
   const currentTime =
     now.year + '-' + now.month + '-' + now.day + '-' + now.hours + '-' + now.day + '-' + now.seconds
-  console.log(currentTime)
+  
   const db = getDatabase()
   let unitlist: string[] = []
   for (let i: number = 0; i < Vege.length; i++) {
     unitlist[i] = porps.vegealldata[Vege[i]][porps.SelectMennum[i]].unit
   }
-  console.log(unitlist)
+  
   if (!porps.SelectMennum || porps.SelectMennum.length !== Vege.length) {
-    console.error('SelectMennumが存在しないか、長さが一致していません')
+    
     return
   }
 
@@ -72,10 +72,10 @@ function writeVegeorder(
     totalmoney: alltotalmoney
   })
     .then(() => {
-      console.log('注文の保存に完全に成功しました')
+      
     })
     .catch((error) => {
-      console.error('注文の最後の保存中にエラーが発生しました:', error)
+      
     })
   for (let i: number = 0; i < Vege.length; i++) {
     set(Fireref(db, 'testOrders/' + currentUser.uid + '/' + currentTime + '/' + i), {
@@ -86,10 +86,10 @@ function writeVegeorder(
       vegeName: Vege[i]
     })
       .then(() => {
-        console.log('注文の保存に成功しました:', i)
+        
       })
       .catch((error) => {
-        console.error('注文のこの段階の保存中にエラーが発生しました:', i, error)
+       
       })
   }
   emit('OnSend', true)
@@ -105,9 +105,7 @@ function handleOrder() {
       porps.SelectDate,
       porps.allTotalmoney
     )
-  } else {
-    console.error('ユーザーが認証されていません。注文を保存できません。')
-  }
+  } 
 }
 //タイムスタンプ文字列を変換
 function parseTimestamp(timestamp: string) {
