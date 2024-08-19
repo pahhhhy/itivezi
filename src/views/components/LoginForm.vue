@@ -1,16 +1,16 @@
 <script setup lang="ts">
 interface Emits {
-  (event: 'OnInput', email: string, password: string): void
+  (event: 'onInput', email: string, password: string): void
 }
 const emit = defineEmits<Emits>()
-function Emitemail(event: Event) {
+function emitEmail(event: Event) {
   const element = event.target as HTMLInputElement
   
-  emit('OnInput', element.value, '')
+  emit('onInput', element.value, '')
 }
-function EmitPassword(event: Event) {
+function emitPassword(event: Event) {
   const element = event.target as HTMLInputElement
-  emit('OnInput', '', element.value)
+  emit('onInput', '', element.value)
 }
 </script>
 <template>
@@ -21,7 +21,7 @@ function EmitPassword(event: Event) {
       class="form-control"
       id="exampleFormControlInput1"
       placeholder="name@example.com"
-      v-on:input="Emitemail"
+      v-on:input="emitEmail"
     />
   </div>
   <label for="inputPassword5" class="form-label">Password</label>
@@ -30,7 +30,7 @@ function EmitPassword(event: Event) {
     id="inputPassword5"
     class="form-control"
     aria-labelledby="passwordHelpBlock"
-    v-on:input="EmitPassword"
+    v-on:input="emitPassword"
   />
   <div id="passwordHelpBlock" class="form-text">
     Your password must be 8-20 characters long, contain letters and numbers, and must not contain

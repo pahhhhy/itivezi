@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { getDatabase, ref, onValue} from 'firebase/database'
 //Vueとfirebaseで同じrefという関数があって競合しているのでVueの方をVuerefにしている
-import { ref as Vueref, computed } from 'vue'
+import { ref as vueRef, computed } from 'vue'
 
 import OrderStep1 from './components/orderpage/OrderStep1.vue'
 import OrderStep2 from './components/orderpage/OrderStep2.vue'
@@ -9,57 +9,57 @@ import OrderStep3 from './components/orderpage/OrderStep3.vue'
 import OrderStep4 from './components/orderpage/OrderStep4.vue'
 import OrderPopup from './components/orderpage/OrderPopup.vue'
 //変数の定義
-const VegeAllData = Vueref<any>(ReadData(''))
-const Stepnum = Vueref<number>(0)
-const SelectVegelist = Vueref<number[]>([])
-const SelectMenlist = Vueref<string[]>([])
-const SelectMenlistnum = Vueref<number[]>([])
-const selectedDate = Vueref<Date | null>(null)
-const vegeCountList = Vueref<number[]>([])
-const TotalmoneyList = Vueref<number[]>([])
-const AllTotalmoney = Vueref<number>(0)
-const FinishSend = Vueref<boolean>(false)
-const vegekeys = computed(() => {
-  return VegeAllData.value ? Object.keys(VegeAllData.value) : []
+const vegeAllData = vueRef<any>(readData(''))
+const stepNum = vueRef<number>(0)
+const selectVegeList = vueRef<number[]>([])
+const selectMenList = vueRef<string[]>([])
+const selectMenListNum = vueRef<number[]>([])
+const selectDate = vueRef<Date | null>(null)
+const vegeCountList = vueRef<number[]>([])
+const totalMoneyList = vueRef<number[]>([])
+const allTotalMoney = vueRef<number>(0)
+const finishSend = vueRef<boolean>(false)
+const vegeKeys = computed(() => {
+  return vegeAllData.value ? Object.keys(vegeAllData.value) : []
 })
 //読みこむデータの指定
-function ReadData(element: string) {
-  const CountRef = ref(getDatabase(), 'testVege/' + element)
-  const Data = Vueref<any>(null)
-  onValue(CountRef, (snapshot) => {
-    Data.value = snapshot.val()
+function readData(element: string) {
+  const countRef = ref(getDatabase(), 'testVege/' + element)
+  const data = vueRef<any>(null)
+  onValue(countRef, (snapshot) => {
+    data.value = snapshot.val()
   })
-  return Data
+  return data
 }
 
 
 
 //Stepの管理
-function OnStep(Next: boolean) {
+function onStep(next: boolean) {
   
-  if (Next) {
-    Stepnum.value = Stepnum.value + 1
+  if (next) {
+    stepNum.value = stepNum.value + 1
   } else {
-    Stepnum.value = Stepnum.value - 1
+    stepNum.value = stepNum.value - 1
   }
 }
-function OnSend(Issend: boolean) {
-  FinishSend.value = Issend
+function onSend(isSend: boolean) {
+  finishSend.value = isSend
 }
 //子要素からのデータの受け取り
 function changeVege(element: number[]) {
-  SelectVegelist.value = element
+  selectVegeList.value = element
 }
-function chagemen(element: string[], num: number[]) {
-  SelectMenlist.value = element
-  SelectMenlistnum.value = num
+function changeMen(element: string[], num: number[]) {
+  selectMenList.value = element
+  selectMenListNum.value = num
 }
-function changecount(count: number[], money: number) {
+function changeCount(count: number[], money: number) {
   vegeCountList.value = count
-  AllTotalmoney.value = money
+  allTotalMoney.value = money
 }
-function chagedate(date: Date | null) {
-  selectedDate.value = date
+function changeDate(date: Date | null) {
+  selectDate.value = date
 }
 </script>
 
@@ -68,57 +68,57 @@ function chagedate(date: Date | null) {
     <h1>注文画面</h1>
   </div>
   <OrderStep1
-    v-bind:vegekeys="vegekeys"
-    v-bind:SelectVegelist="SelectVegelist"
-    v-on:OnStep="OnStep"
-    v-on:changeVege="changeVege"
-    v-if="Stepnum == 0"
+    v-bind:vege-keys="vegeKeys"
+    v-bind:select-vege-list="selectVegeList"
+    v-on:on-step="onStep"
+    v-on:change-vege="changeVege"
+    v-if="stepNum == 0"
   ></OrderStep1>
 
   <!-- 生産者の設定 -->
-  <h1 v-if="Stepnum == 1">{{ SelectMenlistnum }}</h1>
+  <h1 v-if="stepNum == 1">{{ selectMenListNum }}</h1>
   <OrderStep2
-    v-bind:vegealldata="VegeAllData"
-    v-bind:Selectvege="SelectVegelist"
-    v-bind:-selectmen="SelectMenlist"
-    v-bind:vegekeys="vegekeys"
-    v-bind:-selectmennum="SelectMenlistnum"
-    v-on:OnStep="OnStep"
-    v-on:changemen="chagemen"
-    v-if="Stepnum == 1"
+    v-bind:vege-all-data="vegeAllData"
+    v-bind:select-vege="selectVegeList"
+    v-bind:select-men="selectMenList"
+    v-bind:vege-keys="vegeKeys"
+    v-bind:select-men-num="selectMenListNum"
+    v-on:on-step="onStep"
+    v-on:change-men="changeMen"
+    v-if="stepNum == 1"
   ></OrderStep2>
   <!-- 日付・個数の指定 -->
-  <h1 v-if="Stepnum == 2">oya:{{ selectedDate }}</h1>
+  <h1 v-if="stepNum == 2">oya:{{ selectDate }}</h1>
   <OrderStep3
-    v-bind:-select-date="selectedDate"
+    v-bind:select-date="selectDate"
     v-bind:vege-count="vegeCountList"
-    v-bind:vegealldata="VegeAllData"
-    v-bind:vegekeys="vegekeys"
-    v-bind:-select-mennum="SelectMenlistnum"
-    v-bind:-selectvege="SelectVegelist"
-    v-bind:-totalmoney="TotalmoneyList"
-    v-on:changecount="changecount"
-    v-on:OnStep="OnStep"
-    v-on:changedate="chagedate"
-    v-if="Stepnum == 2"
+    v-bind:vege-all-data="vegeAllData"
+    v-bind:vege-keys="vegeKeys"
+    v-bind:select-men-num="selectMenListNum"
+    v-bind:select-vege="selectVegeList"
+    v-bind:total-money="totalMoneyList"
+    v-on:change-count="changeCount"
+    v-on:on-step="onStep"
+    v-on:change-date="changeDate"
+    v-if="stepNum == 2"
   ></OrderStep3>
 
   <!-- 確認・送信画面 -->
   <OrderStep4
-    v-bind:-select-date="selectedDate"
+    v-bind:select-date="selectDate"
     v-bind:vege-count="vegeCountList"
-    v-bind:vegealldata="VegeAllData"
-    v-bind:vegekeys="vegekeys"
-    v-bind:-select-mennum="SelectMenlistnum"
-    v-bind:-select-men="SelectMenlist"
-    v-bind:-selectvege="SelectVegelist"
-    v-bind:-totalmoney="TotalmoneyList"
-    v-bind:all-totalmoney="AllTotalmoney"
-    v-on:-on-step="OnStep"
-    v-on:-on-send="OnSend"
-    v-if="Stepnum == 3"
+    v-bind:vege-all-data="vegeAllData"
+    v-bind:vegeKeys="vegeKeys"
+    v-bind:select-men-num="selectMenListNum"
+    v-bind:select-men="selectMenList"
+    v-bind:select-vege="selectVegeList"
+    v-bind:total-money="totalMoneyList"
+    v-bind:all-total-money="allTotalMoney"
+    v-on:on-step="onStep"
+    v-on:on-send="onSend"
+    v-if="stepNum == 3"
   ></OrderStep4>
-  <OrderPopup v-if="FinishSend"></OrderPopup>
+  <OrderPopup v-if="finishSend"></OrderPopup>
 </template>
 <style>
 .title {

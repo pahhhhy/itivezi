@@ -3,31 +3,31 @@ import { ref, onMounted } from 'vue'
 import { getAuth, onAuthStateChanged, type User } from 'firebase/auth'
 import { getDatabase, ref as Fireref,  set } from 'firebase/database'
 interface Porps {
-  vegekeys: string[]
-  vegealldata: { [key: string]: any[] }
-  Selectvege: number[]
-  SelectMen: string[]
-  SelectMennum: number[]
-  SelectDate: Date | null
+  vegeKeys: string[]
+  vegeAllData: { [key: string]: any[] }
+  selectVege: number[]
+  selectMen: string[]
+  selectMenNum: number[]
+  selectDate: Date | null
   vegeCount: number[]
-  Totalmoney: number[]
-  allTotalmoney: number
+  totalMoney: number[]
+  allTotalMoney: number
 }
 interface Emits {
-  (event: 'OnStep', Next: boolean): void
-  (event: 'OnSend', Issend: boolean): void
+  (event: 'onStep', Next: boolean): void
+  (event: 'onSend', isSend: boolean): void
 }
-function onStep(Next: boolean) {
-  if (!Next) {
-    emit('OnStep', false)
+function onStep(next: boolean) {
+  if (!next) {
+    emit('onStep', false)
   }
 }
 const emit = defineEmits<Emits>()
-const porps = defineProps<Porps>()
+const props = defineProps<Porps>()
 const currentUser = ref<User | null>(null)
-const VegenameList = ref<string[]>([])
-for (let i: number = 0; i < porps.Selectvege.length; i++) {
-  VegenameList.value[i] = porps.vegekeys[porps.Selectvege[i]]
+const vegeNameList = ref<string[]>([])
+for (let i: number = 0; i < props.selectVege.length; i++) {
+  vegeNameList.value[i] = props.vegeKeys[props.selectVege[i]]
 }
 onMounted(() => {
   const auth = getAuth()
@@ -41,63 +41,63 @@ onMounted(() => {
     }
   })
 })
-function writeVegeorder(
-  Vege: string[],
+function writeVegeOrder(
+  vege: string[],
   money: number[],
   num: number[],
-  farmername: string[],
+  farmerName: string[],
   currentUser: User,
   date: Date | null,
-  alltotalmoney: number
+  allTotalMoney: number
 ) {
   const now = parseTimestamp(getJSTTimestamp())
   const currentTime =
     now.year + '-' + now.month + '-' + now.day + '-' + now.hours + '-' + now.day + '-' + now.seconds
   
   const db = getDatabase()
-  let unitlist: string[] = []
-  for (let i: number = 0; i < Vege.length; i++) {
-    unitlist[i] = porps.vegealldata[Vege[i]][porps.SelectMennum[i]].unit
+  let unitList: string[] = []
+  for (let i: number = 0; i < vege.length; i++) {
+    unitList[i] = props.vegeAllData[vege[i]][props.selectMenNum[i]].unit
   }
   
-  if (!porps.SelectMennum || porps.SelectMennum.length !== Vege.length) {
+  if (!props.selectMenNum || props.selectMenNum.length !== vege.length) {
     
     return
   }
 
   set(Fireref(db, 'testOrders/' + currentUser.uid + '/' + currentTime), {
-    ordername: currentUser.displayName,
+    orderName: currentUser.displayName,
     email: currentUser.email,
     selectDate: date,
-    totalmoney: alltotalmoney
+    totalMoney: allTotalMoney
   })
     .then(() => {
       
     })
-  for (let i: number = 0; i < Vege.length; i++) {
+  for (let i: number = 0; i < vege.length; i++) {
     set(Fireref(db, 'testOrders/' + currentUser.uid + '/' + currentTime + '/' + i), {
-      amout: num[i],
-      farmername: farmername[i],
+      amount: num[i],
+      farmerName: farmerName[i],
       price: money[i],
-      unit: unitlist[i],
-      vegeName: Vege[i]
+      unit: unitList[i],
+      vegeName: vege[i]
     })
       .then(() => {
         
       })
   }
-  emit('OnSend', true)
+  emit('onSend', true)
 }
 function handleOrder() {
   if (currentUser.value) {
-    writeVegeorder(
-      VegenameList.value,
-      porps.Totalmoney,
-      porps.vegeCount,
-      porps.SelectMen,
+    writeVegeOrder(
+      vegeNameList.value,
+      props.totalMoney,
+      props.vegeCount,
+      props.selectMen,
       currentUser.value,
-      porps.SelectDate,
-      porps.allTotalmoney
+      props.selectDate,
+      props.allTotalMoney
     )
   } 
 }
@@ -136,28 +136,28 @@ function getJSTTimestamp() {
   <section>
     <h1>Step4</h1>
     <!-- v-for使うところって全部コンポーネント化した方がいいのか？ -->
-    <article v-for="(element, index) in porps.Selectvege" v-bind:key="index" class="Step4_element">
-      <h1>{{ porps.vegekeys[porps.Selectvege[index]] }}</h1>
+    <article v-for="(element, index) in props.selectVege" v-bind:key="index" class="Step4_element">
+      <h1>{{ props.vegeKeys[props.selectVege[index]] }}</h1>
       <h1>
         生産者：{{
-          porps.vegealldata[porps.vegekeys[porps.Selectvege[index]]][SelectMennum[index]].s
+          props.vegeAllData[props.vegeKeys[props.selectVege[index]]][selectMenNum[index]].s
         }}
       </h1>
       <h3>
         単位:{{
-          porps.vegealldata[porps.vegekeys[porps.Selectvege[index]]][SelectMennum[index]].unit
+          props.vegeAllData[props.vegeKeys[props.selectVege[index]]][selectMenNum[index]].unit
         }}
       </h3>
       <h3>
         単価:{{
-          porps.vegealldata[porps.vegekeys[porps.Selectvege[index]]][SelectMennum[index]].en
+          props.vegeAllData[props.vegeKeys[props.selectVege[index]]][selectMenNum[index]].en
         }}円
       </h3>
-      <h1>何組：{{ porps.vegeCount[index] }}組</h1>
+      <h1>何組：{{ props.vegeCount[index] }}組</h1>
     </article>
 
-    <h1>希望日：{{ porps.SelectDate }}</h1>
-    <h1>合計：{{ porps.allTotalmoney }}円</h1>
+    <h1>希望日：{{ props.selectDate }}</h1>
+    <h1>合計：{{ props.allTotalMoney }}円</h1>
     <button v-on:click="handleOrder" class="btn btn-primary">送信</button>
     <button v-on:click="onStep(false)" class="btn btn-primary">戻る</button>
   </section>

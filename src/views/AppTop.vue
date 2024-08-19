@@ -1,14 +1,12 @@
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue'
+import {ref, onMounted} from 'vue'
 import {
   getAuth,
-  signOut,
   onAuthStateChanged,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
   type User
 } from 'firebase/auth'
-import { RouterLink } from 'vue-router'
+import {RouterLink} from 'vue-router'
+
 const currentUser = ref<User | null>(null)
 onMounted(() => {
   const auth = getAuth()
@@ -16,7 +14,7 @@ onMounted(() => {
   onAuthStateChanged(auth, (user) => {
     if (user != null && user.emailVerified) {
       currentUser.value = user
-      
+
     } else {
       currentUser.value = null
     }
@@ -32,7 +30,7 @@ onMounted(() => {
   <article v-if="currentUser == null">
     <h2>ログインしてください。</h2>
     <p>
-      <RouterLink v-bind:to="{ name: 'rogin' }">新規登録/ログイン</RouterLink>
+      <RouterLink v-bind:to="{ name: 'login' }">新規登録/ログイン</RouterLink>
     </p>
   </article>
   <article v-if="currentUser != null">

@@ -1,56 +1,56 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-interface Porps {
-  vegekeys: string[]
-  vegealldata: { [key: string]: any[] }
-  Selectvege: number[]
-  SelectMennum: number[]
-  SelectDate: Date | null
+interface Props {
+  vegeKeys: string[]
+  vegeAllData: { [key: string]: any[] }
+  selectVege: number[]
+  selectMenNum: number[]
+  selectDate: Date | null
   vegeCount: number[]
-  Totalmoney: number[]
+  totalMoney: number[]
 }
 interface Emits {
-  (event: 'OnStep', Next: boolean): void
-  (event: 'changecount', count: number[], money: number): void
-  (event: 'changedate', date: Date | null): void
+  (event: 'onStep', Next: boolean): void
+  (event: 'changeCount', count: number[], money: number): void
+  (event: 'changeDate', date: Date | null): void
 }
 const emit = defineEmits<Emits>()
-const porps = defineProps<Porps>()
-const vegeCountList = ref<number[]>(new Array(porps.Selectvege.length).fill(0))
-const totalmoney = ref<number[]>(porps.Totalmoney)
-const Selectdate = ref<Date | null>(porps.SelectDate)
-const alltotalmony = ref<number>(0)
+const props = defineProps<Props>()
+const vegeCountList = ref<number[]>(new Array(props.selectVege.length).fill(0))
+const totalMoney = ref<number[]>(props.totalMoney)
+const selectDate = ref<Date | null>(props.selectDate)
+const allTotalMoney = ref<number>(0)
 //個と親の変数を同じにしたい。でもこっちはSelectVegeの長さによって初期値が違うのでこのやり方で行う
-for (let i: number = 0; i < porps.vegeCount.length; i++) {
-  vegeCountList.value[i] = porps.vegeCount[i]
+for (let i: number = 0; i < props.vegeCount.length; i++) {
+  vegeCountList.value[i] = props.vegeCount[i]
 }
 function changeMoney(money: number, index: number) {
-  totalmoney.value[index] = vegeCountList.value[index] * money
+  totalMoney.value[index] = vegeCountList.value[index] * money
 
-  for (let i: number = 0; i < totalmoney.value.length; i++) {
-    alltotalmony.value += totalmoney.value[i]
+  for (let i: number = 0; i < totalMoney.value.length; i++) {
+    allTotalMoney.value += totalMoney.value[i]
   }
-  emit('changecount', vegeCountList.value, alltotalmony.value)
+  emit('changeCount', vegeCountList.value, allTotalMoney.value)
 }
-function chagedate() {
-  emit('changedate', Selectdate.value)
+function changeDate() {
+  emit('changeDate', selectDate.value)
 }
 
-const Step3error = ref<boolean>(false)
-function onStep(Next: boolean) {
-  if (!Next) {
-    emit('OnStep', false)
+const step3Error = ref<boolean>(false)
+function onStep(next: boolean) {
+  if (!next) {
+    emit('onStep', false)
   } else {
     if (vegeCountList.value.some((item) => item === 0)) {
-      Step3error.value = true
+      step3Error.value = true
     } else {
-      Step3error.value = false
-      emit('OnStep', true)
+      step3Error.value = false
+      emit('onStep', true)
     }
   }
 }
-watch(Selectdate, (): void => {
-  chagedate()
+watch(selectDate, (): void => {
+  changeDate()
 })
 </script>
 
@@ -58,12 +58,12 @@ watch(Selectdate, (): void => {
   <section>
     <h1>Step3</h1>
     <h1>{{ vegeCountList }}</h1>
-    <h1>{{ SelectDate }}</h1>
-    <div class="form_Step3" v-for="(element, index) in porps.Selectvege" v-bind:key="index">
+    <h1>{{ selectDate }}</h1>
+    <div class="form_Step3" v-for="(element, index) in props.selectVege" v-bind:key="index">
       <!-- スクロールで値が変わるのと０以下を書くことができるのがまずい -->
       <h1>
-        {{ porps.vegekeys[porps.Selectvege[index]] }} :{{
-          porps.vegealldata[porps.vegekeys[porps.Selectvege[index]]][porps.SelectMennum[index]].unit
+        {{ props.vegeKeys[props.selectVege[index]] }} :{{
+          props.vegeAllData[props.vegeKeys[props.selectVege[index]]][props.selectMenNum[index]].unit
         }}
       </h1>
       <input
@@ -74,7 +74,7 @@ watch(Selectdate, (): void => {
         v-model="vegeCountList[index]"
         @change="
           changeMoney(
-            porps.vegealldata[porps.vegekeys[porps.Selectvege[index]]][porps.SelectMennum[index]]
+            props.vegeAllData[props.vegeKeys[props.selectVege[index]]][props.selectMenNum[index]]
               .en,
             index
           )
@@ -82,15 +82,15 @@ watch(Selectdate, (): void => {
       />
 
       <h2>何組：{{ vegeCountList[index] }}組</h2>
-      <h2>合計：{{ Totalmoney[index] }}円</h2>
-      <h2 style="color: red" v-show="Step3error && vegeCountList[index] == 0">
+      <h2>合計：{{ totalMoney[index] }}円</h2>
+      <h2 style="color: red" v-show="step3Error && vegeCountList[index] == 0">
         個数を指定してください
       </h2>
       <!-- 今日より前を選択不可にしないと -->
     </div>
     <h1 style="padding-top: 30px">日付を指定してください</h1>
     <VueDatePicker
-      v-model="Selectdate"
+      v-model="selectDate"
       format="yyyy/MM/dd"
       locale="ja"
       model-type="yyyy-MM-dd"
@@ -99,9 +99,9 @@ watch(Selectdate, (): void => {
       auto-apply
       no-today
     />
-    <h1>日付指定：{{ Selectdate }}</h1>
-    <h1>総合計金額：{{ alltotalmony }}</h1>
-    <h1 style="color: red" v-show="Step3error && Selectdate == null">日付を選択してください</h1>
+    <h1>日付指定：{{ selectDate }}</h1>
+    <h1>総合計金額：{{ allTotalMoney }}</h1>
+    <h1 style="color: red" v-show="step3Error && selectDate == null">日付を選択してください</h1>
     <button v-on:click="onStep(true)" class="btn btn-primary">次へ</button>
     <button v-on:click="onStep(false)" class="btn btn-primary">戻る</button>
   </section>

@@ -1,55 +1,55 @@
 <script setup lang="ts">
-import { ref as Vueref } from 'vue'
+import { ref as vueRef } from 'vue'
 import { type User } from 'firebase/auth'
 import { getDatabase, ref, onValue, set } from 'firebase/database'
 interface Porps {
-  vegekeys: string[]
+  vegeKeys: string[]
   vegeList: number[]
-  VegeMoneyList: number[]
-  VegeAmoutList: number[]
-  VegeTankaList: number[]
+  vegeMoneyList: number[]
+  vegeAmountList: number[]
+  vegeTankaList: number[]
   currentUser: User | null
 }
 interface Emits {
-  (event: 'OnStep', Next: boolean): void
+  (event: 'onStep', Next: boolean): void
 }
 const emit = defineEmits<Emits>()
-const porps = defineProps<Porps>()
+const props = defineProps<Porps>()
 //この登録アルゴリズムでは上書き保存されてしまう可能性が多いにあるので直したい
-function handlewritevege() {
-  if (porps.currentUser?.displayName != null) {
+function vegeWriteHandler() {
+  if (props.currentUser?.displayName != null) {
     writeVege(
-      porps.vegekeys,
-      porps.vegeList,
-      porps.VegeMoneyList,
-      porps.VegeAmoutList,
-      porps.currentUser.displayName,
-      porps.VegeTankaList
+      props.vegeKeys,
+      props.vegeList,
+      props.vegeMoneyList,
+      props.vegeAmountList,
+      props.currentUser.displayName,
+      props.vegeTankaList
     )
   } 
 }
-function onStep(Next: boolean) {
-  if (!Next) emit('OnStep', false)
+function onStep(next: boolean) {
+  if (!next) emit('onStep', false)
 }
-const vegeData = Vueref<any>()
-const FinishSend = Vueref<boolean>(false)
-const VegetankaTempList = Vueref<string[]>(['g', 'kg', '本', '個'])
+const vegeData = vueRef<any>()
+const finishSend = vueRef<boolean>(false)
+const vegeTankaTempList = vueRef<string[]>(['g', 'kg', '本', '個'])
 async function writeVege(
-  Vege: string[],
-  selectvege: number[],
+  vege: string[],
+  selectedVege: number[],
   money: number[],
   num: number[],
-  farmername: string,
+  farmerVege: string,
   tannka: number[]
 ) {
-  let Finishnum: number = 0
+  let finishNum: number = 0
   const db = getDatabase()
   const tankaTempList = ['g', 'kg', '本', '個']
 
-  for (let i: number = 0; i < Vege.length; i++) {
+  for (let i: number = 0; i < vege.length; i++) {
     let count = 0
-    const CountRef = ref(getDatabase(), 'testVege/' + Vege[selectvege[i]] + '/')
-    onValue(CountRef, (snapshot) => {
+    const countRef = ref(getDatabase(), 'testVege/' + vege[selectedVege[i]] + '/')
+    onValue(countRef, (snapshot) => {
       vegeData.value = snapshot.val()
 
       count = vegeData.value ? Object.keys(vegeData.value).length : 0
@@ -57,16 +57,16 @@ async function writeVege(
     })
     const unit: string = num[i] + tankaTempList[tannka[i]]
     
-    set(ref(db, 'testVege/' + Vege[selectvege[i]] + '/' + count), {
+    set(ref(db, 'testVege/' + vege[selectedVege[i]] + '/' + count), {
       en: money[i],
-      s: farmername,
+      s: farmerVege,
       unit: unit
     })
       .then(() => {
-        Finishnum++
+        finishNum++
 
-        if (Finishnum == selectvege.length) {
-          FinishSend.value = true
+        if (finishNum == selectedVege.length) {
+          finishSend.value = true
         }
       })
       
@@ -77,23 +77,23 @@ const refreshPage = () => {
 }
 </script>
 <template>
-  <p>{{ porps.VegeAmoutList }}</p>
-  <p>{{ porps.vegeList }}</p>
-  <p>{{ porps.VegeTankaList }}</p>
+  <p>{{ props.vegeAmountList }}</p>
+  <p>{{ props.vegeList }}</p>
+  <p>{{ props.vegeTankaList }}</p>
 
   <section>
-    <div v-for="(Vegename, index) in porps.vegeList" :key="Vegename + index" class="confirm">
-      <h1>{{ vegekeys[porps.vegeList[index]] }}</h1>
-      <h1>名前：{{ porps.currentUser?.displayName }}</h1>
+    <div v-for="(vegeName, index) in props.vegeList" :key="vegeName + index" class="confirm">
+      <h1>{{ vegeKeys[props.vegeList[index]] }}</h1>
+      <h1>名前：{{ props.currentUser?.displayName }}</h1>
       <h1>
-        単価：{{ porps.VegeAmoutList[index] }} {{ VegetankaTempList[porps.VegeTankaList[index]] }}
+        単価：{{ props.vegeAmountList[index] }} {{ vegeTankaTempList[props.vegeTankaList[index]] }}
       </h1>
-      <h1>価格：{{ VegeMoneyList[index] }}円</h1>
+      <h1>価格：{{ vegeMoneyList[index] }}円</h1>
     </div>
     <button v-on:click="onStep(false)" class="btn btn-primary">戻る</button>
-    <button v-on:click="handlewritevege" class="btn btn-primary">送信</button>
+    <button v-on:click="vegeWriteHandler" class="btn btn-primary">送信</button>
   </section>
-  <div class="card popup" style="width: 30rem" v-show="FinishSend">
+  <div class="card popup" style="width: 30rem" v-show="finishSend">
     <div class="card-body">
       <h5 class="card-title">送信が完了しました</h5>
       <button v-on:click="refreshPage" class="btn btn-primary">初めに戻る</button>

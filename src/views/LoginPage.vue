@@ -9,53 +9,53 @@ import {
   sendEmailVerification,
   type User
 } from 'firebase/auth'
-import { getDatabase, ref as Fireref,  onValue} from 'firebase/database'
-import { ref as Vueref, onMounted } from 'vue'
-import rogin_form from './components/rogin_form.vue'
+import { getDatabase, ref,  onValue} from 'firebase/database'
+import { ref as vueRef, onMounted } from 'vue'
+import LoginForm from './components/LoginForm.vue'
 // ログインしているユーザーデータ
-const currentUser = Vueref<User | null>()
-const Email = Vueref<string>('')
-const Password = Vueref<string>('')
-const errorMes = Vueref<string>('')
-const UserData = Vueref<any>(ReadUserData(''))
+const currentUser = vueRef<User | null>()
+const email = vueRef<string>('')
+const password = vueRef<string>('')
+const errorMes = vueRef<string>('')
+const userData = vueRef<any>(readUserData(''))
 
 // 読み込むデータの指定
-function ReadUserData(element: string) {
-  const CountRef = Fireref(getDatabase(), 'testUser/' + element)
-  const Data = Vueref<any>(null)
-  onValue(CountRef, (snapshot) => {
-    Data.value = snapshot.val()
+function readUserData(element: string) {
+  const countRef = ref(getDatabase(), 'testUser/' + element)
+  const data = vueRef<any>(null)
+  onValue(countRef, (snapshot) => {
+    data.value = snapshot.val()
   })
-  return Data
+  return data
 }
-function checkMydate() {
-  let IsOk = true
+function checkMyData() {
+  let isOk = true
   if (currentUser.value != null) {
-    if (UserData.value[currentUser.value.uid] == null) {
-      IsOk = false
+    if (userData.value[currentUser.value.uid] == null) {
+      isOk = false
     } else {
-      if (UserData.value[currentUser.value.uid].Gender == null) {
-        IsOk = false
+      if (userData.value[currentUser.value.uid].Gender == null) {
+        isOk = false
       }
       if (
-        UserData.value[currentUser.value.uid].place == null ||
-        UserData.value[currentUser.value.uid].place == ''
+        userData.value[currentUser.value.uid].place == null ||
+        userData.value[currentUser.value.uid].place == ''
       ) {
-        IsOk = false
+        isOk = false
       }
-      if (UserData.value[currentUser.value.uid].role == null) {
-        IsOk = false
+      if (userData.value[currentUser.value.uid].role == null) {
+        isOk = false
       }
       if (
-        UserData.value[currentUser.value.uid].PhoneNumber == null ||
-        UserData.value[currentUser.value.uid].place == ''
+        userData.value[currentUser.value.uid].PhoneNumber == null ||
+        userData.value[currentUser.value.uid].place == ''
       ) {
-        IsOk = false
+        isOk = false
       }
     }
   }
   
-  return IsOk
+  return isOk
 }
 // サインイン処理
 function signin(email: string, password: string) {
@@ -71,7 +71,7 @@ function signin(email: string, password: string) {
         
         errorMes.value = ''
         if (currentUser.value != null) {
-          if (!checkMydate()) {
+          if (!checkMyData()) {
             router.push('/Add_Info')
           } else {
             router.push('/')
@@ -99,13 +99,13 @@ function signin(email: string, password: string) {
     })
 }
 
-const OnInput = (email: string, password: string): void => {
+const onInput = (inputEmail: string, inputPassword: string): void => {
   
-  if (email != '') {
-    Email.value = email
+  if (inputEmail != '') {
+    email.value = inputEmail
   }
-  if (password != '') {
-    Password.value = password
+  if (inputPassword != '') {
+    password.value = inputPassword
   }
 }
 
@@ -128,11 +128,11 @@ onMounted(() => {
     <h1>ログイン</h1>
     <h2></h2>
   </div>
-  <rogin_form v-on:OnInput="OnInput"></rogin_form>
-  <h1>{{ Email }}</h1>
+  <login-form v-on:OnInput="onInput"></login-form>
+  <h1>{{ email }}</h1>
   <h1 v-if="currentUser != null">{{ currentUser.displayName }}様</h1>
   <h2 v-if="errorMes != ''" style="color: red">{{ errorMes }}</h2>
-  <button type="button" class="btn btn-primary" @click="signin(Email, Password)">ログイン</button>
+  <button type="button" class="btn btn-primary" @click="signin(email, password)">ログイン</button>
   <p>初めての方は</p>
   <h1><RouterLink v-bind:to="{ name: 'signup' }" class="link">新規会員登録</RouterLink></h1>
 </template>

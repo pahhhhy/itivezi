@@ -1,27 +1,27 @@
 <script setup lang="ts">
-import { ref as Vueref, onMounted, watch } from 'vue'
-import { getDatabase, ref as Fireref, onValue, set } from 'firebase/database'
+import { ref as vueRef, onMounted, watch } from 'vue'
+import { getDatabase, ref , onValue, set } from 'firebase/database'
 
 import { getAuth, onAuthStateChanged, updateProfile, type User } from 'firebase/auth'
 import router from '@/router'
-const currentUser = Vueref<User | null>(null)
-const UserData = Vueref<any>(ReadUserData(''))
-const UserName = Vueref<string>('')
-const Selectrole = Vueref<string>('')
-const placeData = Vueref<string>('')
-const Gender = Vueref<string>('')
-const PhoneNumber = Vueref<number>()
+const currentUser = vueRef<User | null>(null)
+const userData = vueRef<any>(readUserData(''))
+const userName = vueRef<string>('')
+const selectRole = vueRef<string>('')
+const placeData = vueRef<string>('')
+const gender = vueRef<string>('')
+const phoneNumber = vueRef<number>()
 
 // 読み込むデータの指定
-function ReadUserData(element: string) {
-  const CountRef = Fireref(getDatabase(), 'testUser/' + element)
-  const Data = Vueref<any>(null)
-  onValue(CountRef, (snapshot) => {
-    Data.value = snapshot.val()
+function readUserData(element: string) {
+  const countRef = ref(getDatabase(), 'testUser/' + element)
+  const data = vueRef<any>(null)
+  onValue(countRef, (snapshot) => {
+    data.value = snapshot.val()
   })
-  return Data
+  return data
 }
-function updateDisname(user: User, name: string) {
+function updateDisName(user: User, name: string) {
   updateProfile(user, { displayName: name })
     .then(() => {
       // 成功時の処理
@@ -43,7 +43,7 @@ function writeUserdata(
 ) {
   const db = getDatabase()
 
-  set(Fireref(db, 'testUser/' + uid), {
+  set(ref(db, 'testUser/' + uid), {
     name: name,
     role: role,
     place: place,
@@ -52,22 +52,22 @@ function writeUserdata(
   })
 }
 //一度にすべての入力を元に更新する
-function UpdateInfo() {
+function updateInfo() {
   if (
-    Selectrole.value != '' &&
+    selectRole.value != '' &&
     placeData.value != '' &&
-    PhoneNumber.value != undefined &&
-    Gender.value != ''
+    phoneNumber.value != undefined &&
+    gender.value != ''
   ) {
     if (currentUser.value != null) {
-      updateDisname(currentUser.value, UserName.value)
+      updateDisName(currentUser.value, userName.value)
       writeUserdata(
         currentUser.value.uid,
-        Selectrole.value,
+        selectRole.value,
         placeData.value,
-        PhoneNumber.value,
-        Gender.value,
-        UserName.value
+        phoneNumber.value,
+        gender.value,
+        userName.value
       )
 
       router.push('/')
@@ -82,19 +82,19 @@ onMounted(() => {
       currentUser.value = user
       
       if (currentUser.value.displayName != null) {
-        UserName.value = currentUser.value.displayName
+        userName.value = currentUser.value.displayName
       }
     } else {
       currentUser.value = null
     }
   })
 })
-watch(UserData, (): void => {
+watch(userData, (): void => {
   if (currentUser.value != null) {
-    Selectrole.value = UserData.value[currentUser.value.uid].role
-    placeData.value = UserData.value[currentUser.value.uid].place
-    Gender.value = UserData.value[currentUser.value.uid].Gender
-    PhoneNumber.value = UserData.value[currentUser.value.uid].PhoneNumber
+    selectRole.value = userData.value[currentUser.value.uid].role
+    placeData.value = userData.value[currentUser.value.uid].place
+    gender.value = userData.value[currentUser.value.uid].Gender
+    phoneNumber.value = userData.value[currentUser.value.uid].PhoneNumber
   }
 })
 </script>
@@ -102,8 +102,8 @@ watch(UserData, (): void => {
 <template>
   <div class="title">
     <h1>追加情報</h1>
-    <h2>{{ UserName }}</h2>
-    <h2>{{ Selectrole }}</h2>
+    <h2>{{ userName }}</h2>
+    <h2>{{ selectRole }}</h2>
   </div>
   <div class="mb-3">
     <label for="exampleFormControlInput1" class="form-label">名前</label>
@@ -112,7 +112,7 @@ watch(UserData, (): void => {
       class="form-control"
       id="exampleFormControlInput1"
       placeholder="name"
-      v-model="UserName"
+      v-model="userName"
     />
   </div>
   <h3>性別</h3>
@@ -122,7 +122,7 @@ watch(UserData, (): void => {
       type="radio"
       value="men"
       name="gender"
-      v-model="Gender"
+      v-model="gender"
       id="genderMen"
     />
     <label class="form-check-label" for="genderMen"> 男 </label>
@@ -134,7 +134,7 @@ watch(UserData, (): void => {
       name="gender"
       value="women"
       id="genderWomen"
-      v-model="Gender"
+      v-model="gender"
     />
     <label class="form-check-label" for="genderWomen"> 女 </label>
   </div>
@@ -145,7 +145,7 @@ watch(UserData, (): void => {
       name="gender"
       value="other"
       id="genderOther"
-      v-model="Gender"
+      v-model="gender"
     />
     <label class="form-check-label" for="genderOther"> その他 </label>
   </div>
@@ -157,7 +157,7 @@ watch(UserData, (): void => {
       type="radio"
       value="農家"
       name="role"
-      v-model="Selectrole"
+      v-model="selectRole"
       id="roleFarmer"
     />
     <label class="form-check-label" for="roleFarmer"> 農家 </label>
@@ -169,7 +169,7 @@ watch(UserData, (): void => {
       name="role"
       value="飲食店"
       id="roleRestaurant"
-      v-model="Selectrole"
+      v-model="selectRole"
     />
     <label class="form-check-label" for="roleRestaurant"> 飲食店 </label>
   </div>
@@ -191,10 +191,10 @@ watch(UserData, (): void => {
       class="form-control"
       id="exampleFormControlInput1"
       placeholder="電話番号 ハイフンなし"
-      v-model="PhoneNumber"
+      v-model="phoneNumber"
     />
   </div>
-  <button type="button" class="btn btn-primary" @click="UpdateInfo">更新する</button>
+  <button type="button" class="btn btn-primary" @click="updateInfo">更新する</button>
 </template>
 <style>
 .title {

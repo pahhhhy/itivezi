@@ -10,29 +10,29 @@ import {
 } from 'firebase/auth'
 import { ref, onMounted } from 'vue'
 
-import email_form from './components/signup_form.vue'
+import email_form from './components/SignupForm.vue'
 // ログインしているユーザーデータ
 const currentUser = ref<User | null>(null)
-const Email = ref<string>('')
-const Password = ref<string>('')
-const Ispopup = ref<boolean>(false)
+const email = ref<string>('')
+const password = ref<string>('')
+const isPopup = ref<boolean>(false)
 const errorMes = ref<string>('')
-const Name = ref<string>('')
-const OnInput = (email: string, password: string, name: string): void => {
+const name = ref<string>('')
+const onInput = (inputEmail: string, inputPassword: string, inputName: string): void => {
   
-  if (email != '') {
-    Email.value = email
+  if (inputEmail != '') {
+    email.value = inputEmail
   }
-  if (password != '') {
-    Password.value = password
+  if (inputPassword != '') {
+    password.value = inputPassword
   }
-  if (name != '') {
-    Name.value = name
+  if (inputName != '') {
+    name.value = inputName
   }
 }
 //確認メールの送信
-function sendEmailVerifi(User: User) {
-  sendEmailVerification(User)
+function sendEmailVerifi(user: User) {
+  sendEmailVerification(user)
     .then(() => {
       // Email verification sent!
       
@@ -52,7 +52,7 @@ function createAccount(email: string, password: string, name: string) {
       // 成功時処理
       const user = userCredential.user
       
-      Ispopup.value = true
+      isPopup.value = true
       sendEmailVerifi(user)
       return updateProfile(user, { displayName: name })
     })
@@ -66,10 +66,10 @@ function createAccount(email: string, password: string, name: string) {
       
       const errorMessage = error.message
       
-      ErrorMes(errorMessage)
+      setErrorMsg(errorMessage)
     })
 }
-function ErrorMes(element: string) {
+function setErrorMsg(element: string) {
   switch (element) {
     case 'Firebase: Error (auth/invalid-email).':
       errorMes.value = '正しいメールアドレスをいれてください'
@@ -115,18 +115,18 @@ onMounted(() => {
   <div class="title">
     <h1>新規会員登録</h1>
   </div>
-  <email_form v-on:OnInput="OnInput"></email_form>
-  <h1>{{ Email }}</h1>
+  <email_form v-on:OnInput="onInput"></email_form>
+  <h1>{{ email }}</h1>
   <h1 v-if="currentUser != null">{{ currentUser.displayName }}様</h1>
   <h2 v-if="errorMes != ''" style="color: red">{{ errorMes }}</h2>
-  <button type="button" class="btn btn-primary" @click="createAccount(Email, Password, Name)">
+  <button type="button" class="btn btn-primary" @click="createAccount(email, password, name)">
     登録する
   </button>
-  <section class="popup" v-show="Ispopup">
+  <section class="popup" v-show="isPopup">
     <h1>
       メールアドレスの確認メールをおくりました。<br />メールを確認してください<br />認証しないとログインできません
     </h1>
-    <button><RouterLink v-bind:to="{ name: 'rogin' }">戻る</RouterLink></button>
+    <button><RouterLink v-bind:to="{ name: 'login' }">戻る</RouterLink></button>
   </section>
 </template>
 <style>

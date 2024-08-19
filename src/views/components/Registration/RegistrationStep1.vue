@@ -1,40 +1,40 @@
 <script setup lang="ts">
-import { ref as Vueref} from 'vue'
-interface Porps {
+import { ref as vueRef} from 'vue'
+interface Props {
   vegeList: number[]
-  vegekeys: string[]
+  vegeKeys: string[]
 }
 interface Emits {
   (event: 'OnStep', Next: boolean): void
   (event: 'changeSelect', element: number[]): void
 }
 const emit = defineEmits<Emits>()
-const porps = defineProps<Porps>()
-const SelectvegeList = Vueref<number[]>(porps.vegeList)
-const Step1error = Vueref<boolean>(false)
+const props = defineProps<Props>()
+const selectVegeList = vueRef<number[]>(props.vegeList)
+const step1Error = vueRef<boolean>(false)
 
 function onStep() {
-  if (SelectvegeList.value.length == 0) {
-    Step1error.value = true
+  if (selectVegeList.value.length == 0) {
+    step1Error.value = true
   } else {
-    Step1error.value = false
+    step1Error.value = false
     emit('OnStep', true)
   }
 }
 function changeVege() {
-  emit('changeSelect', SelectvegeList.value)
+  emit('changeSelect', selectVegeList.value)
 }
 </script>
 <template>
   <section>
     <h1>野菜を選択してください</h1>
     <div class="form">
-      <div class="form-check" v-for="(element, index) in porps.vegekeys" :key="element">
+      <div class="form-check" v-for="(element, index) in props.vegeKeys" :key="element">
         <input
           class="form-check-input"
           type="checkbox"
           :value="index"
-          v-model="SelectvegeList"
+          v-model="selectVegeList"
           v-on:change="changeVege"
           :id="'flexCheckIndeterminate' + index"
         />
@@ -44,8 +44,8 @@ function changeVege() {
       </div>
     </div>
 
-    <p>Selected Vegetables: {{ SelectvegeList }}</p>
-    <h1 style="color: red" v-show="Step1error && SelectvegeList.length == 0">
+    <p>Selected Vegetables: {{ selectVegeList }}</p>
+    <h1 style="color: red" v-show="step1Error && selectVegeList.length == 0">
       野菜を選択してください
     </h1>
     <button v-on:click="onStep()" class="btn btn-primary">次へ</button>

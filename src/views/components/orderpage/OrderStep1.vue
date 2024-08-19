@@ -1,25 +1,25 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-interface Porps {
-  vegekeys: string[]
-  SelectVegelist: number[]
+interface Props {
+  vegeKeys: string[]
+  selectVegeList: number[]
 }
 interface Emits {
-  (event: 'OnStep', Next: boolean): void
+  (event: 'onStep', Next: boolean): void
   (event: 'changeVege', element: number[]): void
 }
 const emit = defineEmits<Emits>()
-const porps = defineProps<Porps>()
-const Step1error = ref<boolean>(false)
-const selectedVege = ref<number[]>(porps.SelectVegelist)
-function onStep(Next: boolean) {
+const props = defineProps<Props>()
+const step1Error = ref<boolean>(false)
+const selectedVege = ref<number[]>(props.SelectVegelist)
+function onStep(next: boolean) {
   if (selectedVege.value.length == 0) {
-    Step1error.value = true
+    step1Error.value = true
   } else {
-    Step1error.value = false
-    if (Next) {
-      emit('OnStep', true)
+    step1Error.value = false
+    if (next) {
+      emit('onStep', true)
     }
   }
 }
@@ -32,7 +32,7 @@ function changeVege() {
   <section>
     <h1>野菜を選択してください</h1>
     <div class="form">
-      <div class="form-check" v-for="(element, index) in porps.vegekeys" :key="element">
+      <div class="form-check" v-for="(element, index) in props.vegekeys" :key="element">
         <input
           class="form-check-input"
           type="checkbox"
@@ -48,7 +48,7 @@ function changeVege() {
     </div>
 
     <p>Selected Vegetables: {{ SelectVegelist }}</p>
-    <h1 style="color: red" v-show="Step1error && selectedVege.length == 0">
+    <h1 style="color: red" v-show="step1Error && selectedVege.length == 0">
       野菜を選択してください
     </h1>
     <button v-on:click="onStep(true)" class="btn btn-primary">次へ</button>
