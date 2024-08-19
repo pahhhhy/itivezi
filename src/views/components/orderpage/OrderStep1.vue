@@ -32,7 +32,7 @@ function changeVege() {
   <section>
     <h1>野菜を選択してください</h1>
     <div class="form">
-      <div class="form-check" v-for="(element, index) in props.vegekeys" :key="element">
+      <div class="form-check" v-for="(element, index) in props.vegeKeys" :key="element">
         <input
           class="form-check-input"
           type="checkbox"
