@@ -5,7 +5,7 @@ import { type User } from 'firebase/auth'
 interface Props {
   currentUser: User
   vegeKeys: string[]
-  vegeAllData: { [key: string]: any[] }
+  vegeAllData: any
 }
 const props = defineProps<Props>()
 function deleteVegeData(vege: string, count: number) {
@@ -33,22 +33,25 @@ const targetListKeys = ref<string[]>([])
 //自分のデータを取得する。全探索を使うから時間がかかる
 function findMyData(element: string) {
   const countKey: number = countKeys(props.vegeAllData)
-  let resultList: { [key: string]: number[] } = {}
+  
+  let resultList: { [key: string]: string[] } = {}
   //iはkey(ほうれん草とか)の順番のこと
   for (let i: number = 0; i < countKey; i++) {
     let countElement: number = 0
-    if (props.vegeAllData[props.vegeKeys[i]].length == undefined) countElement = 0
-    else countElement = props.vegeAllData[props.vegeKeys[i]].length
+    
     let key: string = props.vegeKeys[i]
+    let uniqueKeys:string[]=Object.keys(props.vegeAllData[props.vegeKeys[i]])
+    if (uniqueKeys.length == undefined) countElement = 0
+    else countElement = uniqueKeys.length
     //jはkeyの中にある要素の順番のこと
     for (let j: number = 0; j < countElement; j++) {
-      const item = props.vegeAllData[key][j]
-      if (item && item.s === element) {
+      const item = props.vegeAllData[key][uniqueKeys[j]]
+      if (item && item.farmer === element) {
         if (!resultList[key]) {
           resultList[key] = []
         }
         
-        resultList[key].push(j)
+        resultList[key].push(uniqueKeys[j])
       }
     }
   }
@@ -80,8 +83,6 @@ watch(
     <h1>登録した野菜はありません</h1>
   </div>
   <div v-for="(elements, key) in targetList" :key="key" class="element" v-show="isToggle">
-    <h2>{{ key }}</h2>
-    <p>{{ elements }}</p>
     <ul>
       <li v-for="index in elements.length" :key="index" class="py-2 px-2">
         key:{{ key }} index:{{ index }}element:{{ elements[index - 1] }}

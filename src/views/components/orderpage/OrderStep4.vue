@@ -4,10 +4,10 @@ import { getAuth, onAuthStateChanged, type User } from 'firebase/auth'
 import { getDatabase, ref as fireRef,  set } from 'firebase/database'
 interface Props {
   vegeKeys: string[]
-  vegeAllData: { [key: string]: any[] }
+  vegeAllData: any
   selectVege: number[]
   selectMen: string[]
-  selectMenNum: number[]
+  selectMenUniqueList: string[]
   selectDate: Date | null
   vegeCount: number[]
   totalMoney: number[]
@@ -57,10 +57,10 @@ function writeVegeOrder(
   const db = getDatabase()
   let unitList: string[] = []
   for (let i: number = 0; i < vege.length; i++) {
-    unitList[i] = props.vegeAllData[vege[i]][props.selectMenNum[i]].unit
+    unitList[i] = props.vegeAllData[vege[i]][props.selectMenUniqueList[i]].unit
   }
   
-  if (!props.selectMenNum || props.selectMenNum.length !== vege.length) {
+  if (!props.selectMenUniqueList || props.selectMenUniqueList.length !== vege.length) {
     
     return
   }
@@ -140,17 +140,17 @@ function getJSTTimestamp() {
       <h1>{{ props.vegeKeys[props.selectVege[index]] }}</h1>
       <h1>
         生産者：{{
-          props.vegeAllData[props.vegeKeys[props.selectVege[index]]][selectMenNum[index]].s
+          props.vegeAllData[props.vegeKeys[props.selectVege[index]]][selectMenUniqueList[index]].farmer
         }}
       </h1>
       <h3>
         単位:{{
-          props.vegeAllData[props.vegeKeys[props.selectVege[index]]][selectMenNum[index]].unit
+          props.vegeAllData[props.vegeKeys[props.selectVege[index]]][selectMenUniqueList[index]].unit
         }}
       </h3>
       <h3>
         単価:{{
-          props.vegeAllData[props.vegeKeys[props.selectVege[index]]][selectMenNum[index]].en
+          props.vegeAllData[props.vegeKeys[props.selectVege[index]]][selectMenUniqueList[index]].en
         }}円
       </h3>
       <h1>何組：{{ props.vegeCount[index] }}組</h1>

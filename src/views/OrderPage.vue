@@ -13,7 +13,7 @@ const vegeAllData = ref<any>(readData(''))
 const stepNum = ref<number>(0)
 const selectVegeList = ref<number[]>([])
 const selectMenList = ref<string[]>([])
-const selectMenListNum = ref<number[]>([])
+const selectMenUniqueList = ref<string[]>([])
 const selectDate = ref<Date | null>(null)
 const vegeCountList = ref<number[]>([])
 const totalMoneyList = ref<number[]>([])
@@ -50,9 +50,9 @@ function onSend(isSend: boolean) {
 function changeVege(element: number[]) {
   selectVegeList.value = element
 }
-function changeMen(element: string[], num: number[]) {
+function changeMen(element: string[], unique: string[]) {
   selectMenList.value = element
-  selectMenListNum.value = num
+  selectMenUniqueList.value = unique
 }
 function changeCount(count: number[], money: number) {
   vegeCountList.value = count
@@ -76,25 +76,25 @@ function changeDate(date: Date | null) {
   ></OrderStep1>
 
   <!-- 生産者の設定 -->
-  <h1 v-if="stepNum == 1">{{ selectMenListNum }}</h1>
+  <h1 v-if="stepNum == 1">{{ selectMenUniqueList }}</h1>
+  <h1 v-if="stepNum == 1&&(vegeAllData==undefined||vegeAllData==null)">データがない</h1>
   <OrderStep2
     v-bind:vege-all-data="vegeAllData"
     v-bind:select-vege="selectVegeList"
     v-bind:select-men="selectMenList"
     v-bind:vege-keys="vegeKeys"
-    v-bind:select-men-num="selectMenListNum"
+    v-bind:select-men-unique-list="selectMenUniqueList"
     v-on:on-step="onStep"
     v-on:change-men="changeMen"
-    v-if="stepNum == 1"
+    v-if="stepNum == 1&&vegeAllData!=undefined"
   ></OrderStep2>
   <!-- 日付・個数の指定 -->
-  <h1 v-if="stepNum == 2">oya:{{ selectDate }}</h1>
   <OrderStep3
     v-bind:select-date="selectDate"
     v-bind:vege-count="vegeCountList"
     v-bind:vege-all-data="vegeAllData"
     v-bind:vege-keys="vegeKeys"
-    v-bind:select-men-num="selectMenListNum"
+    v-bind:select-men-unique-list="selectMenUniqueList"
     v-bind:select-vege="selectVegeList"
     v-bind:total-money="totalMoneyList"
     v-on:change-count="changeCount"
@@ -109,7 +109,7 @@ function changeDate(date: Date | null) {
     v-bind:vege-count="vegeCountList"
     v-bind:vege-all-data="vegeAllData"
     v-bind:vegeKeys="vegeKeys"
-    v-bind:select-men-num="selectMenListNum"
+    v-bind:select-men-unique-list="selectMenUniqueList"
     v-bind:select-men="selectMenList"
     v-bind:select-vege="selectVegeList"
     v-bind:total-money="totalMoneyList"

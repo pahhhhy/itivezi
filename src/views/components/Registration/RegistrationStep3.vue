@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { type User } from 'firebase/auth'
-import { getDatabase, ref as fireRef, onValue, set } from 'firebase/database'
+import { getDatabase, ref as fireRef, onValue, push } from 'firebase/database'
 interface Props {
   vegeKeys: string[]
   vegeList: number[]
@@ -57,9 +57,9 @@ async function writeVege(
     })
     const numWithUnit: string = num[i] + unitTempList[unit[i]]
     
-    set(fireRef(db, 'testVege/' + vege[selectedVege[i]] + '/' + count), {
+    push(fireRef(db, 'testVege/' + vege[selectedVege[i]] ), {
       en: money[i],
-      s: farmerVege,
+      farmer: farmerVege,
       unit: numWithUnit
     })
       .then(() => {

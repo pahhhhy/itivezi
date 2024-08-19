@@ -2,9 +2,9 @@
 import { ref, watch } from 'vue'
 interface Props {
   vegeKeys: string[]
-  vegeAllData: { [key: string]: any[] }
+  vegeAllData: any
   selectVege: number[]
-  selectMenNum: number[]
+  selectMenUniqueList: string[]
   selectDate: Date | null
   vegeCount: number[]
   totalMoney: number[]
@@ -63,7 +63,7 @@ watch(selectDate, (): void => {
       <!-- スクロールで値が変わるのと０以下を書くことができるのがまずい -->
       <h1>
         {{ props.vegeKeys[props.selectVege[index]] }} :{{
-          props.vegeAllData[props.vegeKeys[props.selectVege[index]]][props.selectMenNum[index]].unit
+          props.vegeAllData[props.vegeKeys[props.selectVege[index]]][props.selectMenUniqueList[index]].unit
         }}
       </h1>
       <input
@@ -74,7 +74,7 @@ watch(selectDate, (): void => {
         v-model="vegeCountList[index]"
         @change="
           changeMoney(
-            props.vegeAllData[props.vegeKeys[props.selectVege[index]]][props.selectMenNum[index]]
+            props.vegeAllData[props.vegeKeys[props.selectVege[index]]][props.selectMenUniqueList[index]]
               .en,
             index
           )

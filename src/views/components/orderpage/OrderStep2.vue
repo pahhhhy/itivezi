@@ -1,30 +1,34 @@
 <script setup lang="ts">
+
 import { ref } from 'vue'
 interface Props {
   vegeKeys: string[]
   selectVege: number[]
-  vegeAllData: { [key: string]: any[] }
+  vegeAllData: any
   selectMen: string[]
-  selectMenNum: number[]
+  selectMenUniqueList: string[]
 }
 interface Emits {
   (event: 'onStep', next: boolean): void
-  (event: 'changeMen', element: string[], number: number[]): void
+  (event: 'changeMen', vegeKeyNumber: string[], unique: string[]): void
 }
 const emit = defineEmits<Emits>()
 const props = defineProps<Props>()
 const selectMen = ref<string[]>(new Array(props.selectVege.length).fill(''))
-const step2Num = ref<number[]>(new Array(props.selectVege.length).fill(-1))
+const selectedMenUniqueList = ref<string[]>(new Array(props.selectVege.length).fill(""))
 const step2Error = ref<boolean>(false)
 //個と親の変数を同じにしたい。でもこっちはSelectVegeの長さによって初期値が違うのでこのやり方で行う
 for (let i: number = 0; i < props.selectMen.length; i++) {
   selectMen.value[i] = props.selectMen[i]
-  step2Num.value[i] = props.selectMenNum[i]
+  
+}
+for (let i: number = 0; i < props.selectMenUniqueList.length; i++) {
+  selectedMenUniqueList.value[i] = props.selectMenUniqueList[i]
 }
 
-function changeMen(index: number, sMen: number, key: string) {
-  selectMen.value[index] = props.vegeAllData[key][sMen].s
-  emit('changeMen', selectMen.value, step2Num.value)
+function changeMen(keyNumber:number,index: number, unique: string, key: string) {
+  selectMen.value[index] = props.vegeAllData[key][unique].farmer
+  emit('changeMen', selectMen.value, selectedMenUniqueList.value)
 }
 function onStep(next: boolean) {
   if (!next) {
@@ -43,35 +47,35 @@ function onStep(next: boolean) {
 <template>
   <section>
     <h1>Step2</h1>
-    <article v-for="(element, index) in props.selectVege" v-bind:key="element">
-      <!-- 戻ってきたときにformに選択されていないバグがあるが治し方がわからん -->
-      <h1>{{ props.vegeKeys[element] }}</h1>
+    
+    <article v-for="(vegeKeyNumber, elementIndex) in props.selectVege" :key="vegeKeyNumber">
+      <h1>{{ props.vegeKeys[vegeKeyNumber] }}</h1>
       <select
         class="form-select"
         aria-label="Default select example"
-        v-model="step2Num[index]"
-        @change="changeMen(index, step2Num[index], props.vegeKeys[element])"
+        v-model="selectedMenUniqueList[elementIndex]"
+        @change="changeMen(vegeKeyNumber,elementIndex, selectedMenUniqueList[elementIndex], props.vegeKeys[vegeKeyNumber])"
       >
-        <option selected value="0" disabled hidden>生産者の選択してください</option>
+        <option selected value="0" disabled hidden>生産者を選択してください</option>
         <option
-          v-for="(vegeElement, index) in props.vegeAllData[props.vegeKeys[element]]"
-          v-bind:key="index"
-          v-bind:value="index"
+          v-for="(vegeElement, index) in props.vegeAllData[props.vegeKeys[vegeKeyNumber]]"
+          :key="index"
+          :value="index"
         >
-          {{ props.vegeAllData[props.vegeKeys[element]][index].s }}
+          {{ vegeElement.farmer }}
         </option>
       </select>
-      <p></p>
+
       <p>SelectMen：{{ selectMen }}</p>
-      <p>野菜：{{ props.vegeKeys[element] }}</p>
-      <p v-if="step2Num[index] != -1">
-        生産者：{{ props.vegeAllData[props.vegeKeys[element]][step2Num[index]].s }}
+      <p>野菜：{{ props.vegeKeys[vegeKeyNumber] }}</p>
+      <p v-if="selectedMenUniqueList[elementIndex] !== ''">
+        生産者：{{ props.vegeAllData[props.vegeKeys[vegeKeyNumber]][selectedMenUniqueList[elementIndex] ].farmer }}
       </p>
-      <h3 v-if="step2Num[index] != -1">
-        単位:{{ props.vegeAllData[props.vegeKeys[element]][step2Num[index]].unit }}
+      <h3 v-if="selectedMenUniqueList[elementIndex] !== ''">
+        単位:{{ props.vegeAllData[props.vegeKeys[vegeKeyNumber]][selectedMenUniqueList[elementIndex] ].unit }}
       </h3>
-      <h3 v-if="step2Num[index] != -1">
-        単価:{{ props.vegeAllData[props.vegeKeys[element]][step2Num[index]].en }}円
+      <h3 v-if="selectedMenUniqueList[elementIndex] !== ''">
+        単価:{{ props.vegeAllData[props.vegeKeys[vegeKeyNumber]][selectedMenUniqueList[elementIndex] ].en }}円
       </h3>
     </article>
 
