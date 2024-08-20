@@ -24,7 +24,8 @@ function vegeWriteHandler() {
       props.vegeMoneyList,
       props.vegeAmountList,
       props.currentUser.displayName,
-      props.vegeUnitList
+      props.vegeUnitList,
+      props.currentUser.uid
     )
   } 
 }
@@ -40,7 +41,8 @@ async function writeVege(
   money: number[],
   num: number[],
   farmerVege: string,
-  unit: number[]
+  unit: number[],
+  uid:string
 ) {
   let finishNum: number = 0
   const db = getDatabase()
@@ -56,7 +58,8 @@ async function writeVege(
     push(fireRef(db, 'testVege/' + vege[selectedVege[i]] ), {
       en: money[i],
       farmer: farmerVege,
-      unit: numWithUnit
+      unit: numWithUnit,
+      uid:uid
     })
       .then(() => {
         finishNum++

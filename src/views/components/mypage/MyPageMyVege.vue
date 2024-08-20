@@ -46,7 +46,7 @@ function findMyData(element: string) {
     //jはkeyの中にある要素の順番のこと
     for (let j: number = 0; j < countElement; j++) {
       const item = props.vegeAllData[key][uniqueKeys[j]]
-      if (item && item.farmer === element) {
+      if (item && item.uid === element) {
         if (!resultList[key]) {
           resultList[key] = []
         }
@@ -60,13 +60,13 @@ function findMyData(element: string) {
   targetListKeys.value = Object.keys(resultList)
 }
 if (props.currentUser.displayName != null && props.vegeAllData != undefined)
-  findMyData(props.currentUser.displayName)
+  findMyData(props.currentUser.uid)
 
 watch(
   () => props.vegeAllData,
   () => {
-    if (props.currentUser.displayName != null) {
-      findMyData(props.currentUser.displayName)
+    if (props.currentUser.uid != null) {
+      findMyData(props.currentUser.uid)
     }
   }
 )
