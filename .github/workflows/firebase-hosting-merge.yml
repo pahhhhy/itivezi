@@ -19,6 +19,7 @@ jobs:
           channelId: live
           projectId: blaze-lab-75c62
         env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
           VITE_API_KEY: ${{ secrets.VITE_API_KEY }}
           VITE_AUTH_DOMAIN: ${{ secrets.VITE_AUTH_DOMAIN }}
           VITE_PROJECT_ID: ${{ secrets.VITE_PROJECT_ID }}
