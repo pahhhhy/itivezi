@@ -18,7 +18,7 @@ export const getCurrentRole: (auth: Auth) => Promise<Role> = async (auth) => {
     let role: Role = null;
     const user = await getCurrentUser(auth);
     if (user != null) {
-        role = await readUserData(user.uid);
+        role = await readUserData(user.uid, "role");
     }
     return role;
 }
