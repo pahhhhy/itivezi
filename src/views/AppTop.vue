@@ -25,7 +25,6 @@ onMounted(() => {
 <template>
   <div class="title">
     <h1>TOP</h1>
-    <h1>github Actionsのテスト</h1>
   </div>
   <article v-if="currentUser == null">
     <h2>ログインしてください。</h2>

@@ -47,13 +47,9 @@ async function writeVege(
   const unitTempList = ['g', 'kg', '本', '個']
 
   for (let i: number = 0; i < vege.length; i++) {
-    let count = 0
     const countRef = fireRef(getDatabase(), 'testVege/' + vege[selectedVege[i]] + '/')
     onValue(countRef, (snapshot) => {
       vegeData.value = snapshot.val()
-
-      count = vegeData.value ? Object.keys(vegeData.value).length : 0
-      
     })
     const numWithUnit: string = num[i] + unitTempList[unit[i]]
     

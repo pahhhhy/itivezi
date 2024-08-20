@@ -27,10 +27,6 @@ function updateDisName(user: User, name: string) {
       // 成功時の処理
       
     })
-    .catch((error) => {
-      // 失敗時の処理
-      
-    })
 }
 //指定したデータを書き込むようにしている。Vegeに該当の野菜
 function writeUserdata(
