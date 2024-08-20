@@ -31,7 +31,7 @@ function readUserData(element: string) {
 }
 async function checkMyData() {
   let isOk = true
- 
+
   if (currentUser.value != null) {
     console.log(currentUser.value.photoURL)
     if (userData.value[currentUser.value.uid] == null) {
@@ -70,7 +70,7 @@ async function checkMyData() {
         console.log(isOk)
       }
       }
-      
+
     }
   }
   console.log("isOk:"+isOk)
