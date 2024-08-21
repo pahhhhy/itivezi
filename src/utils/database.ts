@@ -1,5 +1,6 @@
 import {ref as fireRef} from "@firebase/database";
 import {getDatabase, onValue} from "firebase/database";
+import type {ServerTimestamp} from "@/types/chatpage/announcement";
 
 // userIdを元にデータベースからユーザーデータを取得します。もしフィールド名が与えられたら場合そのフィールドのみ取得します。
 export async function readUserData(userId: string, field?: string): Promise<any> {
@@ -13,3 +14,8 @@ export async function readUserData(userId: string, field?: string): Promise<any>
     })
 }
 
+// ServerTimestampからフォーマットされた日付を返します。
+export function formatServerTimestamp(timestamp: ServerTimestamp): string {
+    const date = new Date(timestamp as number);
+    return date.toLocaleString();
+}

@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import {useRoleStore} from "@/stores/roleStore";
-import Announcement from "@/views/components/chatPage/AnnouncementsList.vue";
+import AnnouncementsList from "@/views/components/chatPage/announcements/announcementsList/AnnouncementsList.vue";
+import {getCurrentRole} from "@/utils/auth";
+import {ref} from "vue";
+import {getAuth} from "firebase/auth";
+import PostAnnouncementForm from "@/views/components/chatPage/PostAnnouncementForm.vue";
 
-
-const roleStore = useRoleStore()
-
-roleStore.setRole('管理者') // TODO: 仮
+const role: any = ref(undefined);
+getCurrentRole(getAuth()).then((newRole) => {
+  role.value = newRole;
+});
 
 
 </script>
@@ -13,8 +16,8 @@ roleStore.setRole('管理者') // TODO: 仮
 <template>
   <h1>chat</h1>
   <div class="chat">
-    <Announcement v-if="roleStore.role === '管理者'" />
-    <Announcement v-if="roleStore.role !== '管理者'" />
+    <PostAnnouncementForm v-if="role === '管理者'"/>
+    <AnnouncementsList />
   </div>
 </template>
 

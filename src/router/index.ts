@@ -10,6 +10,7 @@ import Owner from '../views/OwnerPage.vue'
 import {getAuth} from 'firebase/auth'
 import {getCurrentRole} from "../utils/auth"
 import Chat from '../views/ChatPage.vue'
+import Announcement from '../views/AnnouncementPage.vue'
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -58,7 +59,17 @@ const router = createRouter({
             path: '/chat',
             name: 'chat',
             component: Chat,
-        }
+        },
+        {
+            path: '/announcements',
+            name: 'announcements',
+            component: Chat,
+        },
+        {
+            path: '/announcements/:announceId',
+            name: 'announcement',
+            component: Announcement,
+        },
     ]
 })
 // ここからガードの追加部分
@@ -72,4 +83,6 @@ router.beforeEach(async (to, from, next) => {
         next()
     }
 })
+
+
 export default router
