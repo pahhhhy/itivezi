@@ -13,6 +13,6 @@ const {announce} = defineProps<Props>()
 <template>
   <router-link :to="'/announcements/' + announce['announceId']"
                style="border: 1px solid black; height: fit-content; width: 100%; display: flex; justify-content: space-between; gap: 3rem">
-    <span>{{ announce["title"] }}</span><small>{{ formatServerTimestamp(announce["createdAt"]) }}</small>
+    <span>{{ announce["title"] }}</span><small>{{ formatServerTimestamp(announce.createdAt) }}<span style="padding-left: 1rem" v-if="announce.updatedAt">({{ formatServerTimestamp(announce.updatedAt) }}更新)</span></small>
   </router-link>
 </template>

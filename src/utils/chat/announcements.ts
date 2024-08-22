@@ -31,6 +31,7 @@ export function deleteAnnouncement(announcementRef: DatabaseReference) {
  * お知らせを更新します。権限の確認はここでは行いません。
  * @param announcementRef 更新したいお知らせそのもののリファレンス。
  * @param updateData 更新するデータ。
+ * @returns 更新したデータ(サーバータイムスタンプ付き)
  */
 export function updateAnnouncement(announcementRef: DatabaseReference, updateData: Partial<Announcement>) {
     updateData.updatedAt = serverTimestamp()
@@ -38,6 +39,6 @@ export function updateAnnouncement(announcementRef: DatabaseReference, updateDat
         .catch((error) => {
             console.error('エラーが発生しました:', error)
         })
-
+    return updateData;
 }
 

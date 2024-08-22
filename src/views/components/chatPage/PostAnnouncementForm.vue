@@ -39,8 +39,8 @@ function post() {
   content.value = ''
 }
 
-
 const value = ref<any>("");
+
 </script>
 <template>
   <div style="border: 1px solid black; margin: 1rem; height: fit-content; width: fit-content;">
