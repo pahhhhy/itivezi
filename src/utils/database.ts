@@ -17,5 +17,13 @@ export async function readUserData(userId: string, field?: string): Promise<any>
 // ServerTimestampからフォーマットされた日付を返します。
 export function formatServerTimestamp(timestamp: ServerTimestamp): string {
     const date = new Date(timestamp as number);
-    return date.toLocaleString();
+    return date.toLocaleString('ja-JP', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: false
+    });
+
 }

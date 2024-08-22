@@ -12,9 +12,13 @@ import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-icons/font/bootstrap-icons.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 import 'bootstrap/dist/js/bootstrap.bundle.js'
+// markdownエディタ
+import mavonEditor from 'mavon-editor'
+import 'mavon-editor/dist/css/index.css'
 const app = createApp(App)
 app.component('VueDatePicker', VueDatePicker)
 app.use(createPinia())
 app.use(router)
+app.use(mavonEditor)
 
 app.mount('#app')
