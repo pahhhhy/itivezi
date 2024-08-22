@@ -69,7 +69,8 @@ function writeVegeOrder(
     orderName: currentUser.displayName,
     email: currentUser.email,
     selectDate: date,
-    totalMoney: allTotalMoney
+    totalMoney: allTotalMoney,
+    state:"未連絡"
   })
     .then(() => {
       
@@ -80,7 +81,7 @@ function writeVegeOrder(
       farmerName: farmerName[i],
       price: money[i],
       unit: unitList[i],
-      vegeName: vege[i]
+      vegeName: vege[i],
     })
       .then(() => {
         
