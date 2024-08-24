@@ -12,6 +12,7 @@ interface Props {
   vegeCount: number[]
   totalMoney: number[]
   allTotalMoney: number
+  roadStation:string
 }
 interface Emits {
   (event: 'onStep', Next: boolean): void
@@ -48,7 +49,8 @@ function writeVegeOrder(
   farmerName: string[],
   currentUser: User,
   date: Date | null,
-  allTotalMoney: number
+  allTotalMoney: number,
+  roadStation:string
 ) {
   const now = parseTimestamp(getJSTTimestamp())
   const currentTime =
@@ -65,7 +67,7 @@ function writeVegeOrder(
     return
   }
 
-  set(fireRef(db, 'testOrders/' + currentUser.uid + '/' + currentTime), {
+  set(fireRef(db, 'testOrders/' + roadStation+"/"+currentUser.uid + '/' + currentTime), {
     orderName: currentUser.displayName,
     email: currentUser.email,
     selectDate: date,
@@ -76,7 +78,7 @@ function writeVegeOrder(
       
     })
   for (let i: number = 0; i < vege.length; i++) {
-    set(fireRef(db, 'testOrders/' + currentUser.uid + '/' + currentTime + '/' + i), {
+    set(fireRef(db, 'testOrders/' + roadStation+"/"+ currentUser.uid + '/' + currentTime + '/' + i), {
       amount: num[i],
       farmerName: farmerName[i],
       price: money[i],
@@ -98,7 +100,8 @@ function handleOrder() {
       props.selectMen,
       currentUser.value,
       props.selectDate,
-      props.allTotalMoney
+      props.allTotalMoney,
+      props.roadStation
     )
   } 
 }

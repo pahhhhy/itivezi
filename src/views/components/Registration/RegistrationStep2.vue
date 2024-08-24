@@ -93,7 +93,7 @@ function updateStep2List(action:string) {
           placeholder="単価"
           aria-label="default input example"
           v-model="vegeAmountList[index]"
-          @change="updateStep2List('Amout')"
+          @change="updateStep2List('Amount')"
         />
         <select
           class="form-select"

@@ -14,6 +14,7 @@ const props = defineProps<Props>()
 const step1Error = ref<boolean>(false)
 const selectedVege = ref<number[]>(props.selectVegeList)
 function onStep(next: boolean) {
+  if(!next)emit('onStep', false)
   if (selectedVege.value.length == 0) {
     step1Error.value = true
   } else {
@@ -51,6 +52,7 @@ function changeVege() {
     <h1 style="color: red" v-show="step1Error && selectedVege.length == 0">
       野菜を選択してください
     </h1>
+    <button v-on:click="onStep(false)" class="btn btn-primary">戻る</button>
     <button v-on:click="onStep(true)" class="btn btn-primary">次へ</button>
   </section>
 </template>
