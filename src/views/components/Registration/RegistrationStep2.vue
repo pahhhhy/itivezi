@@ -5,23 +5,27 @@ interface Props {
   vegeList: number[]
   vegeMoneyList: number[]
   vegeAmountList: number[]
-  vegeUnitList: number[]
+  vegeUnitList: string[]
 }
 interface Emits {
   (event: 'onStep', Next: boolean): void
   (
     event: 'updateStep2List',
-    vegeMoneyList: number[],
-    vegeAmountList: number[],
-    vegeUnitList: number[]
+    data:{money?:number[];amount?:number[];unit?:string[]}
   ): void
+}
+enum vegeUnitTemp{
+  g="g",
+  kg="kg",
+  book="本",
+  piece="個",
 }
 const emit = defineEmits<Emits>()
 const props = defineProps<Props>()
 const vegeMoneyList = ref<number[]>(props.vegeMoneyList)
 const vegeAmountList = ref<number[]>(props.vegeAmountList)
-const vegeUnitList = ref<number[]>(props.vegeUnitList)
-const vegeUnitTempList = ref<string[]>(['g', 'kg', '本', '個'])
+const vegeUnitList = ref<string[]>(props.vegeUnitList)
+const vegeUnitTempList = ref<string[]>(Object.values(vegeUnitTemp))
 if (vegeMoneyList.value.length == 0) {
   //これをしないとエラー検知ができなかったはず。初回だけvegeListに合わせて０埋め
   vegeMoneyList.value = new Array(props.vegeList.length).fill(0)
@@ -35,7 +39,7 @@ function updateVegeMoney(value: number, index: number) {
   } else {
     vegeMoneyList.value[index] = value
   }
-  updateStep2List()
+  updateStep2List("Money")
 }
 function errorFind() {
   const isMoneyList: boolean =
@@ -65,14 +69,23 @@ function onStep(next: boolean) {
     }
   }
 }
-function updateStep2List() {
-  emit('updateStep2List', vegeMoneyList.value, vegeAmountList.value, vegeUnitList.value)
+function updateStep2List(action:string) {
+ if(action=="Amount"){
+  emit("updateStep2List",{amount:vegeAmountList.value})
+ }
+ if(action=="Unit"){
+  emit("updateStep2List",{unit:vegeUnitList.value})
+ }
+ if(action=="Money"){
+  emit("updateStep2List",{money:vegeMoneyList.value})
+ }
 }
 </script>
 <template>
   <section>
     <h1 v-for="(vegeName, index) in props.vegeList" :key="vegeName + index">
       {{ vegeKeys[vegeName] }}
+      <h4>どのぐらいの量ですか？</h4>
       <div class="unit">
         <input
           class="form-control"
@@ -80,26 +93,26 @@ function updateStep2List() {
           placeholder="単価"
           aria-label="default input example"
           v-model="vegeAmountList[index]"
-          @change="updateStep2List"
+          @change="updateStep2List('Amout')"
         />
         <select
           class="form-select"
           aria-label="Default select example"
           v-model="vegeUnitList[index]"
-          @change="updateStep2List"
+          @change="updateStep2List('Unit')"
         >
           <!-- 選択式ではなく野菜を決めた時点でその野菜に対応した単位を決めてしまった方が良かった -->
           <option selected value="-1" disabled hidden>単位</option>
           <option
-            v-for="(vegeName, index) in vegeUnitTempList"
+            v-for="(vegeName) in vegeUnitTempList"
             :key="vegeName"
-            v-bind:value="index"
+            v-bind:value="vegeName"
           >
-            {{ vegeUnitTempList[index] }}
+            {{ vegeName }}
           </option>
         </select>
       </div>
-
+      <h4>何円にしますか？</h4>
       <input
         class="form-control"
         type="number"
@@ -109,6 +122,7 @@ function updateStep2List() {
         @input="updateVegeMoney(vegeMoneyList[index], index)"
       />
     </h1>
+    
     <h3>vegelist{{ props.vegeList.length }}</h3>
     <h4>money{{ vegeMoneyList.length }}</h4>
     <h1>{{ vegeMoneyList }}</h1>
