@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-enum roadStationUnitTemp{
-  Murone="室根",
-  Kawasaki="川崎",
-}
+import {useRoadStationStore}from "../../stores/roadStation"
+
 interface Props {
   RoadStation: string
 }
@@ -30,7 +28,7 @@ function onStep(next: boolean) {
 }
 const error=ref<boolean>(false)
 const roadStation = ref<string>(props.RoadStation)
-const roadStationUnitTempList = ref<string[]>(Object.values(roadStationUnitTemp))
+const roadStationUnitTempList = ref<string[]>(useRoadStationStore().roadStationTemp)
 </script>
 <template>
 <h1>道の駅を選択してください</h1>

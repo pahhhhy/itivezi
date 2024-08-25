@@ -1,52 +1,58 @@
 <script setup lang="ts">
 import { getDatabase, ref as fireRef, remove } from 'firebase/database'
-import { ref, watch } from 'vue'
+import { ref,watch} from 'vue'
 import { type User } from 'firebase/auth'
+import {useRoadStationStore}from "../../../stores/roadStation"
+const roadStationUnitTempList = ref<string[]>(useRoadStationStore().roadStationTemp)
 interface Props {
   currentUser: User
-  vegeKeys: string[]
   vegeAllData: any
 }
+interface Emits {
+  (event: 'initData'): void
+}
+const emit = defineEmits<Emits>()
 const props = defineProps<Props>()
-function deleteVegeData(vege: string, count: number) {
-  const db = getDatabase()
-  const path = 'testVege/' + vege + '/' + count
-  remove(fireRef(db, path))
-    .then(() => {
-      
+async function deleteVegeData(vege: string, uid: string, RoadStation: string): Promise<void>  {
+  const db = getDatabase();
+  const path = 'testVege/' + RoadStation + "/" + vege + '/' + uid;
+  try {
+    await remove(fireRef(db, path)).then(() => {
+      emit("initData")
     })
     
+  } catch (error) {
+    console.error("Error removing data:", error);
+  }
 }
-
 const isToggle = ref<boolean>(false)
-const isNull = ref<boolean>(false)
+const isNull = ref<boolean[]>([])
 function pushToggle() {
   isToggle.value = !isToggle.value;
  
 }
-const countKeys = (obj: object): number => {
-  return Object.keys(obj).length
-}
 
-const targetList = ref<any>(null)
-const targetListKeys = ref<string[]>([])
+const targetList = ref<any>([])
+const targetListKeys = ref<any>([])
 //自分のデータを取得する。全探索を使うから時間がかかる
-function findMyData(element: string) {
-  const countKey: number = countKeys(props.vegeAllData)
-  
+function findMyData(uid: string,roadData:any,index:number) {
+  let vegeKeys:string[]=Object.keys(roadData)
+  let countKey: number = vegeKeys.length
   let resultList: { [key: string]: string[] } = {}
   //iはkey(ほうれん草とか)の順番のこと
   for (let i: number = 0; i < countKey; i++) {
     let countElement: number = 0
     
-    let key: string = props.vegeKeys[i]
-    let uniqueKeys:string[]=Object.keys(props.vegeAllData[props.vegeKeys[i]])
+    let key: string = vegeKeys[i]
+    let uniqueKeys:string[]=Object.keys(roadData[vegeKeys[i]])
+    
     if (uniqueKeys.length == undefined) countElement = 0
     else countElement = uniqueKeys.length
     //jはkeyの中にある要素の順番のこと
     for (let j: number = 0; j < countElement; j++) {
-      const item = props.vegeAllData[key][uniqueKeys[j]]
-      if (item && item.uid === element) {
+      const item = roadData[key][uniqueKeys[j]]
+      
+      if (item && item.uid === uid) {
         if (!resultList[key]) {
           resultList[key] = []
         }
@@ -55,23 +61,27 @@ function findMyData(element: string) {
       }
     }
   }
-  isNull.value = Object.keys(resultList).length === 0;
-  targetList.value = resultList
-  targetListKeys.value = Object.keys(resultList)
+  
+  targetList.value[index] = resultList
+  targetListKeys.value[index] = Object.keys(resultList)
+  isNull.value[index] = targetListKeys.value[index].length === 0;
 }
-if (props.currentUser.displayName != null && props.vegeAllData != undefined)
-  findMyData(props.currentUser.uid)
-
-watch(
-  () => props.vegeAllData,
-  () => {
-    if (props.currentUser.uid != null) {
-      findMyData(props.currentUser.uid)
+function initData(){
+  if (props.currentUser.displayName != null && props.vegeAllData != null){
+    let countRoadStationKeys:number=roadStationUnitTempList.value.length
+    for(let i:number=0;i<countRoadStationKeys;i++){
+      let roadStationAllData:any=props.vegeAllData[roadStationUnitTempList.value[i]]
+      findMyData(props.currentUser.uid,roadStationAllData,i)
     }
   }
-)
+}
+watch(() => props.vegeAllData, () => {
+  initData()
+});
+initData()
 </script>
 <template>
+  <!-- {{props.vegeAllData}} -->
   <!-- {{ props.vegeAllData }} -->
   <!-- <h2>{{ targetList }}</h2> -->
   <button v-on:click="pushToggle()" class="toggle-button">
@@ -79,26 +89,31 @@ watch(
     <i class="bi bi-caret-up-fill" v-show="isToggle"></i>
     <h2>自分の野菜</h2>
   </button>
-  <div class="nullvege" v-if="isToggle && isNull">
-    <h1>登録した野菜はありません</h1>
+  <div v-for="(roadStationName,i) in roadStationUnitTempList" v-bind:key="roadStationName">
+    <div class="nullvege" v-if="isToggle && isNull[i]">
+      <h1>道の駅：{{roadStationName}}に登録した野菜はありません</h1>
+    </div>
+    <h1  v-show="isToggle&& !isNull[i]">{{roadStationName}}</h1>
+    <div v-for="(elements, key) in targetList[i]" :key="key" class="uid" v-show="isToggle">
+      <ul>
+        <li v-for="index in elements.length" :key="index" class="py-2 px-2">
+          key:{{ key }} index:{{ index }}uid:{{ elements[index - 1] }}
+          <h3>
+            何円：{{ props.vegeAllData[roadStationName]?.[key]?.[elements[index - 1]]?.en ?? 'N/A' }}円
+            <button v-on:click="deleteVegeData(String(key), elements[index - 1], roadStationName)">
+              <i class="bi bi-trash3"></i>
+            </button>
+          </h3>
+          <h3>何組：{{ props.vegeAllData[roadStationName]?.[key]?.[elements[index - 1]]?.unit??"null" }}</h3>
+        </li>
+      </ul>
+    </div>
   </div>
-  <div v-for="(elements, key) in targetList" :key="key" class="element" v-show="isToggle">
-    <ul>
-      <li v-for="index in elements.length" :key="index" class="py-2 px-2">
-        key:{{ key }} index:{{ index }}element:{{ elements[index - 1] }}
-        <h3>
-          何円：{{ props.vegeAllData[key][elements[index - 1]].en }}円
-          <button @click="() => deleteVegeData(String(key), elements[index - 1])">
-            <i class="bi bi-trash3"></i>
-          </button>
-        </h3>
-        <h3>何組：{{ props.vegeAllData[key][elements[index - 1]].unit }}</h3>
-      </li>
-    </ul>
-  </div>
+  
+  
 </template>
 <style>
-.element {
+.uid {
   border: 1px solid black;
   padding-top: 20px;
 }

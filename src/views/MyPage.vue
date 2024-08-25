@@ -6,8 +6,9 @@ import { getAuth, onAuthStateChanged, type User } from 'firebase/auth'
 import MyPageOrder from './components/mypage/MyPageOrder.vue'
 import MyPageUpdate from './components/mypage/MyPageUpdate.vue'
 import MyPageMyVege from './components/mypage/MyPageMyVege.vue'
-
+import {useRoadStationStore}from "../stores/roadStation"
 onMounted(() => {
+  initData()
   const auth = getAuth()
   // ログインしているユーザーを取得する
   onAuthStateChanged(auth, (user) => {
@@ -20,18 +21,23 @@ onMounted(() => {
   })
 })
 const currentUser = ref<User | null>(null)
-function readData(element: string) {
-  const countRef = fireRef(getDatabase(), 'testVege/' + element)
-  const data = ref<any>(null)
-  onValue(countRef, (snapshot) => {
-    data.value = snapshot.val()
-  })
-  return data
+function readvegeAllData(): Promise<any> {
+  return new Promise((resolve, reject) => {
+    const countRef = fireRef(getDatabase(), 'testVege/' )
+    onValue(countRef, (snapshot) => {
+      resolve(snapshot.val())
+    }, (error) => {
+      reject(error)
+    });
+  });
 }
-const vegeAllData = ref<any>(readData(''))
-const vegeKeys = computed(() => {
-  return vegeAllData.value ? Object.keys(vegeAllData.value) : []
-})
+async function initData(){
+  vegeAllData.value=await readvegeAllData()
+  
+}
+const vegeAllData = ref<any>(null)
+
+const roadStationUnitTempList = ref<string[]>(useRoadStationStore().roadStationTemp)
 </script>
 
 <template>
@@ -42,9 +48,9 @@ const vegeKeys = computed(() => {
   <my-page-update v-bind:current-user="currentUser" v-if="currentUser != null"></my-page-update>
   <my-page-my-vege
     v-bind:current-user="currentUser"
-    v-bind:vegeAllData="vegeAllData"
-    v-bind:vegeKeys="vegeKeys"
-    v-if="currentUser != null && vegeAllData != undefined"
+    v-bind:vege-all-data="vegeAllData"
+    v-on:init-data="initData"
+    v-if="currentUser != null && vegeAllData != null"
   ></my-page-my-vege>
   <my-page-order v-bind:current-user="currentUser" v-if="currentUser != null"></my-page-order>
 </template>
