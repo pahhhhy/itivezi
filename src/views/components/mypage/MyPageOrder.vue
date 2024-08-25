@@ -26,7 +26,6 @@ function readData(): Promise<any> {
 }
 
 //これがすべての注文データから野菜のデータだけ抜いたやつ。注文の時間で昇順に並べてある。
-//指定するときはmyDataKeysNum[何番目の][何個目]でやる
 const myOrderVegeData = ref<any>(null)
   function updateKeysNum() {
   let resultList: any = {}

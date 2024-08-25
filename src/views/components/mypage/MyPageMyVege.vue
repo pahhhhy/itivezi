@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getDatabase, ref as fireRef, remove } from 'firebase/database'
+import { getDatabase, ref as fireRef, remove ,update} from 'firebase/database'
 import { ref,watch} from 'vue'
 import { type User } from 'firebase/auth'
 import {useRoadStationStore}from "../../../stores/roadStation"
@@ -16,8 +16,12 @@ const props = defineProps<Props>()
 async function deleteVegeData(vege: string, uid: string, RoadStation: string): Promise<void>  {
   const db = getDatabase();
   const path = 'testVege/' + RoadStation + "/" + vege + '/' + uid;
+  // 更新するデータを指定
+const updates = {
+  state: "Discontinued"
+};
   try {
-    await remove(fireRef(db, path)).then(() => {
+    await update(fireRef(db, path), updates).then(() => {
       emit("initData")
     })
     
@@ -31,7 +35,27 @@ function pushToggle() {
   isToggle.value = !isToggle.value;
  
 }
-
+// stateが"Discontinued"のアイテムを排除する関数
+// 全部、型をanyでやってるの悪そうな感じがする
+const filterDiscontinuedItems = (data:any) => {
+  const filteredData:any = {};
+  
+  for (const [category, items] of Object.entries(data)as [any, any]) {
+    const filteredItems:any = {};
+    
+    for (const [id, item] of Object.entries(items as any)as [string, any]) {
+      if (item.state !== "Discontinued") {
+        filteredItems[id] = item;
+      }
+    }
+    
+    if (Object.keys(filteredItems).length > 0) {
+      filteredData[category] = filteredItems;
+    }
+  }
+  
+  return filteredData;
+};
 const targetList = ref<any>([])
 const targetListKeys = ref<any>([])
 //自分のデータを取得する。全探索を使うから時間がかかる
@@ -71,6 +95,7 @@ function initData(){
     let countRoadStationKeys:number=roadStationUnitTempList.value.length
     for(let i:number=0;i<countRoadStationKeys;i++){
       let roadStationAllData:any=props.vegeAllData[roadStationUnitTempList.value[i]]
+      roadStationAllData=filterDiscontinuedItems(roadStationAllData)
       findMyData(props.currentUser.uid,roadStationAllData,i)
     }
   }

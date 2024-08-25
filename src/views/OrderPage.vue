@@ -33,7 +33,27 @@ function readvegeAllData(roadStation: string): Promise<any> {
     });
   });
 }
-
+// stateが"Discontinued"のアイテムを排除する関数
+// 全部、型をanyでやってるの悪そうな感じがする
+const filterDiscontinuedItems = (data:any) => {
+  const filteredData:any = {};
+  
+  for (const [category, items] of Object.entries(data)as [any, any]) {
+    const filteredItems:any = {};
+    
+    for (const [id, item] of Object.entries(items as any)as [string, any]) {
+      if (item.state !== "Discontinued") {
+        filteredItems[id] = item;
+      }
+    }
+    
+    if (Object.keys(filteredItems).length > 0) {
+      filteredData[category] = filteredItems;
+    }
+  }
+  
+  return filteredData;
+};
 
 
 //Stepの管理
@@ -45,10 +65,10 @@ function onStep(next: boolean) {
     stepNum.value = stepNum.value - 1
   }
 }
+//子要素からのデータの受け取り
 function onSend(isSend: boolean) {
   finishSend.value = isSend
 }
-//子要素からのデータの受け取り
 function changeVege(element: number[]) {
   selectVegeList.value = element
 }
@@ -66,6 +86,7 @@ function changeDate(date: Date | null) {
 async function  updateRoadStation(element:string){
   roadStation.value=element
   vegeAllData.value=await readvegeAllData(element)
+  vegeAllData.value=filterDiscontinuedItems(vegeAllData.value)
   vegeKeys.value= Object.keys(vegeAllData.value)
 }
 </script>
@@ -74,6 +95,7 @@ async function  updateRoadStation(element:string){
   <div class="title">
     <h1>注文画面</h1>
   </div>
+  {{ vegeAllData }}
   <SelectRoadStation
   v-bind:-road-station="roadStation"
   v-on:on-step="onStep"

@@ -53,7 +53,8 @@ async function writeVege(
       en: money[i],
       farmer: farmerVege,
       unit: numWithUnit,
-      uid:uid
+      uid:uid,
+      state:"Available"
     })
       .then(() => {
         finishNum++
