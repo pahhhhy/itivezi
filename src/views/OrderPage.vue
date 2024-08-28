@@ -33,6 +33,16 @@ function readvegeAllData(roadStation: string): Promise<any> {
     });
   });
 }
+function readvegeKeys(roadStation: string): Promise<any> {
+  return new Promise((resolve, reject) => {
+    const countRef = fireRef(getDatabase(), 'testVegeKeys/' + roadStation + "/")
+    onValue(countRef, (snapshot) => {
+      resolve(snapshot.val())
+    }, (error) => {
+      reject(error)
+    });
+  });
+}
 // stateが"Discontinued"のアイテムを排除する関数
 // 全部、型をanyでやってるの悪そうな感じがする
 const filterDiscontinuedItems = (data:any) => {
@@ -87,7 +97,7 @@ async function  updateRoadStation(element:string){
   roadStation.value=element
   vegeAllData.value=await readvegeAllData(element)
   vegeAllData.value=filterDiscontinuedItems(vegeAllData.value)
-  vegeKeys.value= Object.keys(vegeAllData.value)
+  vegeKeys.value= await readvegeKeys(element)
 }
 </script>
 
@@ -95,7 +105,8 @@ async function  updateRoadStation(element:string){
   <div class="title">
     <h1>注文画面</h1>
   </div>
-  {{ vegeAllData }}
+  <!-- {{ vegeAllData }} -->
+  <!-- {{ vegeKeys }} -->
   <SelectRoadStation
   v-bind:-road-station="roadStation"
   v-on:on-step="onStep"

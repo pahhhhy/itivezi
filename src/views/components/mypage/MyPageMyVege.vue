@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getDatabase, ref as fireRef, remove ,update} from 'firebase/database'
+import { getDatabase, ref as fireRef ,update} from 'firebase/database'
 import { ref,watch} from 'vue'
 import { type User } from 'firebase/auth'
 import {useRoadStationStore}from "../../../stores/roadStation"

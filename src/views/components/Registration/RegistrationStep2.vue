@@ -19,6 +19,8 @@ enum vegeUnitTemp{
   kg="kg",
   book="本",
   piece="個",
+  wheel="輪",
+  sheet="枚"
 }
 const emit = defineEmits<Emits>()
 const props = defineProps<Props>()

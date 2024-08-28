@@ -20,6 +20,7 @@
     "bootstrap-icons": "^1.11.3",
     "bootstrap-multiselect": "^1.1.0",
     "bootstrap-vue": "^2.23.1",
+    "csvtojson": "^2.0.10",
     "firebase": "^10.13.0",
     "firebase-admin": "^12.3.1",
     "firebase-functions": "^5.0.1",
@@ -28,14 +29,16 @@
     "popper.js": "^1.16.1",
     "vite-plugin-wasm": "^3.3.0",
     "vue": "^3.4.31",
+    "vue-json-to-csv": "^1.1.8",
     "vue-multiselect": "^3.0.0",
-    "vue-router": "^4.3.0"
+    "vue-router": "^4.3.0",
+    "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.8.0",
     "@tsconfig/node20": "^20.1.4",
     "@types/firebase": "^3.2.1",
-    "@types/node": "^20.12.5",
+    "@types/node": "^20.16.1",
     "@vitejs/plugin-vue": "^5.0.5",
     "@vue/eslint-config-prettier": "^9.0.0",
     "@vue/eslint-config-typescript": "^13.0.0",

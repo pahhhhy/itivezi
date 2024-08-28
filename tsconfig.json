@@ -25,6 +25,6 @@
     "paths": {
       "@/*": ["src/*"]
     },
-    "types": ["vite/client", "@vue/vue3"]
+    "types": ["vite/client", "@vue/vue3","node"]
   }
 }

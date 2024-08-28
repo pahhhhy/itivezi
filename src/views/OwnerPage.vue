@@ -17,13 +17,9 @@ function readData(path:string,element: string) {
   })
   return Data
 }
+
 const myRole = ref<string | null>(null)
-const vegeAllData=ref<any>(readData("testVege",""))
-  const vegeAllOrder=ref<any>(readData("testOrders",""))
-    const vegeAllUser=ref<any>(readData("testUser",""))
-      const vegeKeys = computed(() => {
-  return vegeAllData.value ? Object.keys(vegeAllData.value) : []
-})
+const vegeAllOrder=ref<any>(readData("testOrders",""))
 onMounted(async () => {
   myRole.value = await getCurrentRole(getAuth())
 })
@@ -50,7 +46,7 @@ function changeNavBarNumber(number:number){
     <button v-on:click="changeNavBarNumber(3)">利用者リスト</button>
     <button v-on:click="changeNavBarNumber(4)">各データ</button>
   </div>
-  <OwnerVegeList v-bind:vege-all-data="vegeAllData" v-bind:vege-keys="vegeKeys" v-if="navBarNumber==1&&vegeAllData!=null"></OwnerVegeList>
+  <OwnerVegeList  v-if="navBarNumber==1"></OwnerVegeList>
   <OwnerOrderList v-if="navBarNumber==2&&vegeAllOrder!=null" v-bind:vege-all-order="vegeAllOrder"></OwnerOrderList>
   <OwnerFarmerList v-if="navBarNumber==3"></OwnerFarmerList>
   <OwnerBuyerList v-if="navBarNumber==3"></OwnerBuyerList>
