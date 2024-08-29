@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import { ref,  onMounted ,computed} from 'vue'
+import{ useRoadStationStore}from "../../../stores/roadStation"
+
+const roadStationUnitTempList = ref<string[]>(useRoadStationStore().roadStationTemp)
+const selectdRoadStation=ref<string>(roadStationUnitTempList.value[0])
 interface Props {
   vegeAllOrder:any
 }
@@ -12,14 +16,15 @@ const props = defineProps<Props>()
     isActive.value=!isActive.value
 }
 function makeOrderList() {
-    let orderKeys = Object.keys(props.vegeAllOrder);
+    let roadStationOrderData=props.vegeAllOrder[selectdRoadStation.value]
+    let orderKeys = Object.keys(roadStationOrderData);
     let resultList: any = {};
     for (let i = 0; i < orderKeys.length; i++) {
-        let timeKeys = Object.keys(props.vegeAllOrder[orderKeys[i]]);
+        let timeKeys = Object.keys(roadStationOrderData[orderKeys[i]]);
         
         for (let j = 0; j < timeKeys.length; j++) {
             // timeKeys[j]を使ってアクセスするように修正
-            resultList[timeKeys[j]] = props.vegeAllOrder[orderKeys[i]][timeKeys[j]];
+            resultList[timeKeys[j]] = roadStationOrderData[orderKeys[i]][timeKeys[j]];
             const formattedKey = timeKeys[j].split('-').slice(0, 3).join('/'); 
             resultList[timeKeys[j]] ["key"]=formattedKey
             resultList[timeKeys[j]] ["unique"]=orderKeys[i]
@@ -52,11 +57,18 @@ function selectOrderData(index: number) {
 const isActive=ref<boolean>(false)
 const selectedTableList=ref<boolean[]>([])
 const selectedTableUnitList=ref<any>([])
-const sortedOrderData=ref<any>(makeOrderList())
-    
+const sortedOrderData=ref<any>({})
+function initData(){
+    sortedOrderData.value= makeOrderList()
+    }
+    initData()
 </script>
 <template>
 <h1>注文履歴</h1>
+<select class="form-select" aria-label="roadsideStationSelect" v-model="selectdRoadStation" @change="initData">
+    <option selected v-bind:value="roadStation" v-for="roadStation in roadStationUnitTempList" :key=roadStation >{{roadStation}}</option>
+</select>
+<!-- {{props.vegeAllOrder}} -->
 <!-- {{ sortedOrderData }} -->
 <!-- {{selectedTableUnitList["2024-8-22-11-22-0"]}} -->
 <article v-if="!isActive">
