@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref} from 'vue'
+import { ref,onMounted} from 'vue'
 import { getDatabase, ref as fireRef, update, onValue, set} from 'firebase/database'
 import{ useRoadStationStore}from "../../../stores/roadStation"
 import draggable from 'vuedraggable'
@@ -23,7 +23,20 @@ function pushActive () {
     isActive.value=!isActive.value
     
 }
-
+import { getAuth, onAuthStateChanged, type User } from 'firebase/auth'
+const currentUser = ref<User | null>(null)
+onMounted(() => {
+  const auth = getAuth()
+  // ログインしているユーザーを取得する
+  onAuthStateChanged(auth, (user) => {
+    if (user != null && user.emailVerified) {
+      currentUser.value = user
+      console.log('読み込みました')
+    } else {
+      currentUser.value = null
+    }
+  })
+})
 // stateが"Discontinued"のアイテムを排除する関数
 // 全部、型をanyでやってるの悪そうな感じがする
 const filterDiscontinuedItems = (data: any) => {
@@ -167,7 +180,7 @@ function makeCsvData() {
     const entries = vegeAllData.value[vegetable];
     for (const key in entries) {
       const entry = entries[key];
-      if (entry.farmer === "三浦涼太郎") {
+      if (entry.farmer === currentUser.value?.displayName) {
         result.push([vegetable, entry.unit, entry.en]);
       }
     }
