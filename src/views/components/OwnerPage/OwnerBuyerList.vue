@@ -7,9 +7,17 @@ const roadStationUnitTempList = ref<string[]>(useRoadStationStore().roadStationT
 const selectdRoadStation=ref<string>(roadStationUnitTempList.value[0])
 const orderAllData=ref<any>([])
 const orderNumList=ref<any>([])
+const yearList=ref<number[]>([])
+const selectStartYear=ref<number>(2024)
+const selectStartMonth=ref<number>(1)
+const selectEndYear=ref<number>(2024)
+const selectEndMonth=ref<number>(12)
+const startDate = ref<Date>(new Date(2024, 8, 1));  // 4月 (0ベースなので3月が4月を指す)
+const endDate = ref<Date>(new Date(2024, 9, 31));    // 10月 (0ベースなので9月が10月を指す)
 async function initData(){
   orderAllData.value=await readOrderAllData(selectdRoadStation.value)
-  orderNumList.value=getOrderSummaries(orderAllData.value)
+  yearList.value=getYearsFromData(orderAllData.value)
+  orderNumList.value=getOrderSummaries(orderAllData.value,startDate.value,endDate.value)
 }
 initData()
 function readOrderAllData(roadStation: string): Promise<any> {
@@ -22,24 +30,47 @@ function readOrderAllData(roadStation: string): Promise<any> {
     });
   });
 }
-function getOrderSummaries  (data: any) {
+function getYearsFromData(data: any): number[] {
+  const yearsSet = new Set<number>();
+
+  for (const uniqueKey in data) {
+    const orders = data[uniqueKey];
+    for (const timestamp in orders) {
+      const year = parseInt(timestamp.split('-')[0], 10);
+      yearsSet.add(year);
+    }
+  }
+
+  // Setから配列に変換して返す
+  return Array.from(yearsSet);
+}
+function getOrderSummaries(data: any, startDate: Date, endDate: Date) {
   const orderSummaries: { [key: string]: { count: number; totalMoney: number } } = {};
 
   for (const uniqueKey in data) {
     const orders = data[uniqueKey];
     for (const timestamp in orders) {
-      const orderDetails = orders[timestamp];
-      const orderName = orderDetails.orderName;
-      const totalMoney = orderDetails.totalMoney;
-      
-      if (orderName in orderSummaries) {
-        orderSummaries[orderName].count++;
-        orderSummaries[orderName].totalMoney += totalMoney;
-      } else {
-        orderSummaries[orderName] = {
-          count: 1,
-          totalMoney: totalMoney
-        };
+      // 日付の部分を取り出してDateオブジェクトに変換
+      const orderDateParts = timestamp.split('-');
+      const orderYear = parseInt(orderDateParts[0], 10);
+      const orderMonth = parseInt(orderDateParts[1], 10) - 1; // 月は0から始まるので-1
+      const orderDate = new Date(orderYear, orderMonth);
+
+      // フィルタリング: orderDateがstartDateとendDateの範囲内かを確認
+      if (orderDate >= startDate && orderDate <= endDate) {
+        const orderDetails = orders[timestamp];
+        const orderName = orderDetails.orderName;
+        const totalMoney = orderDetails.totalMoney;
+
+        if (orderName in orderSummaries) {
+          orderSummaries[orderName].count++;
+          orderSummaries[orderName].totalMoney += totalMoney;
+        } else {
+          orderSummaries[orderName] = {
+            count: 1,
+            totalMoney: totalMoney,
+          };
+        }
       }
     }
   }
@@ -47,9 +78,9 @@ function getOrderSummaries  (data: any) {
   return Object.keys(orderSummaries).map(orderName => ({
     orderName,
     count: orderSummaries[orderName].count,
-    totalMoney: orderSummaries[orderName].totalMoney
+    totalMoney: orderSummaries[orderName].totalMoney,
   }));
-};
+}
 type Order = {
   orderName: string;
   count: number;
@@ -80,17 +111,60 @@ function pushExport(){
   const fileName="購入者リスト_"+currentTime
   downloadCSV(CSVfile,fileName)
 }
+function changeDate( data: { startYear?: number;endYear?: number; startMonth?: number;endMonth?: number; }){
+  if (data.startYear !== undefined) {
+    startDate.value.setFullYear(data.startYear);
+  }
+  if (data.endYear !== undefined) {
+    endDate.value.setFullYear(data.endYear)
+  }
+  if (data.startMonth !== undefined) {
+    startDate.value.setMonth(data.startMonth -1)
+  }
+  if (data.endMonth !== undefined) {
+    endDate.value.setMonth(data.endMonth -1)
+  }
+  console.log(startDate.value)
+  
+  orderNumList.value=getOrderSummaries(orderAllData.value,startDate.value,endDate.value)
+}
 </script>
 <template>
 <h1>購入者リスト</h1>
 <!-- {{orderAllData}} -->
- <p>{{ orderNumList }}</p>
+ <!-- {{ yearList }}
+ <p>{{ orderNumList }}</p> -->
 <select class="form-select" aria-label="roadsideStationSelect" v-model="selectdRoadStation" @change="initData">
   <option selected v-bind:value="roadStation" v-for="roadStation in roadStationUnitTempList" :key=roadStation >{{roadStation}}</option>
 </select>
+<div class="selectDate">
+  <select class="form-select" aria-label="select-startyear" v-model="selectStartYear" v-on:change="changeDate({startYear:selectStartYear})">
+    <option v-for="year in yearList"  :key="year" >{{year}}</option>
+  </select>
+  <p>年</p>
+  <select class="form-select" aria-label="select-startmonth" v-model="selectStartMonth" v-on:change="changeDate({startMonth:selectStartMonth})">
+    <option v-for="month in 12"  :key="month" >{{month}}</option>
+  </select>
+  <p>月</p>
+  
+</div>
+<p style="margin: auto;">↓</p>
+<div class="selectDate">
+  <select class="form-select" aria-label="select-startyear" v-model="selectEndYear" v-on:change="changeDate({endYear:selectEndYear})">
+  <option v-for="year in yearList"  :key="year" >{{year}}</option>
+  </select>
+  <p>年</p>
+  <select class="form-select" aria-label="select-startmonth" v-model="selectEndMonth" v-on:change="changeDate({endMonth:selectEndMonth})">
+    <option v-for="month in 12"  :key="month" >{{month}}</option>
+  </select>
+  <p>月</p>
+</div>
+
+
 <div class="buyer-group">
   <h3>注文者名</h3>
   <h3>件数</h3>
+  <h3>総額</h3>
  </div>
 <div v-for="(element,index) in orderNumList" :key="index">
   <!-- <p>{{element}}</p> -->
@@ -99,6 +173,7 @@ function pushExport(){
    <div class="buyer-group">
     <h3>{{element.orderName}}</h3>
     <h3>{{element.count}}件</h3>
+    <h3>{{element.totalMoney}}円</h3>
    </div>
 </div>
 <button v-on:click="pushExport" class="buyer-button">出力する</button>
@@ -113,5 +188,14 @@ function pushExport(){
 .buyer-button{
   background-color: white;
   margin: 1%;
+}
+.selectDate{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+}
+.selectDate p{
+  width: 50px;
 }
 </style>
