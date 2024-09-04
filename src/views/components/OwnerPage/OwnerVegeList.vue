@@ -31,7 +31,7 @@ onMounted(() => {
   onAuthStateChanged(auth, (user) => {
     if (user != null && user.emailVerified) {
       currentUser.value = user
-      console.log('読み込みました')
+      
     } else {
       currentUser.value = null
     }
@@ -80,8 +80,6 @@ function writeVegeKeys(
     const db = getDatabase()
   set(fireRef(db, 'testVegeKeys/' +roadStation+"/"), vegeKeys)
     .then(() => {
-      
-    console.log("List saved successfully");
     })
     .catch((error) => {
         console.error("Error saving list: ", error);

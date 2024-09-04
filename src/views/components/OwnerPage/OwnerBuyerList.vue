@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref,onMounted} from 'vue'
-import { getDatabase, ref as fireRef, update, onValue, set} from 'firebase/database'
+import { ref} from 'vue'
+import { getDatabase, ref as fireRef, onValue} from 'firebase/database'
 import{ useRoadStationStore}from "../../../stores/roadStation"
 
 const roadStationUnitTempList = ref<string[]>(useRoadStationStore().roadStationTemp)
@@ -124,7 +124,7 @@ function changeDate( data: { startYear?: number;endYear?: number; startMonth?: n
   if (data.endMonth !== undefined) {
     endDate.value.setMonth(data.endMonth -1)
   }
-  console.log(startDate.value)
+  
   
   orderNumList.value=getOrderSummaries(orderAllData.value,startDate.value,endDate.value)
 }

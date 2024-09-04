@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { getDatabase, ref as fireRef, onValue,  } from 'firebase/database'
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { type User } from 'firebase/auth'
 import {useRoadStationStore}from "../../../stores/roadStation"
 const roadStationUnitTempList = ref<string[]>(useRoadStationStore().roadStationTemp)
@@ -35,7 +35,7 @@ const myOrderVegeData = ref<any>(null)
     let station = roadStationUnitTempList.value[k]
     // 道の駅ごとのユーザーIDを取得
     let userIds = Object.keys(myOrderData.value[station])
-    console.log(userIds)
+    
     for (let i = 0; i < userIds.length; i++) {
       let uid = userIds[i]
       if (props.currentUser != null && uid != props.currentUser.uid) {

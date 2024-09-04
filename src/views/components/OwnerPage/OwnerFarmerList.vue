@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import{ useRoadStationStore}from "../../../stores/roadStation"
-import { ref,onMounted} from 'vue'
-import { getDatabase, ref as fireRef, update, onValue, set} from 'firebase/database'
+import { ref} from 'vue'
+import { getDatabase, ref as fireRef,  onValue} from 'firebase/database'
 type Data = {
   [key: string]: {
     [key: string]: {

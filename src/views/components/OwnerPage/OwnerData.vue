@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import{ useRoadStationStore}from "../../../stores/roadStation"
-import { getDatabase, ref as fireRef, update, onValue, set} from 'firebase/database'
-import { ref,onMounted} from 'vue'
+import { getDatabase, ref as fireRef,  onValue} from 'firebase/database'
+import { ref} from 'vue'
 const roadStationUnitTempList = ref<string[]>(useRoadStationStore().roadStationTemp)
 const selectdRoadStation=ref<string>(roadStationUnitTempList.value[0])
 const userAllData=ref<any>([])

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref,  onMounted ,computed} from 'vue'
+import { ref} from 'vue'
 import{ useRoadStationStore}from "../../../stores/roadStation"
-import { getDatabase, ref as fireRef,  onValue, update } from 'firebase/database'
+import { getDatabase, ref as fireRef,   update } from 'firebase/database'
 const roadStationUnitTempList = ref<string[]>(useRoadStationStore().roadStationTemp)
 const selectdRoadStation=ref<string>(roadStationUnitTempList.value[0])
 interface Props {
@@ -56,11 +56,11 @@ function updateState(element: string, unique: string, key: string): Promise<void
   return new Promise((resolve, reject) => {
     update(fireRef(db, 'testOrders/' + selectdRoadStation.value + "/" + unique + "/" + key), { state: element })
       .then(() => {
-        console.log("Update successful");
+        
         resolve();
       })
       .catch((error) => {
-        console.error("Update failed: ", error);
+        
         reject(error);
       });
   });
@@ -75,15 +75,44 @@ const selectedTableList=ref<boolean[]>([])
 const selectedTableUnitList=ref<any>([])
 const sortedOrderData=ref<any>({})
 const state=ref<string[]>([])
+const isfilter=ref<boolean>(false)
+
 function initData(){
     sortedOrderData.value= makeOrderList()
     let sortOrderDataKeys=Object.keys(sortedOrderData.value)
     for(let i:number=0;i<sortOrderDataKeys.length;i++){
         state.value[i]=sortedOrderData.value[sortOrderDataKeys[i]].state
     }
-   
+    sortedOrderData.value=getGruopData(sortedOrderData.value)
+}
+initData()
+function getGruopData(data:any){
+    // 結果を格納するオブジェクトを準備
+    const groupedData :any= {
+        "全て": { ...data },  
+        "取引完了": {},
+        "連絡済み": {},
+        "未連絡": {}
+    };
+    // データを state によって分ける
+    for (const key in data) {
+        const state = data[key].state;
+        if (groupedData[state]) {
+            groupedData[state][key] = data[key];
+        }
     }
-    initData()
+    return groupedData
+}
+const labels = ['全て', '未連絡', '連絡済み', '取引完了', '取引取り消し'];
+const selectedClass = ref<number>(0);
+
+function toggleClass(index:number) {
+    selectedClass.value = index;
+    for(let i:number=0;i<selectedTableList.value.length;i++){
+        selectedTableList.value[i]=false
+    }
+    
+}
 </script>
 <template>
 <h1>注文履歴</h1>
@@ -91,8 +120,16 @@ function initData(){
     <option selected v-bind:value="roadStation" v-for="roadStation in roadStationUnitTempList" :key=roadStation >{{roadStation}}</option>
 </select>
 <!-- {{props.vegeAllOrder}} -->
-<!-- {{ sortedOrderData }} -->
+<!-- {{ sortedOrderData["全て"] }} -->
 <!-- {{selectedTableUnitList["2024-8-22-11-22-0"]}} -->
+<div class="filter-nav">
+    <h2>フィルター</h2>
+    <div class="filter-unit">
+        <button v-for="(label, index) in labels" :key="index" @click="toggleClass(index)" :class="{ 'active': selectedClass === index }">
+            {{ label }}
+          </button>
+    </div>
+</div>
 <article v-if="!isActive">
     <div class="orderList-group" >
         <div class="order-table">
@@ -100,7 +137,7 @@ function initData(){
             <p>名前</p>
             <p>連絡</p>
         </div>
-        <div  v-for="(element) in sortedOrderData" :key="element" class="order-table" >
+        <div  v-for="(element) in sortedOrderData[labels[selectedClass]]" :key="element" class="order-table" >
             <p>{{element["date"]}}</p>
             <p>{{element["orderName"]}}</p>
             <p>{{element["state"]}}</p>
@@ -109,15 +146,7 @@ function initData(){
     <button v-on:click="pushActive" class="orderList-button">確認する</button>
 </article>
 <article v-if="isActive">
-    <div class="filter-nav">
-        <h2>フィルター</h2>
-        <div class="filter-unit">
-            <button>未連絡</button>
-            <button>連絡済み</button>
-            <button>取引完了</button>
-            <button>取引取り消し</button>
-        </div>
-    </div>
+    
     <div class="orderList-group-active" >
         <div class="order-table">
             <p>注文時間</p>
@@ -125,42 +154,43 @@ function initData(){
             <p>状態</p>
             <p></p>
         </div>
-        <div v-for="(element,time,index) in sortedOrderData" :key="element" class="order-table-active" >
-            <div class="order-table-unit" v-on:click="selectOrderData(index)" >
-                <!-- {{ element }} -->
-                  
-                <p>{{element["key"]}}</p>
-            <p>{{element["orderName"]}}</p>
-            <p>{{element["state"]}}</p>
-            <i class="bi bi-chevron-down" v-if="!selectedTableList[index]"></i>
-            <i class="bi bi-chevron-up" v-if="selectedTableList[index]"></i>
-            </div>
-            
-            <div class="order-table-selected" v-if="selectedTableList[index]">
-                <div v-for="(vegeData,number) in selectedTableUnitList[time]" v-bind:key="number" class="order-table-selected-unit">
-                    <!-- {{vegeData}}[ "0", { "amount": 345, "farmerName": "三浦涼太郎", "price": 119025, "unit": "123本", "vegeName": "ジャガイモ" } ] -->
-                     <!-- 上のような変数だから１を指定するとデータが取れる -->
-                      <!-- {{ vegeData }} -->
-                    <h3>{{vegeData["vegeName"]}}</h3>
-                    <p>単位：{{vegeData["unit"]}}</p>
-                    <p>個数：{{vegeData["amount"]}}組</p>
-                    <p>農家名：{{vegeData["farmerName"]}}</p>
-                    <p>料金：{{vegeData["price"]}}円</p>
+        <article v-if="!isfilter">
+            <div v-for="(element,time,index) in sortedOrderData[labels[selectedClass]]" :key="element" class="order-table-active" >
+                <div class="order-table-unit" v-on:click="selectOrderData(index)" >
+                    <!-- {{ element }} -->
+                      
+                    <p>{{element["key"]}}</p>
+                <p>{{element["orderName"]}}</p>
+                <p>{{element["state"]}}</p>
+                <i class="bi bi-chevron-down" v-if="!selectedTableList[index]"></i>
+                <i class="bi bi-chevron-up" v-if="selectedTableList[index]"></i>
+                </div>
+                
+                <div class="order-table-selected" v-if="selectedTableList[index]">
+                    <div v-for="(vegeData,number) in selectedTableUnitList[time]" v-bind:key="number" class="order-table-selected-unit">
+                        <!-- {{vegeData}}[ "0", { "amount": 345, "farmerName": "三浦涼太郎", "price": 119025, "unit": "123本", "vegeName": "ジャガイモ" } ] -->
+                         <!-- 上のような変数だから１を指定するとデータが取れる -->
+                          <!-- {{ vegeData }} -->
+                        <h3>{{vegeData["vegeName"]}}</h3>
+                        <p>単位：{{vegeData["unit"]}}</p>
+                        <p>個数：{{vegeData["amount"]}}組</p>
+                        <p>農家名：{{vegeData["farmerName"]}}</p>
+                        <p>料金：{{vegeData["price"]}}円</p>
+                    </div>
+                </div>
+                <div v-if="selectedTableList[index]" style="margin:0% 10%;">
+                    <p>希望日：{{element["selectDate"]}}</p>
+                    <p>合計金額:{{element["totalMoney"]}}円</p>
+                    <p style="display:flex">ステータス:<select class="form-select" aria-label="select-startyear" v-model="state[index]" v-on:change="changeState(state[index],element.unique,element.key)">
+                        <option value="未連絡" >未連絡</option>
+                        <option value="連絡済み" >連絡済み</option>
+                        <option value="取引完了" >取引完了</option>
+                        <option value="取引取り消し" >取引取り消し</option>
+                      </select></p>
                 </div>
             </div>
-            <div v-if="selectedTableList[index]" style="margin:0% 10%;">
-                <p>希望日：{{element["selectDate"]}}</p>
-                <p>合計金額:{{element["totalMoney"]}}円</p>
-                <p style="display:flex">ステータス:<select class="form-select" aria-label="select-startyear" v-model="state[index]" v-on:change="changeState(state[index],element.unique,element.key)">
-                    <option value="未連絡" >未連絡</option>
-                    <option value="連絡済み" >連絡済み</option>
-                    <option value="取引完了" >取引完了</option>
-                    <option value="取引取り消し" >取引取り消し</option>
-                  </select></p>
-                
-
-            </div>
-        </div>
+        </article>
+        
     </div> 
     <button v-on:click="pushActive" class="orderList-button">更新する</button>
 </article>
@@ -206,4 +236,13 @@ margin:0% 10%;
     padding: 5px;
     margin:5px;
     border-radius: 10px;
-}</style>
+}
+.filter-unit button{
+    background-color: white;
+    padding: 10px;
+    margin: 5px 5px;
+}
+.filter-unit button.active{
+    background-color: rgb(175, 175, 175);
+}
+</style>

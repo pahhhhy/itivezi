@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { getDatabase, ref as fireRef, onValue} from 'firebase/database'
 //Vueとfirebaseで同じrefという関数があって競合しているのでfirebaseの方をfireRefにしている
-import { ref, computed } from 'vue'
+import { ref} from 'vue'
 
 import OrderStep1 from './components/orderpage/OrderStep1.vue'
 import OrderStep2 from './components/orderpage/OrderStep2.vue'

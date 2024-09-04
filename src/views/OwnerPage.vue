@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { getAuth, onAuthStateChanged, type User } from 'firebase/auth'
-import { ref,  onMounted ,computed} from 'vue'
+import { getAuth} from 'firebase/auth'
+import { ref,  onMounted } from 'vue'
 import { getDatabase, ref as fireRef,  onValue } from 'firebase/database'
 import {getCurrentRole} from "../utils/auth"
 import OwnerBuyerList from './components/OwnerPage/OwnerBuyerList.vue'
@@ -26,7 +26,7 @@ onMounted(async () => {
 const navBarNumber=ref<number>(0)
 function changeNavBarNumber(number:number){
   navBarNumber.value=number
-  console.log(navBarNumber.value)
+  
 }
 </script>
 
