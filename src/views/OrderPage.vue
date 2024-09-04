@@ -93,11 +93,22 @@ function changeCount(count: number[], money: number) {
 function changeDate(date: Date | null) {
   selectDate.value = date
 }
+function resetData(){
+  selectMenList.value = []
+  selectMenUniqueList.value = []
+  selectDate.value = null
+  vegeCountList.value = []
+  totalMoneyList.value = []
+  allTotalMoney.value = 0
+}
 async function  updateRoadStation(element:string){
   roadStation.value=element
   vegeAllData.value=await readvegeAllData(element)
   vegeAllData.value=filterDiscontinuedItems(vegeAllData.value)
   vegeKeys.value= await readvegeKeys(element)
+  // 変数の初期化
+  selectVegeList.value = []
+  resetData()
 }
 </script>
 
@@ -118,6 +129,7 @@ async function  updateRoadStation(element:string){
     v-bind:select-vege-list="selectVegeList"
     v-on:on-step="onStep"
     v-on:change-vege="changeVege"
+    v-on:reset-data="resetData"
     v-if="stepNum == 1"
   ></OrderStep1>
 

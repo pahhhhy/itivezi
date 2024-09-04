@@ -62,6 +62,13 @@ async function  updateRoadStation(element:string){
   roadStation.value=element
   vegeAllData.value=await readvegeAllData(element)
   vegeKeys.value= Object.keys(vegeAllData.value)
+  vegeList.value = []
+  resetData()
+}
+function resetData(){
+  vegeMoneyList.value = []
+  vegeAmountList.value = []
+  vegeUnitList.value = []
 }
 const vegeList = ref<number[]>([])
 const vegeMoneyList = ref<number[]>([])
@@ -87,6 +94,7 @@ const roadStation = ref<string>("")
     v-bind:vegeKeys="vegeKeys"
     v-on:-on-step="onStep"
     v-on:change-select="changeSelect"
+    v-on:reset-data="resetData"
     v-if="stepNum == 1 && vegeKeys != null"
   ></RegistrationStep1>
   <!-- {{ VegeMoneyList }}

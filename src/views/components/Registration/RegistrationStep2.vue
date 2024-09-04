@@ -34,14 +34,26 @@ if (vegeMoneyList.value.length == 0) {
   vegeUnitList.value = new Array(props.vegeList.length).fill(0)
   vegeAmountList.value = new Array(props.vegeList.length).fill(0)
 }
-function updateVegeMoney(value: number, index: number) {
+function updateVegeMoney(value: number, index: number,mode:string) {
+  
+  if(mode=="Money"){
   // マイナスの値になることを防ぐ
-  if (value < 0) {
-    vegeMoneyList.value[index] = 0
-  } else {
-    vegeMoneyList.value[index] = value
+    if (value < 0) {
+      vegeMoneyList.value[index] = 0
+    } else {
+      vegeMoneyList.value[index] = value
+    }
+    updateStep2List("Money")
   }
-  updateStep2List("Money")
+  if(mode=="Amount"){
+  // マイナスの値になることを防ぐ
+    if (value < 0) {
+      vegeAmountList.value[index] = 0
+    } else {
+      vegeAmountList.value[index] = value
+    }
+    updateStep2List("Amount")
+  }
 }
 function errorFind() {
   const isMoneyList: boolean =
@@ -95,7 +107,7 @@ function updateStep2List(action:string) {
           placeholder="単価"
           aria-label="default input example"
           v-model="vegeAmountList[index]"
-          @change="updateStep2List('Amount')"
+          @change="updateVegeMoney(vegeAmountList[index], index,'Amount')"
         />
         <select
           class="form-select"
@@ -121,7 +133,7 @@ function updateStep2List(action:string) {
         placeholder="何円にしますか？"
         aria-label="default input example"
         v-model="vegeMoneyList[index]"
-        @input="updateVegeMoney(vegeMoneyList[index], index)"
+        @input="updateVegeMoney(vegeMoneyList[index], index,'Money')"
       />
     </h1>
     
