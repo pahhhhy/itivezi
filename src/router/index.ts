@@ -7,6 +7,10 @@ import Signup from '../views/SignupPage.vue'
 import Login from '../views/LoginPage.vue'
 import Addinfo from '../views/AddInfo.vue'
 import Owner from '../views/OwnerPage.vue'
+import {
+  getAuth
+} from 'firebase/auth'
+import {getCurrentRole} from "../utils/auth"
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -52,5 +56,15 @@ const router = createRouter({
     }
   ]
 })
-
+// ここからガードの追加部分
+router.beforeEach(async (to, from, next) => {
+  if (to.name === 'Owner') {
+  // if (to.name === 'chat') {
+      if( await getCurrentRole(getAuth()) === "管理者" ) next();
+      // if( await getCurrentRole(getAuth()) === "管理者" ) next();
+      else next({name: 'login'})
+  }else{
+      next()
+  }
+})
 export default router

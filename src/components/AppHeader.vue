@@ -8,6 +8,8 @@ import {
   type User
 } from 'firebase/auth'
 import { getDatabase, ref as fireRef, onValue } from 'firebase/database'
+import router from '@/router'
+const myRole = ref<string>("")
 const isBurger = ref(false)
 const currentUser = ref<User | null>(null)
 const onClickBurger = (): void => {
@@ -18,10 +20,9 @@ function logout() {
   signOut(auth)
     .then(() => {
       // Sign-out successful.
-      
+      router.push("/")
     })
 }
-const myRole = ref<any>()
 onMounted(async () => {
   const auth = getAuth()
   onAuthStateChanged(auth, async (user) => {
@@ -102,7 +103,7 @@ async function readUserData(element: string): Promise<any> {
       <li v-if="currentUser != null && myRole == '管理者'">
         <button v-on:click="onClickBurger" class="sidebar_element">
           <i class="bi bi-journals"></i>
-          <RouterLink v-bind:to="{ name: 'owner' }" class="link">管理者画面</RouterLink>
+          <RouterLink v-bind:to="{ name: 'Owner' }" class="link">管理者画面</RouterLink>
         </button>
       </li>
       <li v-if="currentUser != null">

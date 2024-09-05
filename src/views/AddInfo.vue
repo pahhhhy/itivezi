@@ -11,7 +11,8 @@ const selectRole = ref<string>('')
 const placeData = ref<string>('')
 const gender = ref<string>('')
 const phoneNumber = ref<number>()
-
+const affiliation =ref<string[]>([])
+const error=ref<boolean>(false)
 // 読み込むデータの指定
 function readUserData(element: string) {
   const countRef = fireRef(getDatabase(), 'testUser/' + element)
@@ -35,7 +36,8 @@ function writeUserdata(
   place: string,
   number: number,
   gender: string,
-  name: string
+  name: string,
+  affiliation:string[]
 ) {
   const db = getDatabase()
 
@@ -44,7 +46,8 @@ function writeUserdata(
     role: role,
     place: place,
     phoneNumber: number,
-    gender: gender
+    gender: gender,
+    affiliation:affiliation
   })
 }
 //一度にすべての入力を元に更新する
@@ -53,7 +56,9 @@ function updateInfo() {
     selectRole.value != '' &&
     placeData.value != '' &&
     phoneNumber.value != undefined &&
-    gender.value != ''
+    gender.value != ''&&
+    userName.value!=""&&
+    affiliation.value.length !=0
   ) {
     if (currentUser.value != null) {
       updateDisName(currentUser.value, userName.value)
@@ -63,12 +68,15 @@ function updateInfo() {
         placeData.value,
         phoneNumber.value,
         gender.value,
-        userName.value
+        userName.value,
+        affiliation.value
       )
 
       router.push('/')
     }
-  } 
+  } else{
+    error.value=true
+  }
 }
 onMounted(() => {
   const auth = getAuth()
@@ -190,6 +198,28 @@ watch(userData, (): void => {
       v-model="phoneNumber"
     />
   </div>
+  <h3>所属</h3>
+<div class="form-check">
+  <input
+    class="form-check-input"
+    type="checkbox"
+    value="室根"
+    v-model="affiliation"
+    id="affiliationMen"
+  />
+  <label class="form-check-label" for="affiliationMen"> 室根 </label>
+</div>
+<div class="form-check">
+  <input
+    class="form-check-input"
+    type="checkbox"
+    value="川崎"
+    id="affiliationWomen"
+    v-model="affiliation"
+  />
+  <label class="form-check-label" for="affiliationWomen"> 川崎 </label>
+</div>
+  <h3 style="color: red;" v-show="error">全ての項目に情報を書いてください</h3>
   <button type="button" class="btn btn-primary" @click="updateInfo">更新する</button>
 </template>
 <style>

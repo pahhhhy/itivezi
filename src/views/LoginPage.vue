@@ -48,7 +48,9 @@ function checkMyData() {
       }
       if (
         userData.value[currentUser.value.uid].phoneNumber == null ||
-        userData.value[currentUser.value.uid].place == ''
+        userData.value[currentUser.value.uid].phoneNumber == 0||
+        userData.value[currentUser.value.uid].affiliation == null||
+        userData.value[currentUser.value.uid].affiliation == ""
       ) {
         isOk = false
       }

@@ -20,13 +20,18 @@ const vegeCountList = ref<number[]>(new Array(props.selectVege.length).fill(0))
 const totalMoney = ref<number[]>(props.totalMoney)
 const selectDate = ref<Date | null>(props.selectDate)
 const allTotalMoney = ref<number>(0)
+  const today = new Date().toISOString().split('T')[0]
 //個と親の変数を同じにしたい。でもこっちはSelectVegeの長さによって初期値が違うのでこのやり方で行う
 for (let i: number = 0; i < props.vegeCount.length; i++) {
   vegeCountList.value[i] = props.vegeCount[i]
 }
 function changeMoney(money: number, index: number) {
+  // マイナスの値になることを防ぐ
+  if (vegeCountList.value[index] < 0) {
+      vegeCountList.value[index] = 0
+    } 
   totalMoney.value[index] = vegeCountList.value[index] * money
-
+  allTotalMoney.value=0
   for (let i: number = 0; i < totalMoney.value.length; i++) {
     allTotalMoney.value += totalMoney.value[i]
   }
@@ -60,7 +65,6 @@ watch(selectDate, (): void => {
     <h1>{{ vegeCountList }}</h1>
     <h1>{{ selectDate }}</h1>
     <div class="form_Step3" v-for="(element, index) in props.selectVege" v-bind:key="index">
-      <!-- スクロールで値が変わるのと０以下を書くことができるのがまずい -->
       <h1>
         {{ props.vegeKeys[props.selectVege[index]] }} :{{
           props.vegeAllData[props.vegeKeys[props.selectVege[index]]][props.selectMenUniqueList[index]].unit
@@ -86,7 +90,6 @@ watch(selectDate, (): void => {
       <h2 style="color: red" v-show="step3Error && vegeCountList[index] == 0">
         個数を指定してください
       </h2>
-      <!-- 今日より前を選択不可にしないと -->
     </div>
     <h1 style="padding-top: 30px">日付を指定してください</h1>
     <VueDatePicker
@@ -96,6 +99,7 @@ watch(selectDate, (): void => {
       model-type="yyyy-MM-dd"
       week-start="0"
       :enable-time-picker="false"
+      :min-date="today"
       auto-apply
       no-today
     />

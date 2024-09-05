@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref ,watch} from 'vue'
 
 interface Props {
   vegeKeys: string[]
@@ -8,12 +8,14 @@ interface Props {
 interface Emits {
   (event: 'onStep', Next: boolean): void
   (event: 'changeVege', element: number[]): void
+  (event: 'resetData', ): void
 }
 const emit = defineEmits<Emits>()
 const props = defineProps<Props>()
 const step1Error = ref<boolean>(false)
 const selectedVege = ref<number[]>(props.selectVegeList)
 function onStep(next: boolean) {
+  if(!next)emit('onStep', false)
   if (selectedVege.value.length == 0) {
     step1Error.value = true
   } else {
@@ -26,6 +28,19 @@ function onStep(next: boolean) {
 function changeVege() {
   emit('changeVege', selectedVege.value)
 }
+
+// チェックボックスの状態が変わったときの関数
+function handleCheckboxChange() {
+  emit("resetData")
+}
+
+// selectedVegeを監視して、変化を検知
+watch(selectedVege, (newVal, oldVal) => {
+  const removedItems = oldVal.filter(item => !newVal.includes(item))
+  if (removedItems.length > 0) {
+    removedItems.forEach(item => handleCheckboxChange())
+  }
+})
 </script>
 
 <template>
@@ -51,6 +66,7 @@ function changeVege() {
     <h1 style="color: red" v-show="step1Error && selectedVege.length == 0">
       野菜を選択してください
     </h1>
+    <button v-on:click="onStep(false)" class="btn btn-primary">戻る</button>
     <button v-on:click="onStep(true)" class="btn btn-primary">次へ</button>
   </section>
 </template>

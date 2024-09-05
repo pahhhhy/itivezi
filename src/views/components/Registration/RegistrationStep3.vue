@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { type User } from 'firebase/auth'
-import { getDatabase, ref as fireRef, onValue, push } from 'firebase/database'
+import { getDatabase, ref as fireRef, push } from 'firebase/database'
 interface Props {
   vegeKeys: string[]
   vegeList: number[]
   vegeMoneyList: number[]
   vegeAmountList: number[]
-  vegeUnitList: number[]
+  vegeUnitList: string[]
   currentUser: User | null
+  roadStation:string
 }
 interface Emits {
   (event: 'onStep', Next: boolean): void
@@ -25,41 +26,35 @@ function vegeWriteHandler() {
       props.vegeAmountList,
       props.currentUser.displayName,
       props.vegeUnitList,
-      props.currentUser.uid
+      props.currentUser.uid,
+      props.roadStation
     )
   } 
 }
 function onStep(next: boolean) {
   if (!next) emit('onStep', false)
 }
-const vegeData = ref<any>()
 const finishSend = ref<boolean>(false)
-const vegeUnitTempList = ref<string[]>(['g', 'kg', '本', '個'])
 async function writeVege(
   vege: string[],
   selectedVege: number[],
   money: number[],
   num: number[],
   farmerVege: string,
-  unit: number[],
-  uid:string
+  unit: string[],
+  uid:string,
+  road:string
 ) {
   let finishNum: number = 0
   const db = getDatabase()
-  const unitTempList = ['g', 'kg', '本', '個']
-
   for (let i: number = 0; i < vege.length; i++) {
-    const countRef = fireRef(getDatabase(), 'testVege/' + vege[selectedVege[i]] + '/')
-    onValue(countRef, (snapshot) => {
-      vegeData.value = snapshot.val()
-    })
-    const numWithUnit: string = num[i] + unitTempList[unit[i]]
-    
-    push(fireRef(db, 'testVege/' + vege[selectedVege[i]] ), {
+    const numWithUnit: string = num[i] + unit[i]
+    push(fireRef(db, 'testVege/' +road+"/"+ vege[selectedVege[i]] ), {
       en: money[i],
       farmer: farmerVege,
       unit: numWithUnit,
-      uid:uid
+      uid:uid,
+      state:"Available"
     })
       .then(() => {
         finishNum++
@@ -76,16 +71,16 @@ const refreshPage = () => {
 }
 </script>
 <template>
-  <p>{{ props.vegeAmountList }}</p>
+  <!-- <p>{{ props.vegeAmountList }}</p>
   <p>{{ props.vegeList }}</p>
-  <p>{{ props.vegeUnitList }}</p>
+  <p>{{ props.vegeUnitList }}</p> -->
 
   <section>
     <div v-for="(vegeName, index) in props.vegeList" :key="vegeName + index" class="confirm">
       <h1>{{ vegeKeys[props.vegeList[index]] }}</h1>
       <h1>名前：{{ props.currentUser?.displayName }}</h1>
       <h1>
-        単価：{{ props.vegeAmountList[index] }} {{ vegeUnitTempList[props.vegeUnitList[index]] }}
+        単価：{{ props.vegeAmountList[index] }} {{ props.vegeUnitList[index] }}
       </h1>
       <h1>価格：{{ vegeMoneyList[index] }}円</h1>
     </div>
