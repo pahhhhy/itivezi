@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import{ useRoadStationStore}from "../../../stores/roadStation"
-import { ref} from 'vue'
-import { getDatabase, ref as fireRef,  onValue} from 'firebase/database'
+import {useRoadStationStore} from "../../../stores/roadStation"
+import {ref} from 'vue'
+import {getDatabase, onValue, ref as fireRef} from 'firebase/database'
+
 type Data = {
   [key: string]: {
     [key: string]: {
@@ -18,25 +19,27 @@ type Result = {
   [farmer: string]: number;
 };
 const roadStationUnitTempList = ref<string[]>(useRoadStationStore().roadStationTemp)
-const selectdRoadStation=ref<string>(roadStationUnitTempList.value[0])
-const vegeAllData=ref<any>(null)
-const vegeKeys=ref<string[]>([])
-const countFarmerList=ref<any>([])
-const selectedTableList=ref<boolean[]>([])
-const groupByFarmerList=ref<any>([])
-async function initData(){
-    vegeAllData.value=await readvegeAllData(selectdRoadStation.value)
-    vegeAllData.value=filterDiscontinuedItems(vegeAllData.value)
-    vegeKeys.value=Object.keys(vegeAllData.value)
-    countFarmerList.value=countFarmers(vegeAllData.value)
-    groupByFarmerList.value=groupByFarmer(vegeAllData.value)
+const selectedRoadStation = ref<string>(roadStationUnitTempList.value[0])
+const vegeAllData = ref<any>(null)
+const vegeKeys = ref<string[]>([])
+const countFarmerList = ref<any>([])
+const selectedTableList = ref<boolean[]>([])
+const groupByFarmerList = ref<any>([])
+
+async function initData() {
+  vegeAllData.value = await readvegeAllData(selectedRoadStation.value)
+  vegeAllData.value = filterDiscontinuedItems(vegeAllData.value)
+  vegeKeys.value = Object.keys(vegeAllData.value)
+  countFarmerList.value = countFarmers(vegeAllData.value)
+  groupByFarmerList.value = groupByFarmer(vegeAllData.value)
 }
+
 initData()
 const filterDiscontinuedItems = (data: any) => {
   const filteredData: any = {};
   const excludedItems: any = {};  // 排除されたアイテムを保存するオブジェクト
   const allDiscontinuedCategories: string[] = [];  // すべてが "Discontinued" のカテゴリ名を保存する配列
-  
+
   for (const [category, items] of Object.entries(data) as [string, any]) {
     const filteredItems: any = {};
     const excludedCategoryItems: any = {};  // このカテゴリーで排除されたアイテム
@@ -64,6 +67,7 @@ const filterDiscontinuedItems = (data: any) => {
   }
   return filteredData;
 };
+
 function readvegeAllData(roadStation: string): Promise<any> {
   return new Promise((resolve, reject) => {
     const countRef = fireRef(getDatabase(), 'testVege/' + roadStation + "/")
@@ -74,12 +78,13 @@ function readvegeAllData(roadStation: string): Promise<any> {
     });
   });
 }
+
 function countFarmers(data: Data): Result {
   const result: Result = {};
 
   Object.values(data).forEach(vegeData => {
     Object.values(vegeData).forEach(record => {
-      const { farmer } = record;
+      const {farmer} = record;
       if (result[farmer]) {
         result[farmer]++;
       } else {
@@ -87,18 +92,20 @@ function countFarmers(data: Data): Result {
       }
     });
   });
-  selectedTableList.value=new Array(result.length).fill(false)
+  selectedTableList.value = new Array(result.length).fill(false)
   return result;
 };
-function pushFarmer(index:number){
-    selectedTableList.value[index]=!selectedTableList.value[index]
+
+function pushFarmer(index: number) {
+  selectedTableList.value[index] = !selectedTableList.value[index]
 }
-function groupByFarmer (data: Data): Result  {
+
+function groupByFarmer(data: Data): Result {
   const result: any = {};
 
   Object.entries(data).forEach(([vegetable, records]) => {
     Object.entries(records).forEach(([id, record]) => {
-      const { farmer, ...rest } = record;
+      const {farmer, ...rest} = record;
       if (!result[farmer]) {
         result[farmer] = {};
       }
@@ -111,13 +118,15 @@ function groupByFarmer (data: Data): Result  {
 
   return result;
 };
-function pushExport(){
-  let CSVfile=convertToCSV(groupByFarmerList.value)
+
+function pushExport() {
+  let CSVfile = convertToCSV(groupByFarmerList.value)
   const now = new Date()
   const currentTime = now.toLocaleString()
-  let fileName="出品者リスト_"+selectdRoadStation.value+"_"+currentTime
-  downloadCSV(CSVfile,fileName)
+  let fileName = "出品者リスト_" + selectedRoadStation.value + "_" + currentTime
+  downloadCSV(CSVfile, fileName)
 }
+
 // CSVに変換する関数
 const convertToCSV = (data: any): string => {
   // CSVのヘッダー
@@ -143,7 +152,7 @@ const convertToCSV = (data: any): string => {
 // ブラウザでCSVファイルをダウンロードさせる関数
 const downloadCSV = (csv: string, filename: string) => {
   const bom = "\uFEFF"; // BOMを追加
-  const blob = new Blob([bom + csv], { type: "text/csv;charset=utf-8;" });
+  const blob = new Blob([bom + csv], {type: "text/csv;charset=utf-8;"});
   const link = document.createElement("a");
   const url = URL.createObjectURL(blob);
   link.setAttribute("href", url);
@@ -155,68 +164,74 @@ const downloadCSV = (csv: string, filename: string) => {
 };
 </script>
 <template>
-<h1>出品者リスト</h1>
-<select class="form-select" aria-label="roadsideStationSelect" v-model="selectdRoadStation" @change="initData">
-    <option selected v-bind:value="roadStation" v-for="roadStation in roadStationUnitTempList" :key=roadStation >{{roadStation}}</option>
-</select>
-<!-- {{vegeAllData}}
-{{ countFarmerList }} -->
- <!-- {{ groupByFarmerList }} -->
- 
-<div v-for="(number,farmer,index) in countFarmerList" :key="farmer">
+  <h1>出品者リスト</h1>
+  <select class="form-select" aria-label="roadsideStationSelect" v-model="selectedRoadStation" @change="initData">
+    <option selected v-bind:value="roadStation" v-for="roadStation in roadStationUnitTempList" :key=roadStation>
+      {{ roadStation }}
+    </option>
+  </select>
+  <!-- {{vegeAllData}}
+  {{ countFarmerList }} -->
+  <!-- {{ groupByFarmerList }} -->
+
+  <div v-for="(number,farmer,index) in countFarmerList" :key="farmer">
     <!-- {{ number }}
     {{ farmer }} -->
-    <div class="farmarList-group">
-        <button v-on:click="pushFarmer(index)">
-            <h3>{{ farmer }}さん</h3>
-            <h3>{{number}}件</h3>
-            <i class="bi bi-chevron-down" v-if="!selectedTableList[index]"></i>
-            <i class="bi bi-chevron-up" v-if="selectedTableList[index]"></i>
-        </button>
-        <div class="farmarList-group-element">
-            <div v-for="(element,vege) in groupByFarmerList[farmer]" :key="vege" v-show="selectedTableList[index]" >
-                <!-- {{ element }}
-                {{vege}} -->
-                <article>
-                    <h3>{{vege}}</h3>
-                    <p>{{ element[0].unit }}    {{element[0].en}}円</p>
-                </article>
-                
-            </div>
+    <div class="farmerList-group">
+      <button v-on:click="pushFarmer(index)">
+        <h3>{{ farmer }}さん</h3>
+        <h3>{{ number }}件</h3>
+        <i class="bi bi-chevron-down" v-if="!selectedTableList[index]"></i>
+        <i class="bi bi-chevron-up" v-if="selectedTableList[index]"></i>
+      </button>
+      <div class="farmerList-group-element">
+        <div v-for="(element,vege) in groupByFarmerList[farmer]" :key="vege" v-show="selectedTableList[index]">
+          <!-- {{ element }}
+          {{vege}} -->
+          <article>
+            <h3>{{ vege }}</h3>
+            <p>{{ element[0].unit }} {{ element[0].en }}円</p>
+          </article>
+
         </div>
-        
+      </div>
+
     </div>
-</div>
-<button class="export-button" v-on:click="pushExport()">出力する</button>
+  </div>
+  <button class="export-button" v-on:click="pushExport()">出力する</button>
 </template>
 <style>
-.export-button{
+.export-button {
   background-color: white;
   margin-top: 20px;
 }
-.farmarList-group button{
-    display: flex;
-    width: 600px;
-    margin: 0 20px ;
-    background-color: white;
-    border: none;
-    border-top:1px solid gray ;
-    border-bottom:1px solid gray ;
-    justify-content: space-between;
+
+.farmerList-group button {
+  display: flex;
+  width: 600px;
+  margin: 0 20px;
+  background-color: white;
+  border: none;
+  border-top: 1px solid gray;
+  border-bottom: 1px solid gray;
+  justify-content: space-between;
 }
-.farmarList-group button i{
-    display: flex;
-    align-items: center;
-    margin:auto 0;
+
+.farmerList-group button i {
+  display: flex;
+  align-items: center;
+  margin: auto 0;
 }
-.farmarList-group-element{
-    display: flex;
-    
+
+.farmerList-group-element {
+  display: flex;
+
 }
-.farmarList-group-element article{
-    border: 1px solid gray;
-    margin: 10px;
-    border-radius: 20px;
-    padding: 10px;
+
+.farmerList-group-element article {
+  border: 1px solid gray;
+  margin: 10px;
+  border-radius: 20px;
+  padding: 10px;
 }
 </style>
