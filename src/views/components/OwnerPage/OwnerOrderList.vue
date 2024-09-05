@@ -92,7 +92,8 @@ function getGruopData(data:any){
         "全て": { ...data },  
         "取引完了": {},
         "連絡済み": {},
-        "未連絡": {}
+        "未連絡": {},
+        '取引取り消し':{}
     };
     // データを state によって分ける
     for (const key in data) {
