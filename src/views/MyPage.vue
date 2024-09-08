@@ -45,12 +45,12 @@ const vegeAllData = ref<any>(null)
     <h1>マイページ</h1>
   </div>
 
-  <my-page-update v-bind:current-user="currentUser" v-if="currentUser != null"></my-page-update>
+  <my-page-update v-bind:current-user="currentUser" v-bind:vege-all-data="vegeAllData" v-if="currentUser != null"></my-page-update>
   <my-page-my-vege
     v-bind:current-user="currentUser"
     v-bind:vege-all-data="vegeAllData"
     v-on:init-data="initData"
-    v-if="currentUser != null && vegeAllData != null"
+    v-if="currentUser != null && (vegeAllData != null || vegeAllData.length!=0)"
   ></my-page-my-vege>
   <my-page-order v-bind:current-user="currentUser" v-if="currentUser != null"></my-page-order>
 </template>

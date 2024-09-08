@@ -125,7 +125,7 @@ header {
   width: 100%;
   display: flex;
   justify-content: space-between;
-  border-bottom: 3px solid black;
+  border-bottom: 1px solid rgb(223, 223, 223);
 }
 nav {
   display: flex;
