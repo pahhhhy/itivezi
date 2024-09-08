@@ -50,7 +50,7 @@ const vegeAllData = ref<any>(null)
     v-bind:current-user="currentUser"
     v-bind:vege-all-data="vegeAllData"
     v-on:init-data="initData"
-    v-if="currentUser != null && (vegeAllData != null || vegeAllData.length!=0)"
+    v-if="currentUser != null && (vegeAllData != null && vegeAllData.length !== 0)"
   ></my-page-my-vege>
   <my-page-order v-bind:current-user="currentUser" v-if="currentUser != null"></my-page-order>
 </template>

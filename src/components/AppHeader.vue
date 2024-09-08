@@ -126,6 +126,7 @@ header {
   display: flex;
   justify-content: space-between;
   border-bottom: 1px solid rgb(223, 223, 223);
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.26);
 }
 nav {
   display: flex;

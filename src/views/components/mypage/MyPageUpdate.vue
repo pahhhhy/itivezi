@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref,  watchEffect } from 'vue'
+import { ref,  watchEffect,watch } from 'vue'
 import {  updateProfile, type User } from 'firebase/auth'
 import { getDatabase, ref as fireRef,  onValue, update } from 'firebase/database'
 interface Props {
@@ -148,7 +148,7 @@ function extractFarmerInfo(data: any): [string, string, string][] {
             Object.entries(items as any).forEach(([itemId, info]) => {
                 if (typeof info === 'object' && info !== null && 'farmer' in info) {
                     const farmer = (info as { farmer: string }).farmer;
-                    if (farmer === "三浦涼太郎") {
+                    if (farmer === props.currentUser?.displayName) {
                         result.push([location, cropName, itemId]);
                     }
                 }
@@ -159,6 +159,10 @@ function extractFarmerInfo(data: any): [string, string, string][] {
     return result;
 }
 const MyvegeData=ref<[string, string, string][]>(extractFarmerInfo(props.vegeAllData))
+// vegeAllData を監視
+watch(() => props.vegeAllData, (newValue, oldValue) => {
+  MyvegeData.value=extractFarmerInfo(props.vegeAllData)
+});
 async function writeVege(
   road:string,
   vege: string,
@@ -176,7 +180,7 @@ async function writeVege(
 </script>
 <template>
   <!-- {{ props.vegeAllData }} -->
-    {{MyvegeData[0][0]}}
+    {{MyvegeData}}
   <button v-on:click="pushToggle()" class="toggle-button">
     <i class="bi bi-caret-down-fill" v-show="!isToggle"></i>
     <i class="bi bi-caret-up-fill" v-show="isToggle"></i>
