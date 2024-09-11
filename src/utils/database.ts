@@ -1,6 +1,6 @@
 import {ref as fireRef} from "@firebase/database";
 import {getDatabase, onValue} from "firebase/database";
-import type {ServerTimestamp} from "@/types/chatpage/announcement";
+import type {ServerTimestamp} from "@/types/announcement/announcement";
 
 // userIdを元にデータベースからユーザーデータを取得します。もしフィールド名が与えられたら場合そのフィールドのみ取得します。
 export async function readUserData(userId: string, field?: string): Promise<any> {

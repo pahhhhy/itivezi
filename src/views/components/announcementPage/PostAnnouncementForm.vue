@@ -1,29 +1,22 @@
 <script setup lang="ts">
 import {ref} from "vue";
-import {getDatabase, serverTimestamp, ref as fireRef} from "firebase/database";
-import {getAuth, type User} from "firebase/auth";
-import {getCurrentRole, getCurrentUser} from "@/utils/auth";
-import {postAnnouncement} from "@/utils/chat/announcements";
+import {getDatabase, ref as fireRef, serverTimestamp} from "firebase/database";
+import {useAuthData} from "@/utils/auth";
+import {postAnnouncement} from "@/utils/announcement/announcements";
+import {useAnnouncementFiles} from "@/utils/announcement/announcementFilesHook";
+
+
+const {files, content, imgAdd, deleteImgFromStorage, splitFiles} = useAnnouncementFiles()
 
 // 投稿者uid添付や投稿権限確認に使う変数
-let user: User | null = null
-const role = ref<string>('')
+const {user, role} = useAuthData();
 
 // 後にフォームから入力する部分
 const title = ref<string>('');
-const content = ref<string>('');
 
 // お知らせのリファレンス
 const announcementsRef = fireRef(getDatabase(), 'testAnnouncements/announcements')
 
-// ユーザーを非同期で取得
-getCurrentUser(getAuth()).then((newUser) => {
-  if (newUser) user = newUser;
-})
-// ロールを非同期で取得
-getCurrentRole(getAuth()).then((newRole) => {
-  if (newRole) role.value = newRole;
-});
 
 // お知らせを投稿する処理
 function post() {
@@ -31,15 +24,17 @@ function post() {
     title: title.value,
     content: content.value,
     createdAt: serverTimestamp(),
-    userID: user?.uid ?? '',
+    userID: user.value?.uid ?? '',
     categoryID: '',
+    comments: [],
   }
+
+  const {deleteFiles} = splitFiles(files.value, content.value)
+  deleteImgFromStorage(deleteFiles)
 
   postAnnouncement(announcementsRef, pushData)
   content.value = ''
 }
-
-const value = ref<any>("");
 
 </script>
 <template>
@@ -49,8 +44,15 @@ const value = ref<any>("");
     <label for="title">タイトル</label>
     <input id="title" type="text" required v-model="title"/>
 
-    <mavon-editor language="ja" placeholder="ここにテキストを入力..." v-model="content"/>
+    <mavon-editor language="ja" placeholder="ここにテキストを入力..." v-model="content" @imgAdd="imgAdd"/>
 
     <button @click="post">送信</button>
   </div>
 </template>
+
+<!-- .markdown-bodyはmavon-editor内のクラス -->
+<style scoped>
+.markdown-body {
+  z-index: 0;
+}
+</style>

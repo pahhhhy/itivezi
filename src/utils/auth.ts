@@ -1,6 +1,21 @@
-import {onAuthStateChanged, type User, type Auth} from "firebase/auth";
+import {onAuthStateChanged, type User, type Auth, getAuth} from "firebase/auth";
 import type {Role} from "@/types/auth";
 import {readUserData} from "@/utils/database";
+import {onMounted, ref} from "vue";
+
+export const useAuthData = () => {
+    const auth = getAuth();
+    const user = ref<User | null | undefined>(undefined);
+    const role = ref<Role | null | undefined>(undefined);
+
+    onMounted(async () => {
+        user.value = await getCurrentUser(auth);
+        role.value = await getCurrentRole(auth);
+    })
+
+    return {user, role}
+}
+
 
 /**
  * ログイン中のユーザーを非同期で取得します。ログインしていない場合はnullを返します。

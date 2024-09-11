@@ -1,23 +1,16 @@
 <script setup lang="ts">
-import AnnouncementsList from "@/views/components/chatPage/announcements/announcementsList/AnnouncementsList.vue";
-import {getCurrentRole} from "@/utils/auth";
-import {ref} from "vue";
-import {getAuth} from "firebase/auth";
-import PostAnnouncementForm from "@/views/components/chatPage/PostAnnouncementForm.vue";
+import AvailableChatRoomList from "@/views/components/chatPage/AvailableChatRoomList.vue";
+import {useAuthData} from "@/utils/auth";
 
-const role: any = ref(undefined);
-getCurrentRole(getAuth()).then((newRole) => {
-  role.value = newRole;
-});
-
-
+const {user} = useAuthData()
 </script>
 
 <template>
   <h1>chat</h1>
   <div class="chat">
-    <PostAnnouncementForm v-if="role === '管理者'"/>
-    <AnnouncementsList />
+    <AvailableChatRoomList v-if="user" :user="user"/>
+
+
   </div>
 </template>
 

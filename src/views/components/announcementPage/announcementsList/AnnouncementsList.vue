@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {ref} from 'vue'
 import {getDatabase, onValue, ref as fireRef} from 'firebase/database'
-import AnnouncementsListElement from "@/views/components/chatPage/announcements/announcementsList/AnnouncementsListElement.vue";
+import AnnouncementsListElement from "@/views/components/announcementPage/announcementsList/AnnouncementsListElement.vue";
 
 // お知らせのリファレンス
 const announcementsRef = fireRef(getDatabase(), 'testAnnouncements/announcements')

@@ -84,7 +84,7 @@ watch(
       <i v-if="isBurger" v-on:click="onClickBurger" class="bi bi-x-lg burger"></i>
     </nav>
   </header>
-  <aside v-if="isBurger">
+  <aside v-if="isBurger" >
     <ul>
       <li>
         <button v-on:click="onClickBurger" class="sidebar_element">

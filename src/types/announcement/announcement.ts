@@ -1,3 +1,5 @@
+import type {AnnouncementComment} from "@/types/announcement/announcementComments";
+
 export interface Announcement {
     announceId: string;
     title: string;
@@ -6,6 +8,7 @@ export interface Announcement {
     updatedAt?: ServerTimestamp;
     userID: string;
     categoryID: string;
+    comments: AnnouncementComment[];
 }
 
 export type ServerTimestamp = object | number; // set時にはserverTimestamp()を使用のこと。firebaseに送る前はobject, 取得したものはnumber型になっている。

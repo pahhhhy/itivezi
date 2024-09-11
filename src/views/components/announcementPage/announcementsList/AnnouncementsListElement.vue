@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type {Announcement} from "@/types/chatpage/announcement";
+import type {Announcement} from "@/types/announcement/announcement";
 import {formatServerTimestamp} from "@/utils/database";
 
 interface Props {

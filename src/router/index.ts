@@ -10,7 +10,8 @@ import Owner from '../views/OwnerPage.vue'
 import {getAuth} from 'firebase/auth'
 import {getCurrentRole} from "../utils/auth"
 import Chat from '../views/ChatPage.vue'
-import Announcement from '../views/AnnouncementPage.vue'
+import AnnouncementsPage from "@/views/AnnouncementsPage.vue";
+import AnnouncementDetailPage from "@/views/AnnouncementDetailPage.vue";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -63,12 +64,12 @@ const router = createRouter({
         {
             path: '/announcements',
             name: 'announcements',
-            component: Chat,
+            component: AnnouncementsPage,
         },
         {
             path: '/announcements/:announceId',
             name: 'announcement',
-            component: Announcement,
+            component: AnnouncementDetailPage,
         },
     ]
 })

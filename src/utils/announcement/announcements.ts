@@ -1,5 +1,5 @@
-import {type DatabaseReference, push, remove, set, ref as fireRef, update, serverTimestamp} from "firebase/database";
-import type {Announcement} from "@/types/chatpage/announcement";
+import {type DatabaseReference, push, remove, serverTimestamp, set, update} from "firebase/database";
+import type {Announcement} from "@/types/announcement/announcement";
 
 /**
  * お知らせを投稿します。権限の確認はここでは行いません。
@@ -8,7 +8,6 @@ import type {Announcement} from "@/types/chatpage/announcement";
  * @returns 保存したデータのID
  */
 export function postAnnouncement(announcementsRef: DatabaseReference, pushData: Omit<Announcement, "announceId">) {
-    // fireRefの取得はvueコンポーネント内でないとできないので引数に取っています
     const newAnnounceRef = push(announcementsRef)
     const pushDataWithId = {...pushData, announceId: newAnnounceRef.key}
     set(newAnnounceRef, pushDataWithId)
@@ -20,10 +19,9 @@ export function postAnnouncement(announcementsRef: DatabaseReference, pushData: 
 
 /**
  * お知らせを削除します。権限の確認はここでは行いません。
- * @param announcementsRef 削除したいお知らせそのもののリファレンス。
+ * @param announcementRef 削除したいお知らせそのもののリファレンス。
  */
 export function deleteAnnouncement(announcementRef: DatabaseReference) {
-    // 現状はremoveを実行するだけですが、後ほど削除時の処理を拡張する可能性があるため関数分けをしています。
     remove(announcementRef);
 }
 
