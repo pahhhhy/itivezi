@@ -2,6 +2,8 @@
 import { ref,  watchEffect,watch } from 'vue'
 import {  updateProfile, type User } from 'firebase/auth'
 import { getDatabase, ref as fireRef,  onValue, update } from 'firebase/database'
+import {useRoadStationStore}from "../../../stores/roadStation"
+const roadStationUnitTempList = ref<string[]>(useRoadStationStore().roadStationTemp)
 interface Props {
   currentUser: User | null
   vegeAllData:any
@@ -68,6 +70,11 @@ function pushUpdate(element: string, bool: boolean) {
         for(let i:number=0;i<MyvegeData.value.length;i++){
           writeVege(MyvegeData.value[i][0],MyvegeData.value[i][1],MyvegeData.value[i][2],upName.value)
         }
+        for(let i:number=0;i<roadStationUnitTempList.value.length;i++){
+          for(let j:number=0;j<Myorderdata.value[roadStationUnitTempList.value[i]].length;j++){
+          writeOrder(roadStationUnitTempList.value[i],Myorderdata.value[roadStationUnitTempList.value[i]][j],upName.value)
+        }
+        }
       }
     }
   }
@@ -102,6 +109,16 @@ function pushUpdate(element: string, bool: boolean) {
       if (props.currentUser != null) writeUserdata(props.currentUser.uid, { PhoneNumber: upPhone.value })
     }
   }
+}
+function readOrderAllData(): Promise<any> {
+  return new Promise((resolve, reject) => {
+    const countRef = fireRef(getDatabase(), 'testOrders/')
+    onValue(countRef, (snapshot) => {
+      resolve(snapshot.val())
+    }, (error) => {
+      reject(error)
+    });
+  });
 }
 function writeUserdata(
   uid: string,
@@ -158,9 +175,40 @@ function extractFarmerInfo(data: any): [string, string, string][] {
 
     return result;
 }
+function extractOrderLocations(data: any, targetName: string|null): { [location: string]: string[] } {
+  const result: { [location: string]: string[] } = {};
+  if(targetName==null)return result
+  for (const location in data) {
+    result[location] = [];
+
+    for (const id in data[location]) {
+      const orders = data[location][id];
+
+      for (const orderDate in orders) {
+        const order = orders[orderDate];
+
+        if (order.orderName === targetName) {
+          result[location].push(orderDate);
+        }
+      }
+    }
+  }
+
+  return result;
+}
+const OrderAllData=ref<any>([])
 const MyvegeData=ref<[string, string, string][]>(extractFarmerInfo(props.vegeAllData))
+const Myorderdata=ref<any>()
+async function initData(){
+  OrderAllData.value=await readOrderAllData()
+  if(props.currentUser!=null){
+    Myorderdata.value=extractOrderLocations(OrderAllData.value,props.currentUser.displayName)
+  }
+  
+}
+initData()
 // vegeAllData を監視
-watch(() => props.vegeAllData, (newValue, oldValue) => {
+watch(() => props.vegeAllData, () => {
   MyvegeData.value=extractFarmerInfo(props.vegeAllData)
 });
 async function writeVege(
@@ -177,10 +225,26 @@ async function writeVege(
     })
   
 }
+async function writeOrder(
+  road:string,
+  day:string,
+  nweName:string
+  
+) {
+  const db = getDatabase()
+  if(props.currentUser!=null){
+    update(fireRef(db, 'testOrders/' +road+"/"+ props.currentUser.uid+"/"+ day), {
+      orderName: nweName,
+    })
+  }
+    
+  
+}
 </script>
 <template>
   <!-- {{ props.vegeAllData }} -->
-    {{MyvegeData}}
+    <!-- {{MyvegeData}} -->
+     {{ Myorderdata }}
   <button v-on:click="pushToggle()" class="toggle-button">
     <i class="bi bi-caret-down-fill" v-show="!isToggle"></i>
     <i class="bi bi-caret-up-fill" v-show="isToggle"></i>

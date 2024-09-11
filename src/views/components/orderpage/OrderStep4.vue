@@ -50,7 +50,8 @@ function writeVegeOrder(
   currentUser: User,
   date: Date | null,
   allTotalMoney: number,
-  roadStation:string
+  roadStation:string,
+  unique:string[]
 ) {
   const now = parseTimestamp(getJSTTimestamp())
   const currentTime =
@@ -72,7 +73,7 @@ function writeVegeOrder(
     email: currentUser.email,
     selectDate: date,
     totalMoney: allTotalMoney,
-    state:"未連絡"
+    state:"未連絡",
   })
     .then(() => {
       
@@ -84,6 +85,7 @@ function writeVegeOrder(
       price: money[i],
       unit: unitList[i],
       vegeName: vege[i],
+      unique:unique[i]
     })
       .then(() => {
         
@@ -101,7 +103,8 @@ function handleOrder() {
       currentUser.value,
       props.selectDate,
       props.allTotalMoney,
-      props.roadStation
+      props.roadStation,
+      props.selectMenUniqueList
     )
   } 
 }

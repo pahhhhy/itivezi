@@ -9,6 +9,7 @@ import OrderStep3 from './components/orderpage/OrderStep3.vue'
 import OrderStep4 from './components/orderpage/OrderStep4.vue'
 import OrderPopup from './components/orderpage/OrderPopup.vue'
 import SelectRoadStation from './components/SelectRoadStation.vue'
+import OrderHistory from './components/orderpage/OrderHistory.vue'
 //変数の定義
 const vegeAllData = ref<any>(null)
 const stepNum = ref<number>(0)
@@ -126,8 +127,11 @@ async function updateRoadStation(element: string) {
   <div class="title">
     <h1>注文画面</h1>
   </div>
+  
   <!-- {{ vegeAllData }} -->
   <!-- {{ vegeKeys }} -->
+  <OrderHistory>
+</OrderHistory>  
   <SelectRoadStation
       v-bind:-road-station="roadStation"
       v-on:on-step="onStep"

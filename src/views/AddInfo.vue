@@ -101,13 +101,28 @@ watch(userData, (): void => {
     phoneNumber.value = userData.value[currentUser.value.uid].phoneNumber
   }
 })
+const imagePreview = ref<string | null>(null)
+// 画像ファイル選択時の処理
+function onFileChange(event: Event) {
+  const input = event.target as HTMLInputElement;
+  const file = input.files ? input.files[0] : null;
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      imagePreview.value = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  }
+}
 </script>
 
 <template>
+  
   <div class="title">
     <h1>追加情報</h1>
-    <h2>{{ userName }}</h2>
-    <h2>{{ selectRole }}</h2>
+    <!-- <h2>{{ userName }}</h2>
+    <h2>{{ selectRole }}</h2> -->
+    
   </div>
   <div class="mb-3">
     <label for="exampleFormControlInput1" class="form-label">名前</label>
@@ -119,6 +134,20 @@ watch(userData, (): void => {
       v-model="userName"
     />
   </div>
+  <!-- <h3>アイコン画像</h3>
+    <div class="mb-3">
+      <label for="formFile" class="form-label">画像ファイルを選択してください</label>
+      <input 
+        class="form-control" 
+        type="file" 
+        id="formFile" 
+        @change="onFileChange" 
+        accept="image/*"
+      >
+    </div>
+    <div class="mb-3" v-if="imagePreview">
+      <img :src="imagePreview" alt="画像プレビュー" class="img-fluid">
+    </div> -->
   <h3>性別</h3>
   <div class="form-check">
     <input
