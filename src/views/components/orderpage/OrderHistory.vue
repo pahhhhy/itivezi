@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref,  onMounted } from 'vue'
-import {getDatabase, onValue, ref as fireRef} from 'firebase/database'
+import {getDatabase, onValue, ref as fireRef,set} from 'firebase/database'
 import { getAuth, onAuthStateChanged, type User } from 'firebase/auth'
 import {useRoadStationStore}from "../../../stores/roadStation"
 const roadStationUnitTempList = ref<string[]>(useRoadStationStore().roadStationTemp)
@@ -21,6 +21,9 @@ const isActive=ref<boolean>(false)
 const OrderAllData=ref<any>([])
 const vegeAllData=ref<any>([])
 const dayisTureList=ref<any>([])
+const IsPopup=ref<boolean>(false)
+const today = new Date().toISOString().split('T')[0]
+const selectDate = ref<Date>()
 function onPushHistory(){
     isActive.value=!isActive.value
 }
@@ -95,16 +98,13 @@ function compareData(orders: any, veges: any) {
     if (currentUser.value) {
       const stationOrders = orders[station][currentUser.value.uid];
       const stationVeges = veges[station] || {};
-
       // 日付ごとにループ
       const dateResults: any = {};
       Object.keys(stationOrders).forEach(date => {
         const orderItems = stationOrders[date];
         let isAllAvailable = true; // 初期値をTrueに設定
-        
         // 数字の部分だけを抽出してループする
         const numericKeys = Object.keys(orderItems).filter(key => /^\d+$/.test(key));
-
         numericKeys.forEach(itemKey => {
           const item = orderItems[itemKey];
           // 野菜データの中で該当する野菜を検索
@@ -153,6 +153,70 @@ function reversedOrderAllData(data: any) {
 
   return reversedData;
 }
+const selectedVegeData=ref<any>([])
+const selectedRoadStation=ref<string>("")
+const dayError=ref<boolean>(false)
+function onPushOrder(vege:any,roadstation:string){
+  IsPopup.value=true
+  selectedVegeData.value=vege
+  selectedRoadStation.value=roadstation
+}
+function onPushSend(){
+  if(selectDate.value!=undefined)
+  selectedVegeData.value.selectDate=selectDate.value
+  else{
+    dayError.value=true
+  }
+  if(currentUser.value){writeVegeOrder(selectedVegeData.value,currentUser.value,selectedRoadStation.value)}
+  
+}
+function writeVegeOrder(
+  OrderData: any,
+  currentUser: User,
+  roadStation:string,
+) {
+  const now = parseTimestamp(getJSTTimestamp())
+  const currentTime =
+    now.year + '-' + now.month + '-' + now.day + '-' + now.hours + '-' + now.day + '-' + now.seconds
+  const db = getDatabase()
+  set(fireRef(db, 'testOrders/' + roadStation+"/"+currentUser.uid + '/' + currentTime), OrderData)
+    .then(() => {
+      IsPopup.value=false
+      initData()
+      selectDate.value=undefined
+    })
+
+}
+//タイムスタンプ文字列を変換
+function parseTimestamp(timestamp: string) {
+  const datePart = timestamp.split('T')[0]
+  const timePart = timestamp.split('T')[1].replace('Z', '')
+
+  const [year, month, day] = datePart.split('-').map(Number)
+  const [hours, minutes, seconds, milliseconds] = timePart.split('-').map(Number)
+
+  return {
+    year,
+    month,
+    day,
+    hours,
+    minutes,
+    seconds,
+    milliseconds
+  }
+}
+function getJSTTimestamp() {
+  const date = new Date()
+
+  // JSTのオフセットはUTC+9時間
+  const jstOffset = 9 * 60 * 60 * 1000
+
+  // JSTに変換
+  const jstDate = new Date(date.getTime() + jstOffset)
+
+  // ISO 8601フォーマットに変換し、無効な文字を置き換える
+  return jstDate.toISOString().replace(/[:.]/g, '-')
+}
 </script>
 <template>
   <!-- {{OrderAllData}} -->
@@ -163,9 +227,10 @@ function reversedOrderAllData(data: any) {
     <caption>{{roadStation}}の過去の注文データ</caption>
     <thead>
       <tr>
-        <th scope="col">日付</th>
+        <th scope="col">日時</th>
         <th scope="col" colspan="4">野菜データ</th>
         <th scope="col">合計金額</th>
+        <th scope="col">希望日</th>
         <th scope="col">再度注文</th>
       </tr>
     </thead>
@@ -192,18 +257,67 @@ function reversedOrderAllData(data: any) {
             </tr>
           </table>
         </td>
-        <!-- 合計金額は rowspanを使って結合 -->
         <td >{{ Data.totalMoney }}円</td>
+        <td >{{ Data.selectDate}}</td>
         <td>
-          <button v-if="dayisTureList[roadStation][day]">再度注文</button>
+          <button v-if="dayisTureList[roadStation][day]" v-on:click="onPushOrder(Data,roadStation)">再度注文</button>
           <h3 v-if="!dayisTureList[roadStation][day]">販売停止</h3>
         </td>
       </tr>
     </tbody>
   </table>
 </article>
+<article v-if="IsPopup" class="popup">
+  <!-- {{ selectedVegeData }} -->
+  <table >
+    <thead>
+      <tr>
+          <td>野菜</td>
+          <td>単位</td>
+          <td>個数</td>
+          <td>値段</td>
+          <td>農家名</td>
+      </tr>
+    </thead>
+    <tbody v-if="currentUser!=null">
+      <tr v-for="(Data, index) in filterVegeData(selectedVegeData)" :key="index">
+        <!-- {{ Data }} -->
+        <td>{{ Data.vegeName}}</td>
+        <td>{{ Data.unit}}</td>
+        <td>{{ Data.amount}}</td>
+        <td>{{ Data.price}}</td>
+        <td>{{ Data.farmerName}}</td>
+        <!-- 野菜データ部分のみをループ -->
+      </tr>
+    </tbody>
+  </table>
+  <h3>希望日を選択してください</h3>
+  <h1 style="padding-top: 30px">日付を指定してください</h1>
+    <VueDatePicker
+      v-model="selectDate"
+      format="yyyy/MM/dd"
+      locale="ja"
+      model-type="yyyy-MM-dd"
+      week-start="0"
+      :enable-time-picker="false"
+      :min-date="today"
+      auto-apply
+      no-today
+    />
+    <h3 style="color: red;" v-if="dayError">希望日を入力してください</h3>
+    <button v-on:click="onPushSend()">注文する</button>
+</article>
 </template>
 <style>
+.popup{
+  position: absolute;
+  z-index: 1;
+  border: 1px solid gray;
+  border-radius: 20px;
+  top: 20%;
+  left: 20%;
+  padding: 20px;
+}
 .history-button{
     background: white;
 }
