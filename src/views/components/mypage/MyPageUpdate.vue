@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { ref,  watchEffect,watch } from 'vue'
-import {  updateProfile, type User } from 'firebase/auth'
+import {  updateProfile, type User,getAuth } from 'firebase/auth'
 import { getDatabase, ref as fireRef,  onValue, update } from 'firebase/database'
 import {useRoadStationStore}from "../../../stores/roadStation"
+import {useIconStore}from "../../../stores/icon"
+const iconStore = (useIconStore())
 const roadStationUnitTempList = ref<string[]>(useRoadStationStore().roadStationTemp)
 interface Props {
   currentUser: User | null
@@ -17,7 +19,8 @@ enum Mode{
   name="名前",
   gender="性別",
   place="住所",
-  role="役職"
+  role="役職",
+  icon="アイコン"
 }
 const props = defineProps<Props>()
 const isToggle = ref<boolean>(false)
@@ -34,6 +37,26 @@ const upPlace = ref<string>('')
 const upRole = ref<string>(myRole.value)
 const upgender=ref<string>(myGender.value)
 const upPhone=ref<number>(myNumber.value)
+const auth = getAuth();
+// 選択された画像とプロフィール画像を格納する変数
+const selectedImage = ref<File | null>(null);
+const userProfileImage = ref(auth.currentUser?.photoURL || '');
+// 画像選択時の処理
+const onFileChange = (e:Event) => {
+  const target = e.target as HTMLInputElement;  // HTMLInputElementにキャスト
+  if (target && target.files) {
+    selectedImage.value = target.files[0];  // 'files'にアクセス
+    console.log(selectedImage.value)
+    userProfileImage.value = URL.createObjectURL(selectedImage.value);
+  }
+};
+// Firebase Storageに画像をアップロードし、Firebase Authのプロフィールを更新
+const uploadImage = async () => {
+  if (props.currentUser) {
+    await iconStore.uploadImage(selectedImage.value, props.currentUser);
+    pushUpdate(Mode.icon, false); 
+  } 
+};
 watchEffect(() => {
   // currentUserがnullでない場合のみデータを読み込む
   if (props.currentUser) {
@@ -56,7 +79,7 @@ function updateDisName(user: User, name: string) {
       
     })
 }
-const elementsBool = ref<boolean[]>(new Array(6).fill(false))
+const elementsBool = ref<boolean[]>(new Array(7).fill(false))
 function pushUpdate(element: string, bool: boolean) {
   if (element == Mode.name) {
     elementsBool.value[0] = bool
@@ -109,6 +132,9 @@ function pushUpdate(element: string, bool: boolean) {
       if (props.currentUser != null) writeUserdata(props.currentUser.uid, { PhoneNumber: upPhone.value })
     }
   }
+  if (element == Mode.icon) {
+    elementsBool.value[6] = bool
+  }
 }
 function readOrderAllData(): Promise<any> {
   return new Promise((resolve, reject) => {
@@ -152,7 +178,6 @@ function extractFarmerInfo(data: any): [string, string, string][] {
     const result: [string, string, string][] = [];
 
     if (!data || typeof data !== 'object') {
-      console.log("asdwasdwasdw")
         return result;
     }
 
@@ -237,14 +262,17 @@ async function writeOrder(
       orderName: nweName,
     })
   }
-    
-  
+}
+async function resetIcon(){
+  if(props.currentUser)
+  await iconStore.resetPhotoURL(props.currentUser)
+  userProfileImage.value=""
 }
 </script>
 <template>
   <!-- {{ props.vegeAllData }} -->
     <!-- {{MyvegeData}} -->
-     {{ Myorderdata }}
+     <!-- {{ Myorderdata }} -->
   <button v-on:click="pushToggle()" class="toggle-button">
     <i class="bi bi-caret-down-fill" v-show="!isToggle"></i>
     <i class="bi bi-caret-up-fill" v-show="isToggle"></i>
@@ -265,7 +293,19 @@ async function writeOrder(
       />
       <button v-on:click="pushUpdate(Mode.name, false)" class="btn btn-primary">更新する</button>
     </div>
-    
+    <div v-show="!elementsBool[6]">
+      <h3>アイコン画像</h3>
+      <img :src="userProfileImage" class="aicon-image" alt="プロフィール画像" v-if="userProfileImage" />
+      <div v-if="!userProfileImage">存在しない</div>
+      <button v-on:click="pushUpdate(Mode.icon, true)" class="btn btn-primary">更新する</button>
+    </div>
+    <div v-show="elementsBool[6]">
+      <h3>プロフィール画像をアップロード</h3>
+      <input type="file" @change="onFileChange" />
+      <img :src="userProfileImage" class="aicon-image" alt="プロフィール画像" v-if="userProfileImage" />
+      <button @click="uploadImage">アップロード</button>
+      <button @click="resetIcon">Reset</button>
+    </div>
     
     <div class="UP_elements" v-show="elementsBool[4]">
       <div class="form-check">
@@ -371,7 +411,7 @@ async function writeOrder(
 }
 .UP_elements {
   display: flex;
-  width: 30%;
+  width: 40%;
   height: 50px;
 }
 </style>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted,watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import {
   getAuth,
@@ -9,6 +9,9 @@ import {
 } from 'firebase/auth'
 import { getDatabase, ref as fireRef, onValue } from 'firebase/database'
 import router from '@/router'
+import {useIconStore}from "../stores/icon"
+const iconStore = (useIconStore())
+const iconURL=ref<string|null|undefined>(iconStore.iconURL)
 const myRole = ref<string>("")
 const isBurger = ref(false)
 const currentUser = ref<User | null>(null)
@@ -20,14 +23,17 @@ function logout() {
   signOut(auth)
     .then(() => {
       // Sign-out successful.
+      iconStore.deleteURL()
       router.push("/")
     })
 }
 onMounted(async () => {
   const auth = getAuth()
+  
   onAuthStateChanged(auth, async (user) => {
     if (user != null && user.emailVerified) {
       currentUser.value = user
+      iconStore.initURL(user)
       try {
         const userData = await readUserData(currentUser.value!.uid)
         myRole.value = userData.role
@@ -55,14 +61,25 @@ async function readUserData(element: string): Promise<any> {
     )
   })
 }
+watch(
+  () => iconStore.iconURL,
+  (newPhotoURL, oldPhotoURL) => {
+    if (newPhotoURL !== oldPhotoURL) {
+      // 変数userProfileImageを更新
+      iconURL.value=iconStore.iconURL
+    }
+  }
+);
 </script>
 
 <template>
   <header>
     <img src="..\\assets\\itivezilogo.png" alt="" />
-
+    
     <nav>
+      <div v-if="iconURL != null&&iconURL != '' "><img v-bind:src="iconURL" alt="" class="aicon-image"></div>
       <p v-if="currentUser != null">{{ currentUser.displayName }}様</p>
+      
       <i v-if="!isBurger" v-on:click="onClickBurger" class="bi bi-justify burger"></i>
       <i v-if="isBurger" v-on:click="onClickBurger" class="bi bi-x-lg burger"></i>
     </nav>
@@ -133,6 +150,11 @@ nav {
   align-items: center;
   justify-content: center;
   padding: 10px;
+}
+.aicon-image{
+  width: 50px;
+  height: 50px;
+  border-radius: 25px;
 }
 .burger {
   font-size: 40px;
