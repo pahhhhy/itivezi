@@ -304,7 +304,7 @@ async function resetIcon(){
       <input type="file" @change="onFileChange" />
       <img :src="userProfileImage" class="aicon-image" alt="プロフィール画像" v-if="userProfileImage" />
       <button @click="uploadImage">アップロード</button>
-      <button @click="resetIcon">Reset</button>
+      <!-- <button @click="resetIcon">Reset</button> -->
     </div>
     
     <div class="UP_elements" v-show="elementsBool[4]">
