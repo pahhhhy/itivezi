@@ -73,7 +73,7 @@ async function checkMyData() {
       
     }
   }
-  
+  console.log("isOk:"+isOk)
   return isOk
 }
 // サインイン処理
@@ -97,8 +97,7 @@ async function signin(email: string, password: string) {
             router.push('/')
           }
         } else {
-          
-          router.push('/')
+          router.push('/add-info')
         }
       } else {
         // メールアドレスが未認証の場合の処理

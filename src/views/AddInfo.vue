@@ -15,7 +15,6 @@ const gender = ref<string>('')
 const phoneNumber = ref<number>()
 const affiliation =ref<string[]>([])
 const error=ref<boolean>(false)
-const storage = getStorage();
 const auth = getAuth();
 // 選択された画像とプロフィール画像を格納する変数
 const selectedImage = ref<any>(null);
