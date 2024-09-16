@@ -100,6 +100,7 @@ function compareData(orders: any, veges: any) {
       const stationVeges = veges[station] || {};
       // 日付ごとにループ
       const dateResults: any = {};
+      if(stationOrders==undefined) return results
       Object.keys(stationOrders).forEach(date => {
         const orderItems = stationOrders[date];
         let isAllAvailable = true; // 初期値をTrueに設定
@@ -224,7 +225,9 @@ function getJSTTimestamp() {
 <button v-on:click="onPushHistory" v-bind:class="{active:isActive}" class="history-button">過去の注文</button>
 <article v-if="isActive">
   <table v-for="(roadStation,index) in roadStationUnitTempList" :key="index">
-    <caption>{{roadStation}}の過去の注文データ</caption>
+    <h3 v-if="currentUser!=null &&OrderAllData[roadStation][currentUser.uid]==undefined">{{roadStation}}で注文していません</h3>
+    <div v-if="currentUser!=null &&OrderAllData[roadStation][currentUser.uid]!=undefined">
+      <caption>{{roadStation}}の過去の注文データ</caption>
     <thead>
       <tr>
         <th scope="col">日時</th>
@@ -234,7 +237,8 @@ function getJSTTimestamp() {
         <th scope="col">再度注文</th>
       </tr>
     </thead>
-    <tbody v-if="currentUser!=null">
+    <tbody >
+    
       <tr v-for="(Data, day,Index) in OrderAllData[roadStation][currentUser.uid]" :key="Index">
         <!-- {{ Data }} -->
         <td>{{ day}}</td>
@@ -265,6 +269,8 @@ function getJSTTimestamp() {
         </td>
       </tr>
     </tbody>
+    </div>
+    
   </table>
 </article>
 <article v-if="IsPopup" class="popup">
