@@ -12,6 +12,7 @@ import {
 import { getDatabase, ref as fireRef, onValue} from 'firebase/database'
 import { ref, onMounted } from 'vue'
 import LoginForm from './components/LoginForm.vue'
+import { getStorage, ref as storageRef, getMetadata } from 'firebase/storage';
 // ログインしているユーザーデータ
 const currentUser = ref<User | null>()
 const email = ref<string>('')
@@ -28,9 +29,11 @@ function readUserData(element: string) {
   })
   return data
 }
-function checkMyData() {
+async function checkMyData() {
   let isOk = true
+ 
   if (currentUser.value != null) {
+    console.log(currentUser.value.photoURL)
     if (userData.value[currentUser.value.uid] == null) {
       isOk = false
     } else {
@@ -54,18 +57,32 @@ function checkMyData() {
       ) {
         isOk = false
       }
+      if (
+        currentUser.value.photoURL==null||
+        currentUser.value.photoURL==undefined||
+        currentUser.value.photoURL==''
+      ) {
+        isOk = false
+      }
+      if(currentUser.value.photoURL){
+        if(await checkImageExistsInFirebase( currentUser.value.photoURL)==false){
+        isOk = false
+        console.log(isOk)
+      }
+      }
+      
     }
   }
-  
+  console.log("isOk:"+isOk)
   return isOk
 }
 // サインイン処理
-function signin(email: string, password: string) {
+async function signin(email: string, password: string) {
   // メールアドレスとパスワードが入力されているかを確認
   if (email == '' || email == '') return
   const auth = getAuth()
   signInWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
+    .then(async (userCredential) => {
       // 成功時処理
       const user = userCredential.user
       if (user.emailVerified) {
@@ -73,14 +90,14 @@ function signin(email: string, password: string) {
         
         errorMes.value = ''
         if (currentUser.value != null) {
-          if (!checkMyData()) {
+          if (!await checkMyData()) {
+
             router.push('/add-info')
           } else {
             router.push('/')
           }
         } else {
-          
-          router.push('/')
+          router.push('/add-info')
         }
       } else {
         // メールアドレスが未認証の場合の処理
@@ -110,7 +127,21 @@ const onInput = (inputEmail: string, inputPassword: string): void => {
     password.value = inputPassword
   }
 }
+async function checkImageExistsInFirebase(path: string): Promise<boolean> {
+  const storage = getStorage();
+  const imageRef = storageRef(storage, path);
 
+  try {
+    await getMetadata(imageRef);
+    return true;  // メタデータが取得できた場合は存在する
+  } catch (error) {
+    if ((error as any).code === 'storage/object-not-found') {
+      return false;  // 画像が見つからない場合
+    }
+    console.error('画像存在確認エラー:', error);
+    return false;
+  }
+}
 onMounted(() => {
   const auth = getAuth()
   // ログインしているユーザーを取得する

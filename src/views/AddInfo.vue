@@ -3,7 +3,9 @@ import { ref, onMounted, watch } from 'vue'
 import { getDatabase, ref as fireRef , onValue, set } from 'firebase/database'
 import { getAuth, onAuthStateChanged, updateProfile, type User } from 'firebase/auth'
 import router from '@/router'
-
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
+import {useIconStore}from "../stores/icon"
+const iconStore = (useIconStore())
 const currentUser = ref<User | null>(null)
 const userData = ref<any>(readUserData(''))
 const userName = ref<string>('')
@@ -13,6 +15,25 @@ const gender = ref<string>('')
 const phoneNumber = ref<number>()
 const affiliation =ref<string[]>([])
 const error=ref<boolean>(false)
+const auth = getAuth();
+// 選択された画像とプロフィール画像を格納する変数
+const selectedImage = ref<any>(null);
+const userProfileImage = ref(auth.currentUser?.photoURL || '');
+// 画像選択時の処理
+const onFileChange = (e:Event) => {
+  const target = e.target as HTMLInputElement;  // HTMLInputElementにキャスト
+  if (target && target.files) {
+    selectedImage.value = target.files[0];  // 'files'にアクセス
+    console.log(selectedImage.value)
+    userProfileImage.value = URL.createObjectURL(selectedImage.value);
+  }
+};
+// Firebase Storageに画像をアップロードし、Firebase Authのプロフィールを更新
+const uploadImage = async () => {
+  if (currentUser.value) {
+    await iconStore.uploadImage(selectedImage.value, currentUser.value);
+  } 
+};
 // 読み込むデータの指定
 function readUserData(element: string) {
   const countRef = fireRef(getDatabase(), 'testUser/' + element)
@@ -58,7 +79,8 @@ function updateInfo() {
     phoneNumber.value != undefined &&
     gender.value != ''&&
     userName.value!=""&&
-    affiliation.value.length !=0
+    affiliation.value.length !=0&&
+    currentUser.value?.photoURL!=null
   ) {
     if (currentUser.value != null) {
       updateDisName(currentUser.value, userName.value)
@@ -101,13 +123,15 @@ watch(userData, (): void => {
     phoneNumber.value = userData.value[currentUser.value.uid].phoneNumber
   }
 })
+
 </script>
 
 <template>
   <div class="title">
     <h1>追加情報</h1>
-    <h2>{{ userName }}</h2>
-    <h2>{{ selectRole }}</h2>
+    <!-- <h2>{{ userName }}</h2>
+    <h2>{{ selectRole }}</h2> -->
+    
   </div>
   <div class="mb-3">
     <label for="exampleFormControlInput1" class="form-label">名前</label>
@@ -118,6 +142,12 @@ watch(userData, (): void => {
       placeholder="name"
       v-model="userName"
     />
+  </div>
+  <div>
+    <h3>プロフィール画像をアップロード</h3>
+    <input type="file" @change="onFileChange" />
+    <img :src="userProfileImage" class="aicon-image" alt="プロフィール画像" v-if="userProfileImage" />
+    <button @click="uploadImage">アップロード</button>
   </div>
   <h3>性別</h3>
   <div class="form-check">
@@ -225,5 +255,10 @@ watch(userData, (): void => {
 <style>
 .title {
   text-align: center;
+}
+.aicon-image{
+  width: 100px;
+  height: 100px;
+  border-radius: 50px;
 }
 </style>

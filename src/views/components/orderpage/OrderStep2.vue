@@ -47,7 +47,7 @@ function onStep(next: boolean) {
 <template>
   <section>
     <h1>Step2</h1>
-    
+    {{ selectMenUniqueList }}
     <article v-for="(vegeKeyNumber, elementIndex) in props.selectVege" :key="vegeKeyNumber">
       <h1>{{ props.vegeKeys[vegeKeyNumber] }}</h1>
       <select
