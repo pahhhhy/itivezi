@@ -73,7 +73,6 @@ async function checkMyData() {
       
     }
   }
-  console.log("isOk:"+isOk)
   return isOk
 }
 // サインイン処理

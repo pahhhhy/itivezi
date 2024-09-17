@@ -3,7 +3,6 @@ import { ref, onMounted, watch } from 'vue'
 import { getDatabase, ref as fireRef , onValue, set } from 'firebase/database'
 import { getAuth, onAuthStateChanged, updateProfile, type User } from 'firebase/auth'
 import router from '@/router'
-import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import {useIconStore}from "../stores/icon"
 const iconStore = (useIconStore())
 const currentUser = ref<User | null>(null)
