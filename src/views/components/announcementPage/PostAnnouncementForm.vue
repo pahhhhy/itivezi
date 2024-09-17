@@ -3,7 +3,7 @@ import {ref} from "vue";
 import {getDatabase, ref as fireRef, serverTimestamp} from "firebase/database";
 import {useAuthData} from "@/utils/auth";
 import {postAnnouncement} from "@/utils/announcement/announcements";
-import {useAnnouncementFiles} from "@/utils/announcement/announcementFilesHook";
+import {useAnnouncementFiles} from "@/utils/announcement/useAnnouncementFilesHook";
 
 
 const {files, content, imgAdd, deleteImgFromStorage, splitFiles} = useAnnouncementFiles()

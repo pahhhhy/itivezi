@@ -7,9 +7,9 @@ import {formatServerTimestamp} from "@/utils/database";
 import {useAuthData} from "@/utils/auth";
 import {deleteAnnouncement, updateAnnouncement} from "@/utils/announcement/announcements";
 import router from "@/router";
-import {useAnnouncementFiles} from "@/utils/announcement/announcementFilesHook";
+import {useAnnouncementFiles} from "@/utils/announcement/useAnnouncementFilesHook";
 import {storageURLPattern} from "@/types/files";
-import {useAnnouncementCommentEditor} from "@/utils/announcement/announcementCommentEditorHook";
+import {useAnnouncementCommentEditor} from "@/utils/announcement/useAnnouncementCommentEditorHook";
 
 const route = useRoute()
 // 実際に表示するお知らせ内容。編集する場合はこちらが変更される

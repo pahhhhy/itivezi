@@ -1,15 +1,4 @@
-import {
-    child,
-    type DataSnapshot,
-    getDatabase,
-    onValue,
-    push,
-    ref as fireRef,
-    set,
-    type Unsubscribe,
-    update
-} from 'firebase/database';
-import {onBeforeMount, type Ref, watch} from "vue";
+import {child, get, getDatabase, push, ref as fireRef, set, update} from 'firebase/database';
 import type {User} from "firebase/auth";
 
 export const useChatRoomHook = (user: User) => {
@@ -26,6 +15,7 @@ export const useChatRoomHook = (user: User) => {
         const roomId = newRoomRef.key;
         if (!roomId) throw new Error('新規roomの作成に失敗しました');
         const roomData = {
+            roomId: roomId,
             roomName: roomName,
             users: {
                 [user.uid]: true
@@ -80,16 +70,17 @@ export const useChatRoomHook = (user: User) => {
         });
     }
 
-    const joinedRoomsObserver = (callback: (_: DataSnapshot) => void): Unsubscribe | null => {
+    // ログイン中のユーザーが参加しているroom一覧を一度だけ取得してコールバックを呼ぶ
+    const getJoinedRoomsOnce = () => {
         const joinedRoomsRef = child(usersRef, user.uid);
-        console.log("joinedRoomsRef: ", joinedRoomsRef);
-        return onValue(joinedRoomsRef, (snapshot) => {
-            callback(snapshot);
-            console.log("rooms: ", snapshot.val());
-        });
+        return get(joinedRoomsRef).then((snapshot) => { // /usersでログイン中のユーザーが参加しているroom一覧を取得
+            return get(roomsRef, snapshot.key).then((roomSnapshot) => { // 取得したroom一覧からそれぞれのroomの情報を取得
+                return roomSnapshot.val();
+            });
+        })
     };
 
     return {
-        createDMRoom, createChatRoom, addUserToChatRoom, leaveChatRoom, deleteChatRoom, joinedRoomsObserver
+        createDMRoom, createChatRoom, addUserToChatRoom, leaveChatRoom, deleteChatRoom, getJoinedRoomsOnce
     }
 }
