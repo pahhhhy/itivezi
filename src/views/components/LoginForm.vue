@@ -15,7 +15,7 @@ function emitPassword(event: Event) {
 </script>
 <template>
   <div class="mb-3">
-    <label for="exampleFormControlInput1" class="form-label">Email address</label>
+    <label for="exampleFormControlInput1" class="form-label">メールアドレス</label>
     <input
       type="email"
       class="form-control"
@@ -24,7 +24,7 @@ function emitPassword(event: Event) {
       v-on:input="emitEmail"
     />
   </div>
-  <label for="inputPassword5" class="form-label">Password</label>
+  <label for="inputPassword5" class="form-label">パスワード</label>
   <input
     type="password"
     id="inputPassword5"
@@ -32,8 +32,10 @@ function emitPassword(event: Event) {
     aria-labelledby="passwordHelpBlock"
     v-on:input="emitPassword"
   />
-  <div id="passwordHelpBlock" class="form-text">
-    Your password must be 8-20 characters long, contain letters and numbers, and must not contain
-    spaces, special characters, or emoji.
-  </div>
+  
 </template>
+<style>
+label{
+  color: #434343;
+}
+</style>

@@ -26,17 +26,20 @@ function OnBurger(bool:boolean){
 * {
   width: 100%;
   height: 100%;
+  
+}
+body{
+  overflow-x:hidden;
 }
 .background{
   background-color:#f8f8f8 ;
-  width: 100vw;
+  width: 100%;
   height: 100vh;
   z-index: -1;
 }
 .black_back{
-  width: 100vw;
+  width: 100%;
   height: 100vh;
   z-index: -1;
-  overflow:hidden;
 }
 </style>

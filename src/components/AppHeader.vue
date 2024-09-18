@@ -131,7 +131,7 @@ watch(
       <li v-if="currentUser == null">
         <button v-on:click="onClickBurger" class="sidebar_element">
           <i class="bi bi-box-arrow-in-right"></i>
-          <RouterLink v-bind:to="{ name: 'login' }" class="link">ログイン/新規登録</RouterLink>
+          <RouterLink v-bind:to="{ name: 'login' }" class="link">ログイン<br>新規登録</RouterLink>
         </button>
       </li>
       <li v-if="currentUser != null && myRole == '管理者'">
@@ -166,6 +166,7 @@ header {
   border-bottom: 1px solid rgb(223, 223, 223);
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.26);
   padding: 0 3%;
+  overflow-x: hidden;
 }
 .header-icon{
   width: 50%;

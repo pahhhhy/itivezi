@@ -27,10 +27,16 @@ onMounted(() => {
     <h1>TOP</h1>
   </div>
   <article v-if="currentUser == null">
-    <h2>ログインしてください。</h2>
-    <p>
-      <RouterLink v-bind:to="{ name: 'login' }">新規登録/ログイン</RouterLink>
-    </p>
+
+    <div class="login-form">
+      <h3>ログイン、会員登録することでこのアプリを使うことができます。</h3>
+      <h2>ログインしてください。</h2>
+      <p class="btn btn-success">
+        <RouterLink v-bind:to="{ name: 'login' }">新規登録/ログイン</RouterLink>
+      </p>
+    </div>
+    
+    
   </article>
   <article v-if="currentUser != null">
     <h1>ようこそ{{ currentUser.displayName }}様</h1>
@@ -39,5 +45,14 @@ onMounted(() => {
 <style>
 .title {
   text-align: center;
+}
+.login-form a{
+  color: white;
+  text-decoration: none;
+}
+.login-form{
+  display: flex;
+  align-items: center;
+  flex-direction:column;
 }
 </style>

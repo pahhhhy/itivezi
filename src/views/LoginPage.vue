@@ -13,6 +13,7 @@ import { getDatabase, ref as fireRef, onValue} from 'firebase/database'
 import { ref, onMounted } from 'vue'
 import LoginForm from './components/LoginForm.vue'
 import { getStorage, ref as storageRef, getMetadata } from 'firebase/storage';
+import '../assets/main.css'
 // ログインしているユーザーデータ
 const currentUser = ref<User | null>()
 const email = ref<string>('')
@@ -93,6 +94,9 @@ async function signin(email: string, password: string) {
 
             router.push('/add-info')
           } else {
+            window.scrollTo({
+              top: 0,       // 一番上に移動
+            });
             router.push('/')
           }
         } else {
@@ -156,21 +160,72 @@ onMounted(() => {
 
 </script>
 <template>
-  <div class="title">
-    <h1>ログイン</h1>
-    <h2></h2>
-  </div>
-  <login-form v-on:OnInput="onInput"></login-form>
-  <h1>{{ email }}</h1>
-  <h1 v-if="currentUser != null">{{ currentUser.displayName }}様</h1>
-  <h2 v-if="errorMes != ''" style="color: red">{{ errorMes }}</h2>
-  <button type="button" class="btn btn-primary" @click="signin(email, password)">ログイン</button>
-  <p>初めての方は</p>
-  <h1><RouterLink v-bind:to="{ name: 'signup' }" class="link">新規会員登録</RouterLink></h1>
+  <article class="login_page">
+    <div class="title">
+      <h1>ログイン</h1>
+    </div>
+    <article class="form_card">
+      <login-form v-on:OnInput="onInput"></login-form>
+      <h1 v-if="currentUser != null">{{ currentUser.displayName }}様</h1>
+      <h2 v-if="errorMes != ''" style="color: red">{{ errorMes }}</h2>
+      <div class="form_link_group">
+        <button type="button" class="btn btn-success" @click="signin(email, password)">ログイン</button>
+        <p><RouterLink v-bind:to="{ name: 'signup' }" class="link">アカウントの新規登録</RouterLink></p>
+      </div>
+      
+    </article>
+  </article>
+  
+  
 </template>
 <style scoped>
+
+.login_page{
+  width: 536px;
+  margin: auto;
+}
+
 .link {
+  margin-top: 30px;
   text-decoration: none;
-  color: black;
+  color: var(--other-color);
+}
+
+.form_card{
+  background-color: white;
+  border-radius: 20px;
+  margin: auto;
+  padding: 48px;
+  box-shadow: rgba(0, 0, 0, 0.12) 0px 2px 10px;
+}
+.form_link_group{
+  margin-top: 50px;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+}
+.form_link_group >p{
+  font-size: 18px;
+  font-weight: 500;
+    transition: color 250ms cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+.form_link_group >button{
+  width: 50%;
+  padding: 0.625rem;
+  margin-bottom: 1.5rem;
+  height: 48px;
+  line-height: 1.25;
+  font-weight: 500;
+  max-width: 240px;
+  box-shadow: rgba(60, 69, 50, 0.2) 0px 6px 20px;
+  transition-property: background-color, color, box-shadow;
+    transition-duration: 150ms;
+    transition-timing-function: ease-in-out;
+}
+.title{
+  display: flex;
+  align-items: center;
+  padding: 30px 0;
 }
 </style>

@@ -9,8 +9,9 @@ import {
   type User
 } from 'firebase/auth'
 import { ref, onMounted } from 'vue'
-
+import '../assets/main.css'
 import email_form from './components/SignupForm.vue'
+import router from '../router'
 // ログインしているユーザーデータ
 const currentUser = ref<User | null>(null)
 const email = ref<string>('')
@@ -109,44 +110,98 @@ onMounted(() => {
     }
   })
 })
+function OnPushBack(){
+  router.push('/login')
+  window.scrollTo({
+    top: 0,       // 一番上に移動
+  });
+}
 </script>
 
 <template>
-  <div class="title">
-    <h1>新規会員登録</h1>
-  </div>
-  <email_form v-on:OnInput="onInput"></email_form>
-  <h1>{{ email }}</h1>
-  <h1 v-if="currentUser != null">{{ currentUser.displayName }}様</h1>
-  <h2 v-if="errorMes != ''" style="color: red">{{ errorMes }}</h2>
-  <button type="button" class="btn btn-primary" @click="createAccount(email, password, name)">
-    登録する
-  </button>
-  <section class="popup" v-show="isPopup">
-    <h1>
-      メールアドレスの確認メールをおくりました。<br />メールを確認してください<br />認証しないとログインできません
-    </h1>
-    <button><RouterLink v-bind:to="{ name: 'login' }">戻る</RouterLink></button>
-  </section>
+  <article class="signup_page">
+    <div class="title">
+      <h1>アカウントの新規作成</h1>
+    </div>
+    <article class="form_card">
+      <email_form v-on:OnInput="onInput"></email_form>
+      <h1 v-if="currentUser != null">{{ currentUser.displayName }}様</h1>
+      <h2 v-if="errorMes != ''" style="color: red">{{ errorMes }}</h2>
+      <div class="d-flex justify-content-center my-3 ">
+        <button type="button" class="btn btn-success form_button" @click="createAccount(email, password, name)">
+          登録する
+        </button>
+      </div>
+      
+      
+    </article>
+    <section class="popup_signup" v-show="!isPopup">
+      <h2>
+        メールアドレスの確認メールをおくりました。<br />メールを確認してください<br />認証しないとログインできません
+      </h2>
+      <button class="btn btn-success form_button " v-on:click="OnPushBack"> 戻る</button>
+    </section>
+  </article>
+  
 </template>
-<style>
+<style scoped>
+:root {
+  --main-color: #8CD790;
+  --sub-color:#C5E99B;
+  --text-color:#434343;
+  --acsent-color:#C5E99B;
+  --background-color:#F1F1F1;
+  --other-color:#008037;
+}
 body {
   position: relative;
 }
-.title {
-  text-align: center;
+
+.signup_page{
+  width: 536px!important;
+  margin: auto;
 }
-.popup {
+.form_card{
+  background-color: white;
+  border-radius: 20px;
+  margin: auto;
+  padding: 48px;
+  box-shadow: rgba(0, 0, 0, 0.12) 0px 2px 10px;
+}
+.title {
+  display: flex;
+  align-items: center;
+  padding: 30px 0;
+  color: var(--text-color)!important;
+}
+.popup_signup {
   position: absolute;
-  height: 30%;
+  top: 40%;
+  left: 25%;
   width: 50%;
-  border: 1px gray solid;
   border-radius: 20px;
   text-align: center;
   background-color: white;
+  box-shadow: rgba(60, 69, 50, 0.2) 0px 6px 20px;
+  padding: 1.5rem;
+}
+.popup_signup >button{
+  margin-top: 30px;
 }
 .link {
   text-decoration: none;
-  color: black;
+  color: white;
+}
+.form_button{
+  width: 100%;
+  padding: 0.625rem;
+  height: 48px;
+  line-height: 1.25;
+  font-weight: 500;
+  max-width: 240px;
+  box-shadow: rgba(60, 69, 50, 0.2) 0px 6px 20px;
+  transition-property: background-color, color, box-shadow;
+    transition-duration: 150ms;
+    transition-timing-function: ease-in-out;
 }
 </style>
