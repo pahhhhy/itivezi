@@ -1,12 +1,6 @@
 <script setup lang="ts">
-import {ref, onMounted,watch} from 'vue'
-import {
-  getAuth,
-  onAuthStateChanged,
-  type User
-} from 'firebase/auth'
+import {ref,watch} from 'vue'
 import {RouterLink} from 'vue-router'
-import { getDatabase, ref as fireRef, onValue} from 'firebase/database'
 import AppTopBuyer from './components/AppTop/AppTopBuyer.vue';
 import AppTopFarmer from './components/AppTop/AppTopFarmer.vue';
 import AppTopOwner from './components/AppTop/AppTopOwner.vue';

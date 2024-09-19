@@ -1,13 +1,11 @@
 <script setup lang="ts">
-import { ref, onMounted,watch } from 'vue'
+import { ref,watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import {
   getAuth,
   signOut,
-  onAuthStateChanged,
-  type User
 } from 'firebase/auth'
-import { getDatabase, ref as fireRef, onValue } from 'firebase/database'
+
 import router from '@/router'
 import {useIconStore}from "../stores/icon"
 import gsap from 'gsap';

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { getDatabase, ref as fireRef,  onValue, update } from 'firebase/database'
+import { getDatabase, ref as fireRef,  onValue } from 'firebase/database'
 interface Vegetables{
     [key:string]:{
         [key:string]:{
