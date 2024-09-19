@@ -135,7 +135,7 @@ function OnPushBack(){
       
       
     </article>
-    <section class="popup_signup" v-show="!isPopup">
+    <section class="popup_signup" v-show="isPopup">
       <h2>
         メールアドレスの確認メールをおくりました。<br />メールを確認してください<br />認証しないとログインできません
       </h2>
