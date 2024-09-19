@@ -48,6 +48,7 @@ onMounted(async () => {
     if (user != null && user.emailVerified) {
       currentUser.value = user
       iconStore.initURL(user)
+      console.log(currentUser.value.uid)
       try {
         const userData = await readUserData(currentUser.value!.uid)
         myRole.value = userData.role
@@ -91,7 +92,6 @@ watch(
     <div class="header-icon">
       <img src="..\\assets\\itivezilogo.png" alt="" />
     </div>
-    
     
     <nav>
       <div v-if="iconURL != null&&iconURL != '' "><img v-bind:src="iconURL" alt="" class="aicon-image"></div>

@@ -1,9 +1,14 @@
 <script setup lang="ts">
 import AppHeader from './components/AppHeader.vue'
-import { ref} from 'vue'
+import { ref,onMounted} from 'vue'
 import gsap from 'gsap';
+import { useUserStore } from './stores/userData';
+import { usefireUserStore } from './stores/fireUserdata';
 const isBurger=ref<boolean>()
 const background=ref(null)
+const userStore=useUserStore()
+const fireUseStore=usefireUserStore()
+const currentUser = ref(userStore.currentUser);
 function OnBurger(bool:boolean){
   if(!isBurger.value){
     gsap.fromTo(background.value,0.5,{backgroundColor:"#f8f8f800"},{backgroundColor:"#00000020"})
@@ -12,6 +17,19 @@ function OnBurger(bool:boolean){
   }
   isBurger.value=bool;
 }
+async function initData(){
+  await userStore.roadUserData()
+  currentUser.value=userStore.currentUser
+  if(currentUser.value){
+    await fireUseStore.roadFireUseData(currentUser.value.uid)
+  }
+  
+else
+console.log("error")
+}
+onMounted(() => {
+  initData()
+})
 </script>
 
 <template>
