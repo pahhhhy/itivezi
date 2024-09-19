@@ -11,16 +11,35 @@ import { getDatabase, ref as fireRef, onValue } from 'firebase/database'
 import router from '@/router'
 import {useIconStore}from "../stores/icon"
 import gsap from 'gsap';
+import { useUserStore } from '@/stores/userData';
+import { usefireUserStore } from '@/stores/fireUserdata';
 interface Emits {
   (event: 'OnBurger', Next: boolean): void
 }
+interface Usertables{
+    affiliation:String[]
+    gender:string
+    name:string
+    phoneNumber:number
+    place:string
+    role:Role
+}
+enum Role{
+    Onwer="管理者",
+    Buyer="飲食店",
+    Farmer="農家",
+    None=""
+  }
+const userStore=useUserStore()
+const fireUseStore=usefireUserStore()
 const emit = defineEmits<Emits>()
 const iconStore = (useIconStore())
 const iconURL=ref<string|null|undefined>(iconStore.iconURL)
 const myRole = ref<string>("")
 const isBurger = ref(false)
-const currentUser = ref<User | null>(null)
 const sidebar=ref(null)
+const myUserData=ref<Usertables>(fireUseStore.myUserData)
+const currentUser = ref(userStore.currentUser);
 const onClickBurger = (): void => {
   if(!isBurger.value){
     gsap.to(sidebar.value,{x:205,duration:0.5})
@@ -41,41 +60,15 @@ function logout() {
       router.push("/")
     })
 }
-onMounted(async () => {
-  const auth = getAuth()
-  
-  onAuthStateChanged(auth, async (user) => {
-    if (user != null && user.emailVerified) {
-      currentUser.value = user
-      iconStore.initURL(user)
-      console.log(currentUser.value.uid)
-      try {
-        const userData = await readUserData(currentUser.value!.uid)
-        myRole.value = userData.role
-       
-      } catch (error) {
-        console.error('Error fetching user data:', error)
-      }
-    } else {
-      currentUser.value = null
-    }
-  })
-})
-//読みこむデータの指定
-async function readUserData(element: string): Promise<any> {
-  const countRef = fireRef(getDatabase(), 'testUser/' + element)
-  return new Promise((resolve, reject) => {
-    onValue(
-      countRef,
-      (snapshot) => {
-        resolve(snapshot.val())
-      },
-      (error) => {
-        reject(error)
-      }
-    )
-  })
-}
+watch(() => userStore.currentUser, (newUser) => {
+  currentUser.value = newUser;
+  if(currentUser.value)
+  iconStore.initURL(currentUser.value)
+});
+watch(() => fireUseStore.myUserData, (newUser) => {
+  myUserData.value = newUser;
+  myRole.value=myUserData.value.role
+});
 watch(
   () => iconStore.iconURL,
   (newPhotoURL, oldPhotoURL) => {
@@ -116,7 +109,7 @@ watch(
           <RouterLink v-bind:to="{ name: 'order' }" class="link">注文</RouterLink>
         </button>
       </li>
-      <li v-if="currentUser != null">
+      <li v-if="currentUser != null&& myRole != Role.Buyer">
         <button v-on:click="onClickBurger" class="sidebar_element">
           <i class="bi bi-pencil-square"></i>
           <RouterLink v-bind:to="{ name: 'registration' }" class="link">登録</RouterLink>
@@ -134,7 +127,7 @@ watch(
           <RouterLink v-bind:to="{ name: 'login' }" class="link">ログイン<br>新規登録</RouterLink>
         </button>
       </li>
-      <li v-if="currentUser != null && myRole == '管理者'">
+      <li v-if="currentUser != null && myRole == Role.Onwer">
         <button v-on:click="onClickBurger" class="sidebar_element">
           <i class="bi bi-columns-gap"></i>
           <RouterLink v-bind:to="{ name: 'Owner' }" class="link">管理者画面</RouterLink>
