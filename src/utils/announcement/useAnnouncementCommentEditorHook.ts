@@ -2,100 +2,96 @@ import {type DatabaseReference, serverTimestamp} from "firebase/database";
 import {
     addAnnouncementComment,
     addAnnouncementCommentReply,
-    deleteAnnouncementComment
+    deleteAnnouncementComment, editAnnouncementComment
 } from "@/utils/announcement/announcementComments";
 import type {User} from "firebase/auth";
 import {defineComponent, h, ref, type Ref} from "vue";
-import mavonEditor from "mavon-editor";
+import smallTextInputField from "@/views/components/common/smallTextInputField.vue";
+import type {AnnouncementComment} from "@/types/announcement/announcementComments";
 
 export const useAnnouncementCommentEditor = (announcementRef: DatabaseReference, user: Ref<User | null>) => {
     // 返信しようとしているコメント(返信先)のID (nullは返信しようとしていないことを表す)
     const replyingCommentId = ref<string | null>(null);
 
+    // 編集しようとしているコメントのID (nullは編集しようとしていないことを表す)
+    const editingCommentId = ref<string | null>(null);
+
+    // 下の入力欄の内容
     const commentContent = ref<string>('');
-    const replyContent = ref<string>('');
 
 
     // ----- コメント関連 -----
-    const addComment = () => {
-        if (!user.value) return;
-        const data = {
-            content: commentContent.value,
-            createdAt: serverTimestamp(),
-            userId: user.value.uid,
-            replies: [],
+    const sendComment = () => {
+        if (!user.value || !commentContent.value) return;
+
+        if (replyingCommentId.value) { // 返信中だったなら
+            const data = {
+                content: commentContent.value,
+                createdAt: serverTimestamp(),
+                userId: user.value.uid,
+                replyTo: replyingCommentId.value,
+            }
+            addAnnouncementCommentReply(announcementRef, replyingCommentId.value, data);
+            replyingCommentId.value = null;
+        }else if (editingCommentId.value) { // 編集中だったなら
+            editAnnouncementComment(announcementRef,editingCommentId.value, commentContent.value);
+            setEditingMessage(null)
+        } else { // 通常のコメントだったなら
+            const data = {
+                content: commentContent.value,
+                createdAt: serverTimestamp(),
+                userId: user.value.uid,
+                replies: [],
+            }
+            addAnnouncementComment(announcementRef, data);
         }
-        addAnnouncementComment(announcementRef, data);
+        commentContent.value = '';
     }
 
     const editComment = () => {
 
     }
 
-    const deleteComment = (commentId: string) => {
+    const deleteComment = (comment: AnnouncementComment) => {
         if (!user.value) return;
-        deleteAnnouncementComment(announcementRef, commentId);
+        deleteAnnouncementComment(announcementRef, comment);
     }
 
 
     // ----- 返信関連 -----
-
     const setReplyingMessage = (targetCommentId: string | null) => {
+        editingCommentId.value = null;
         replyingCommentId.value = targetCommentId;
-        replyContent.value = '';
     }
 
-    const addReply = () => {
-        if (!replyingCommentId.value || !user.value) return;
-        console.log(replyContent.value);
-        const data = {
-            content: replyContent.value,
-            createdAt: serverTimestamp(),
-            userId: user.value.uid || '',
-            replyTo: replyingCommentId.value,
-        }
-        addAnnouncementCommentReply(announcementRef, replyingCommentId.value, data);
+    // ----- 編集関連 -----
+    const setEditingMessage = (comment: AnnouncementComment | null) => {
+        replyingCommentId.value = null;
+        editingCommentId.value = comment ? comment.commentId : null;
+        commentContent.value = comment ? comment.content : '';
     }
 
-
-
-    // ----- 返信エディタコンポーネント -----
-
-    const commentEditor = () => h(mavonEditor.mavonEditor, {
+    // ----- 入力欄コンポーネント -----
+    const commentEditor = () => h(smallTextInputField, {
         // modelValueとonUpdate:modelValueを使ってv-modelを実現
         modelValue: commentContent.value,
         "onUpdate:modelValue": (val: string) => {
             commentContent.value = val;
         },
-        language: "ja",
-        placeholder: "ここにコメントを入力...",
+        onSendClicked: sendComment,
     })
     // 仮想ノードをコンポーネントにする
-    const commentEditorComponent = defineComponent({render: commentEditor,});
+    const commentInputField = defineComponent({render: commentEditor,});
 
-
-    // h()関数は仮想ノードを生成できるすぐれもの
-    const replyEditor = () => h(mavonEditor.mavonEditor, {
-        // modelValueとonUpdate:modelValueを使ってv-modelを実現
-        modelValue: replyContent.value,
-        "onUpdate:modelValue": (val: string) => {
-            replyContent.value = val;
-        },
-        language: "ja",
-        placeholder: "ここに返信を入力...",
-    })
-    // 仮想ノードをコンポーネントにする
-    const replyEditorComponent = defineComponent({render: replyEditor,});
 
     return {
-        replyContent,
         replyingCommentId,
-        addComment,
+        editingCommentId,
+        sendComment,
         editComment,
         deleteComment,
         setReplyingMessage,
-        addReply,
-        commentEditorComponent,
-        replyEditorComponent,
+        setEditingMessage,
+        commentInputField,
     };
 }

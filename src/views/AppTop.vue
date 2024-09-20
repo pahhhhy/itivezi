@@ -34,6 +34,7 @@ onMounted(() => {
   </article>
   <article v-if="currentUser != null">
     <h1>ようこそ{{ currentUser.displayName }}様</h1>
+    <router-link to="/announcements">掲示板</router-link>
   </article>
 </template>
 <style>

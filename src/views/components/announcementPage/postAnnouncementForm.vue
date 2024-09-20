@@ -4,6 +4,14 @@ import {getDatabase, ref as fireRef, serverTimestamp} from "firebase/database";
 import {useAuthData} from "@/utils/auth";
 import {postAnnouncement} from "@/utils/announcement/announcements";
 import {useAnnouncementFiles} from "@/utils/announcement/useAnnouncementFilesHook";
+import type {Category} from "@/types/announcement/categories";
+
+
+interface Props {
+  categories: Category[]
+}
+
+const {categories} = defineProps<Props>()
 
 
 const {files, content, imgAdd, deleteImgFromStorage, splitFiles} = useAnnouncementFiles()
@@ -13,9 +21,12 @@ const {user, role} = useAuthData();
 
 // 後にフォームから入力する部分
 const title = ref<string>('');
+const category = ref<string>('')
 
 // お知らせのリファレンス
 const announcementsRef = fireRef(getDatabase(), 'testAnnouncements/announcements')
+// カテゴリーのリファレンス
+const categoriesRef = fireRef(getDatabase(), 'testAnnouncements/categories')
 
 
 // お知らせを投稿する処理
@@ -24,8 +35,8 @@ function post() {
     title: title.value,
     content: content.value,
     createdAt: serverTimestamp(),
-    userID: user.value?.uid ?? '',
-    categoryID: '',
+    userId: user.value?.uid ?? '',
+    categoryId: category.value,
     comments: [],
   }
 
@@ -40,13 +51,22 @@ function post() {
 <template>
   <div style="border: 1px solid black; margin: 1rem; height: fit-content; width: fit-content;">
     <h5>お知らせを送信する(仮)</h5>
-
-    <label for="title">タイトル</label>
-    <input id="title" type="text" required v-model="title"/>
-
+    <div>
+      <label for="category">カテゴリ</label>
+      <select v-model="category">
+        <option v-for="category in categories" :key="category.categoryId" :value="category.categoryId">
+          {{ category.categoryName }}
+        </option>
+      </select>
+    </div>
+    <div>
+      <label for="title">タイトル</label>
+      <input id="title" type="text" required v-model="title"/>
+    </div>
+      <!--    <announcement-editor v-model="content" @imgAdd="imgAdd"/>-->
     <mavon-editor language="ja" placeholder="ここにテキストを入力..." v-model="content" @imgAdd="imgAdd"/>
 
-    <button @click="post">送信</button>
+    <button :disabled="!title || !content || !category" @click="post">送信</button>
   </div>
 </template>
 

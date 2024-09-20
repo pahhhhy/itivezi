@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {getCurrentInstance, ref} from 'vue'
+import {getCurrentInstance, onMounted, ref} from 'vue'
 import {getDatabase, onValue, ref as fireRef} from 'firebase/database'
 import {useRoute} from "vue-router";
 import type {Announcement, MavonEditorToolbars} from "@/types/announcement/announcement";
@@ -10,20 +10,31 @@ import router from "@/router";
 import {useAnnouncementFiles} from "@/utils/announcement/useAnnouncementFilesHook";
 import {storageURLPattern} from "@/types/files";
 import {useAnnouncementCommentEditor} from "@/utils/announcement/useAnnouncementCommentEditorHook";
+import {getUserIconURL, getUserName} from "@/utils/userData";
+import KebabMenu from "@/views/components/common/kebabMenu.vue";
+import type {AnnouncementCommentWithViewData} from "@/types/announcement/announcementComments";
+import AnnouncementComment from "@/views/components/announcementPage/announcementComment.vue";
 
 const route = useRoute()
 // 実際に表示するお知らせ内容。編集する場合はこちらが変更される
 const title = ref('');
 // 編集差分の検知などで使うバックアップお知らせ
 const originalAnnouncement = ref<Announcement>();
+// ユーザーアイコンつきコメントを保管する変数
+const commentsWithViewData = ref<AnnouncementCommentWithViewData | null>({});
 // 画像やファイルを扱うHooks
 const {files, content, imgAdd, deleteImgFromStorage, splitFiles} = useAnnouncementFiles()
 // 編集モードかどうかを保管する変数
 const editMode = ref<boolean>(false);
 // 保存していない変更があったかどうかを保管する変数
 const isEdited = ref(false);
-// ユーザー情報
+// ログイン中のユーザー情報
 const {user, role} = useAuthData()
+// 投稿者のアイコンURL
+const authorUserIconRef = ref<null | string>(null);
+// 投稿者のname
+const authorName = ref<null | string>(null);
+
 
 // -----表示関連機能-----
 
@@ -33,13 +44,89 @@ const announceId = route.params.announceId
 // このページで表示する記事
 const announcementRef = fireRef(getDatabase(), 'testAnnouncements/announcements/' + announceId)
 
+onMounted(() => {
+  // お知らせを非同期で取得
+  onValue(announcementRef, async (snapshot) => {
+    console.log("onvalue")
+    originalAnnouncement.value = snapshot.val()
+    title.value = snapshot.val().title
+    content.value = snapshot.val().content
+    getUserIconURL(snapshot.val().userId).then((url) => { // 投稿者のアイコンを取得
+      authorUserIconRef.value = url
+    })
+    getUserName(snapshot.val().userId).then((name) => { // 投稿者の名前を取得
+      authorName.value = name
+    })
 
-// お知らせを非同期で取得
-onValue(announcementRef, (snapshot) => {
-  originalAnnouncement.value = snapshot.val()
-  title.value = snapshot.val().title
-  content.value = snapshot.val().content
+    const comments = snapshot.val().comments
+    if (!comments){
+      commentsWithViewData.value = {};
+      return
+    }
+
+    function sortComments(comments: AnnouncementComment[]): AnnouncementComment[] {
+      // 親コメントと子コメントを分離
+      const parentComments: AnnouncementComment[] = [];
+      const childComments: Record<string, AnnouncementComment[]> = {};
+
+      comments.forEach(comment => {
+        if (!comment.replyTo) {
+          parentComments.push(comment);
+        } else {
+          if (!childComments[comment.replyTo]) {
+            childComments[comment.replyTo] = [];
+          }
+          childComments[comment.replyTo].push(comment);
+        }
+      });
+
+      // 親コメントを日時順にソート
+      parentComments.sort((a, b) => a.datetime - b.datetime);
+
+      // ソート済みの配列に結果を格納
+      const sortedComments: AnnouncementComment[] = [];
+
+      parentComments.forEach(parent => {
+        sortedComments.push(parent);
+        if (childComments[parent.commentId]) {
+          childComments[parent.commentId].sort((a, b) => a.datetime - b.datetime);
+          sortedComments.push(...childComments[parent.commentId]);
+        }
+      });
+
+      return sortedComments;
+    }
+
+    const commentsArray = sortComments(Object.keys(comments).map((key) => {
+      return {...comments[key], commentId: key}
+    }))
+
+
+    const commentsInfoAdded = commentsArray.map(async (comment) => {
+      return await addUserInfoToComment(comment)
+    })
+    Promise.all(commentsInfoAdded).then((commentsInfoAdded) => {
+      commentsWithViewData.value = commentsInfoAdded;
+    })
+
+  })
 })
+
+
+// コメントを渡すと送信者のアイコンと名前を追加して返す関数
+const addUserInfoToComment = async (comment: AnnouncementCommentWithViewData) => {
+  // コメント送信者のアイコンを取得
+  const url = await getUserIconURL(comment.userId)
+  // コメント送信者の名前を取得
+  const name = await getUserName(comment.userId)
+
+  return {
+    userIconURL: url,
+    userName: name,
+    ...comment,
+  }
+}
+
 
 // -----表示関連機能ここまで-----
 
@@ -146,76 +233,239 @@ const onChange = (mdEditorsContent: string | null = null) => {
 
 // -----コメント, コメント返信関連機能ここから-----
 const commentHooks = useAnnouncementCommentEditor(announcementRef, user)
-const commentEditorComponent = commentHooks.commentEditorComponent
-const replyEditorComponent = commentHooks.replyEditorComponent
+const commentInputField = commentHooks.commentInputField
 
 // -----コメント, コメント返信関連機能ここまで-----
 
+// const authorUserIconRef = ref<null | string>(getUserIconURL(originalAnnouncement.value?.userId));
+// console.log(authorUserIconRef)
 </script>
 <template>
-  <div>
-    <div v-if="originalAnnouncement">
-      <div style="border: 1px solid black; margin: 1rem; height: fit-content; width: fit-content;">
-        <h1 v-if="!editMode">{{ title }}</h1>
-        <h1 v-else><input @change="onChange()" v-model="title" @keydown="onChange()" @keyup="onChange()"
-                          :readonly="!editMode"></h1>
-        <mavon-editor
-            :key="editMode"
-            v-model="content"
-            language="ja"
-            :subfield=editMode
-            defaultOpen="preview"
-            placeholder="ここにテキストを入力..."
-            :toolbars="toolbarsPropertiesForVisibility(editMode)"
-            @change="(changedContent: string) => {onChange(changedContent);}"
-            @imgAdd="imgAdd"
-        />
-        <p>
-          <span>投稿: {{ formatServerTimestamp(originalAnnouncement.createdAt) }}</span>
-          <span v-if="originalAnnouncement.updatedAt"> (最終更新: {{
-              formatServerTimestamp(originalAnnouncement.updatedAt)
-            }})</span>
-        </p>
+  <div class="screen-wrapper">
+    <div class="contents-wrapper" v-if="originalAnnouncement">
+      <div class="scroll-wrapper">
 
-        <div v-if="role == '管理者'">
-          <button v-if="!editMode" @click="allowEditMode">編集</button>
-          <button v-if="editMode" :disabled="!isEdited" @click="saveAnnounce">保存して公開</button>
-          <button v-if="editMode" @click="finishEdit">終了</button>
-          <button @click="deleteAnnounce">削除</button>
+        <div class="announcement-wrapper">
+          <p class="announcement-title">{{ title }}</p>
+          <div class="announcement-head">
+            <img v-if="authorUserIconRef" :src="authorUserIconRef"
+                 alt="掲示板投稿者アイコン">
+            <div class="announcement-head-text">
+              <p class="announcement-author">{{ authorName }}</p>
+              <p class="announcement-date">
+                <span>{{ formatServerTimestamp(originalAnnouncement.createdAt) }}</span>
+                <span v-if="originalAnnouncement.updatedAt"> (最終更新: {{
+                    formatServerTimestamp(originalAnnouncement.updatedAt)
+                  }})</span>
+              </p>
+            </div>
+            <div class="kebab">
+              <div v-if="role == '管理者'">
+                <kebabMenu>
+                  <!--                  TODO: 次やるのはこれ作るでもいいし, 喫緊なのはコメントの体裁を整えてコメントの編集, ユーザーアイコンと投稿者表示,-->
+                  <!--                  すること (画像は不要) ← これやる-->
+                  <!--                  TODO: コメントのmd対応は本質ではないのでwysiwygは記事投稿のところにのみ使おう-->
+                  <!--                  TODO: その後に投稿カテゴリー追加もやる ← categoryIdはもうあるのでこれを追加する処理,-->
+                  <!--                  作成編集削除一覧管理する処理(AnnouncementsList内で良し)を作る-->
+                  <button v-if="!editMode" @click="allowEditMode">編集</button>
+                  <button v-if="editMode" :disabled="!isEdited" @click="saveAnnounce">保存して公開</button>
+                  <button v-if="editMode" @click="finishEdit">終了</button>
+                  <button @click="deleteAnnounce">削除</button>
+                </kebabMenu>
+              </div>
+            </div>
+
+          </div>
+          <p v-if="editMode"><input @change="onChange()" v-model="title" @keydown="onChange()" @keyup="onChange()"
+                                    :readonly="!editMode"></p>
+          <mavon-editor
+              :key="editMode"
+              v-model="content"
+              class="announcement-content"
+              language="ja"
+              :subfield=editMode
+              defaultOpen="preview"
+              :boxShadow="false"
+              placeholder="ここにテキストを入力..."
+              :toolbars="toolbarsPropertiesForVisibility(editMode)"
+              @change="(changedContent: string) => {onChange(changedContent);}"
+              @imgAdd="imgAdd"
+          />
+
+<!--                内容-->
+<!--          <div class="announcement-content" v-html="content"></div>-->
+
+
         </div>
 
-      </div>
-
-
-      <div style="border: 1px solid black; margin: 1rem; height: fit-content; width: fit-content;">
-        <p>コメント</p>
-        <div v-for="comment in originalAnnouncement.comments" :key="(comment.createdAt as number)"
-             style="border: 1px solid black; margin: 1rem; height: fit-content; width: fit-content;">
-          <p>{{ comment.content }}</p>
-          <p>{{ comment.createdAt }}</p>
-          <button v-if="comment.userId === user?.uid" @click="commentHooks.deleteComment(comment.commentId)">削除
-          </button>
-
-          <div v-for="reply in comment.replies" :key="(reply.createdAt as number)"
-               style="border: 1px solid black; margin: 1rem; height: fit-content; width: fit-content;">
-            <p>{{ reply.content }}</p>
-            <p>{{ reply.createdAt }}</p>
-          </div>
-          <button v-if="comment.userId === user?.uid" @click="commentHooks.editComment()">編集</button>
-          <button :disabled="!user?.uid" v-if="commentHooks.replyingCommentId.value === comment.commentId"
-                  @click="commentHooks.setReplyingMessage(null)">返信をキャンセル
-          </button>
-          <button :disabled="!user?.uid" v-else @click="commentHooks.setReplyingMessage(comment.commentId)">返信
-          </button>
-          <div v-if="commentHooks.replyingCommentId.value === comment.commentId">
-            <replyEditorComponent/>
-            <button :disabled="!user?.uid" @click="commentHooks.addReply">送信</button>
-          </div>
+        <!--    ここからコメント-->
+        <div class="comment-wrapper" v-if="commentsWithViewData">
+          <announcementComment  v-for="comment in commentsWithViewData" :key="(comment.createdAt as number)" :user="user"
+                               :comment="comment" :commentHooks="commentHooks"/>
         </div>
-        <commentEditorComponent/>
-        <button :disabled="!user?.uid" @click="commentHooks.addComment">コメントを送信</button>
       </div>
+
+      <div class="comment-input-field">
+        <div class="comment-input-field-alert" v-if="commentHooks.replyingCommentId.value">
+          <p>返信先: {{
+              commentsWithViewData.find((comment) => comment.commentId === commentHooks.replyingCommentId.value)?.userName
+            }}</p>
+          <button @click="commentHooks.setReplyingMessage(null)">キャンセル</button>
+        </div>
+        <div class="comment-input-field-alert" v-if="commentHooks.editingCommentId.value">
+          <p>編集中</p>
+          <button @click="commentHooks.setEditingMessage(null)">キャンセル</button>
+        </div>
+        <commentInputField/>
+      </div>
+
     </div>
   </div>
 
 </template>
+<style scoped>
+.screen-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  height: calc(100vh - 80px);
+  width: 100%;
+  transition: all 0.5s linear;
+}
+
+.contents-wrapper {
+  padding: 0.25em;
+  position: relative;
+  height: 100%;
+  width: auto;
+  max-width: 100vw;
+  aspect-ratio: 9 / 16;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: center;
+}
+
+.scroll-wrapper {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  overflow-y: scroll;
+  scrollbar-width: none;
+
+}
+
+.announcement-title {
+  font-size: 1.5em;
+  font-weight: bold;
+}
+
+.announcement-wrapper {
+  height: fit-content;
+}
+
+.announcement-head {
+  display: flex;
+  flex-direction: row;
+  justify-content: start;
+  align-items: start;
+  gap: 1rem;
+  border-bottom: 1px solid black;
+  padding-bottom: 1em;
+  height: fit-content;
+}
+
+.announcement-head > img {
+  display: inline-block;
+  width: 10%;
+  aspect-ratio: 1;
+  border-radius: 100%;
+  flex-grow: 1;
+}
+
+.announcement-head-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: start;
+  width: 100%;
+  height: 3em;
+  margin: 0;
+  flex-grow: 0;
+}
+
+.kebab {
+  position: absolute;
+  right: 0;
+  width: 7.5%;
+  aspect-ratio: 1;
+}
+
+.kebab button {
+  width: fit-content;
+  min-width: 100%;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+p {
+  margin: 0;
+}
+
+.announcement-author {
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+.announcement-date {
+  font-size: 0.8em;
+}
+
+.announcement-content {
+  //margin: 2em 1em 0;
+  //padding-bottom: 1em;
+  //border-bottom: 1px #000000 dashed;
+  //background-color: white;
+  //box-shadow: none;
+}
+.scroll-style {
+  background-color: white !important;
+}
+
+.comment-wrapper {
+  margin-top: 2em;
+}
+
+.kebab {
+  position: absolute;
+  right: 0;
+  width: 7.5%;
+  aspect-ratio: 1;
+}
+
+.comment-input-field {
+  display: flex;
+  height: fit-content;
+  width: 100%;
+  flex-direction: column;
+}
+
+.comment-input-field-alert {
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  gap: 1em;
+}
+
+.comment-input-field-alert > button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  color: #0000EE;
+
+}
+
+
+</style>

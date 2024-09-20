@@ -7,5 +7,12 @@ export interface AnnouncementComment {
     createdAt: ServerTimestamp;
     updatedAt?: ServerTimestamp;
     replyTo?: string;
-    replies?: AnnouncementComment[];
+    replies?: {
+        [string]: AnnouncementComment
+    };
+}
+
+export interface AnnouncementCommentWithViewData extends AnnouncementComment {
+    userName: string;
+    userIconURL: string;
 }

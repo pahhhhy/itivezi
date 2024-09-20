@@ -1,18 +1,51 @@
 <script setup lang="ts">
 import AnnouncementsList from "@/views/components/announcementPage/announcementsList/AnnouncementsList.vue";
 import {useAuthData} from "@/utils/auth";
-import PostAnnouncementForm from "@/views/components/announcementPage/PostAnnouncementForm.vue";
+import PostAnnouncementForm from "@/views/components/announcementPage/postAnnouncementForm.vue";
+import CategoriesManager from "@/views/components/announcementPage/categoriesManager.vue";
+import {getDatabase, onValue, ref as fireRef} from "firebase/database";
+import {onMounted, ref} from "vue";
+import type {Category} from "@/types/announcement/categories";
 
 const {role} = useAuthData();
+
+// カテゴリーのリファレンス
+const categoriesRef = fireRef(getDatabase(), 'testAnnouncements/categories')
+const categories = ref()
+
+onMounted(() => {
+
+// カテゴリー一覧を非同期で取得する処理
+  onValue(categoriesRef, (snapshot) => {
+    if (!snapshot.exists()) {
+      const defaultData: Category = {
+        categoryId: '',
+        categoryName: '未分類',
+        announces: {}
+      }
+      categories.value = [defaultData]
+    } else {
+
+      categories.value = snapshot.val()
+      console.log("snapshot",categories.value)
+      setTimeout(() =>{
+        console.log("first", categories.value)
+          },1000)
+    }
+  })
+
+})
 
 
 </script>
 
 <template>
   <h1>掲示板</h1>
-  <div class="announcements">
-    <PostAnnouncementForm v-if="role === '管理者'"/>
-    <AnnouncementsList/>
+  <div class="announcements" v-if="categories !== undefined">
+<!--    {{categories}}-->
+    <CategoriesManager :categories="categories" v-if="role === '管理者'"/>
+    <PostAnnouncementForm :categories="categories" v-if="role === '管理者'"/>
+    <AnnouncementsList :categories="categories"/>
   </div>
 </template>
 

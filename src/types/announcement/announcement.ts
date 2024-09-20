@@ -6,8 +6,8 @@ export interface Announcement {
     content: string;
     createdAt: ServerTimestamp;
     updatedAt?: ServerTimestamp;
-    userID: string;
-    categoryID: string;
+    userId: string;
+    categoryId: string;
     comments: AnnouncementComment[];
 }
 

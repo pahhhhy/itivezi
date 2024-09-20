@@ -67,6 +67,10 @@ const router = createRouter({
             component: AnnouncementsPage,
         },
         {
+            path: '/announcement',
+            redirect: '/announcements',
+        },
+        {
             path: '/announcements/:announceId',
             name: 'announcement',
             component: AnnouncementDetailPage,
@@ -76,7 +80,7 @@ const router = createRouter({
 // ここからガードの追加部分
 router.beforeEach(async (to, from, next) => {
     if (to.name === 'Owner') {
-        // if (to.name === 'chat') {
+        // if (to.categoryName === 'chat') {
         if (await getCurrentRole(getAuth()) === "管理者") next();
         // if( await getCurrentRole(getAuth()) === "管理者" ) next();
         else next({name: 'login'})
