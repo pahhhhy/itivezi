@@ -1,14 +1,15 @@
 import { defineStore } from 'pinia'
-import { getDatabase, ref as fireRef,  onValue } from 'firebase/database'
+import { getDatabase, ref as fireRef,  onValue,push ,set} from 'firebase/database'
 interface Vegetables{
     [key:string]:{
         [key:string]:{
-            en:string;
+            en:number;
             farmer:string
             roadStation:string
             state:string
             uid:string
             unit:string
+            photo:string
         }
     }
 }
@@ -38,6 +39,36 @@ export const useVegeStore = defineStore({
           },
           getKeys(){
             return Object.keys(this.VegeAllData)
+          },
+          getUniqueKey(){
+            const db = getDatabase();
+            const newRef = fireRef(db, 'testVege2/');
+            const uniqueKey = push(newRef).key;
+            return uniqueKey
+          },
+          updateVegeData(data: Vegetables): Promise<boolean> {
+            const db = getDatabase();
+            const vegeKeys = Object.keys(data);
+          
+            // 全ての更新処理をPromiseの配列で管理
+            const updatePromises: Promise<void>[] = [];
+          
+            vegeKeys.forEach((vegeKey) => {
+              const uniqueKeys = Object.keys(data[vegeKey]);
+          
+              uniqueKeys.forEach((uniqueKey) => {
+                const updatePromise = set(
+                  fireRef(db, `testVege2/${vegeKey}/${uniqueKey}`), 
+                  data[vegeKey][uniqueKey]
+                );
+                updatePromises.push(updatePromise);
+              });
+            });
+          
+            // 全てのPromiseが完了するのを待つ
+            return Promise.all(updatePromises)
+              .then(() => true) // 全て成功
+              .catch(() => false); // どこかで失敗
           }
     }
 

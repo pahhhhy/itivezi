@@ -1,46 +1,41 @@
 <script setup lang="ts">
-import {getDatabase, onValue, ref as fireRef} from 'firebase/database'
+
 //Vueとfirebaseで同じrefという関数があって競合しているのでfirebaseの方をfireRefにしている
-import {onMounted, ref} from 'vue'
-import {getAuth, onAuthStateChanged, type User} from 'firebase/auth'
+import { ref,watch} from 'vue'
 import RegistrationStep1 from './components/Registration/RegistrationStep1.vue'
 import RegistrationStep2 from './components/Registration/RegistrationStep2.vue'
 import RegistrationStep3 from './components/Registration/RegistrationStep3.vue'
-import SelectRoadStation from './components/SelectRoadStation.vue'
+import { useVegeStore } from '@/stores/vege'
+import { useUserStore } from '@/stores/userData';
 
-const vegeAllData = ref<any>(null)
-const vegeKeys = ref<any>(null)
-
-//読みこむデータの指定
-function readvegeAllData(roadStation: string): Promise<any> {
-  return new Promise((resolve, reject) => {
-    const countRef = fireRef(getDatabase(), 'testVege/' + roadStation + "/")
-    onValue(countRef, (snapshot) => {
-      resolve(snapshot.val())
-    }, (error) => {
-      reject(error)
-    });
-  });
-}
-
-const currentUser = ref<User | null>(null)
-//指定したデータを書き込むようにしている。Vegeに該当の野菜
-onMounted(() => {
-  const auth = getAuth()
-  // ログインしているユーザーを取得する
-  onAuthStateChanged(auth, (user) => {
-    if (user != null && user.emailVerified) {
-      currentUser.value = user
-
-    } else {
-      currentUser.value = null
+interface Vegetables{
+    [key:string]:{
+        [key:string]:{
+            en:number;
+            farmer:string
+            roadStation:string
+            state:string
+            uid:string
+            unit:string
+            photo:string
+        }
     }
-  })
-})
-
-
+}
+const userStore=useUserStore()
+const vegeStore=useVegeStore()
+const vegeAllData = ref<Vegetables>(vegeStore.VegeAllData)
+const vegeKeys = ref<string[]>(vegeStore.getKeys())
+const uproadVegeData=ref<Vegetables>({})
+const uniqueKey=ref<string|null>(vegeStore.getUniqueKey())
+watch(() => vegeStore.VegeAllData, (newUser) => {
+  vegeAllData.value = newUser;
+  vegeKeys.value= vegeStore.getKeys()
+});
+const currentUser = ref(userStore.currentUser);
+watch(() => userStore.currentUser, (newUser) => {
+  currentUser.value = newUser;
+});
 const stepNum = ref<number>(0)
-
 function onStep(next: boolean) {
   if (next) stepNum.value = stepNum.value + 1
   else stepNum.value = stepNum.value - 1
@@ -49,61 +44,31 @@ function onStep(next: boolean) {
 function changeSelect(element: number[]) {
   vegeList.value = element
 }
-
-function updateStep2List(
-    data: { money?: number[]; amount?: number[]; unit?: string[]; }
-) {
-  if (data.money !== undefined) {
-    vegeMoneyList.value = data.money
-  }
-  if (data.amount !== undefined) {
-    vegeAmountList.value = data.amount
-  }
-  if (data.unit !== undefined) {
-    vegeUnitList.value = data.unit
-  }
+function updateUproadData(Data:Vegetables){
+  uproadVegeData.value=Data
 }
-
-async function updateRoadStation(element: string) {
-  roadStation.value = element
-  vegeAllData.value = await readvegeAllData(element)
-  vegeKeys.value = Object.keys(vegeAllData.value)
-  vegeList.value = []
-  resetData()
-}
-
-function resetData() {
-  vegeMoneyList.value = []
-  vegeAmountList.value = []
-  vegeUnitList.value = []
-}
-
 const vegeList = ref<number[]>([])
-const vegeMoneyList = ref<number[]>([])
-const vegeAmountList = ref<number[]>([])
-const vegeUnitList = ref<string[]>([])
-const roadStation = ref<string>("")
 </script>
 
 <template>
   <!-- {{ roadStationUnitList }}
   {{ vegeUnitList }} -->
+   <!-- {{ vegeKeys }} -->
+     <!-- {{ vegeList }} -->
   <div class="title">
     <h1>登録</h1>
   </div>
-  <SelectRoadStation
-      v-bind:-road-station="roadStation"
-      v-on:on-step="onStep"
-      v-on:update-road-station="updateRoadStation"
-      v-if="stepNum==0">
-  </SelectRoadStation>
+  <!-- {{ uniqueKey }}
+  {{ uproadVegeData }} -->
   <RegistrationStep1
       v-bind:vegeList="vegeList"
       v-bind:vegeKeys="vegeKeys"
+      v-bind:uproad-data="uproadVegeData"
+      v-bind:uniquw-key="uniqueKey"
       v-on:-on-step="onStep"
-      v-on:change-select="changeSelect"
-      v-on:reset-data="resetData"
-      v-if="stepNum == 1 && vegeKeys != null"
+      v-on:update-uproad-data="updateUproadData"
+      v-on:change-select-list="changeSelect"
+      v-if="stepNum == 0 && vegeKeys != null"
   ></RegistrationStep1>
   <!-- {{ VegeMoneyList }}
   {{ vegeAmountList }}
@@ -111,24 +76,20 @@ const roadStation = ref<string>("")
   <RegistrationStep2
       v-bind:vege-list="vegeList"
       v-bind:vege-keys="vegeKeys"
-      v-bind:vege-amount-list="vegeAmountList"
-      v-bind:vege-money-list="vegeMoneyList"
-      v-bind:vege-unit-list="vegeUnitList"
+      v-bind:unique-key="uniqueKey"
+      v-bind:uproad-data="uproadVegeData"
       v-on:on-step="onStep"
-      v-on:update-step2-list="updateStep2List"
-      v-if="stepNum == 2 && vegeKeys != null"
+      v-if="stepNum == 1 && vegeKeys != null"
   ></RegistrationStep2>
   <!-- 送信と確認画面 -->
   <RegistrationStep3
       v-bind:vege-list="vegeList"
       v-bind:vege-keys="vegeKeys"
-      v-bind:vege-amount-list="vegeAmountList"
-      v-bind:vege-money-list="vegeMoneyList"
-      v-bind:vege-unit-list="vegeUnitList"
       v-bind:current-user="currentUser"
-      v-bind:road-station="roadStation"
+      v-bind:uproad-data="uproadVegeData"
+      v-bind:unique-key="uniqueKey"
       v-on:on-step="onStep"
-      v-if="stepNum == 3 && vegeKeys != null"
+      v-if="stepNum == 2 && vegeKeys != null"
   ></RegistrationStep3>
 </template>
 <style>

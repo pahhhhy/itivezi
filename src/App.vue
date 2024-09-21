@@ -4,9 +4,11 @@ import { ref,onMounted} from 'vue'
 import gsap from 'gsap';
 import { useUserStore } from './stores/userData';
 import { usefireUserStore } from './stores/fireUserdata';
+import { useVegeStore } from './stores/vege';
 const isBurger=ref<boolean>()
 const background=ref(null)
 const userStore=useUserStore()
+const vegeStore=useVegeStore()
 const fireUseStore=usefireUserStore()
 const currentUser = ref(userStore.currentUser);
 function OnBurger(bool:boolean){
@@ -19,6 +21,7 @@ function OnBurger(bool:boolean){
 }
 async function initData(){
   await userStore.roadUserData()
+  await vegeStore.roadData()
   currentUser.value=userStore.currentUser
   if(currentUser.value){
     await fireUseStore.roadFireUseData(currentUser.value.uid)
