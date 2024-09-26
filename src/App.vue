@@ -5,12 +5,14 @@ import gsap from 'gsap';
 import { useUserStore } from './stores/userData';
 import { usefireUserStore } from './stores/fireUserdata';
 import { useVegeStore } from './stores/vege';
+import { useCartStore } from '@/stores/cart';
 const isBurger=ref<boolean>()
 const background=ref(null)
 const userStore=useUserStore()
 const vegeStore=useVegeStore()
 const fireUseStore=usefireUserStore()
 const currentUser = ref(userStore.currentUser);
+const CartStore=useCartStore()
 function OnBurger(bool:boolean){
   if(!isBurger.value){
     gsap.fromTo(background.value,0.5,{backgroundColor:"#f8f8f800"},{backgroundColor:"#00000020"})
@@ -22,6 +24,7 @@ function OnBurger(bool:boolean){
 async function initData(){
   await userStore.roadUserData()
   await vegeStore.roadData()
+  CartStore.roadData()
   currentUser.value=userStore.currentUser
   if(currentUser.value){
     await fireUseStore.roadFireUseData(currentUser.value.uid)

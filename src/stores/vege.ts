@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
 import { getDatabase, ref as fireRef,  onValue,push ,set} from 'firebase/database'
 interface Vegetables{
-    [key:string]:{
-        [key:string]:{
+    [vegeName:string]:{
+        [uniqueKey:string]:{
             en:number;
             farmer:string
             roadStation:string

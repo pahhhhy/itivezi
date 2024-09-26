@@ -3,8 +3,8 @@ import { ref } from 'vue'
 import { type User } from 'firebase/auth'
 import { useVegeStore } from '@/stores/vege'
 interface Vegetables{
-    [key:string]:{
-        [key:string]:{
+    [vegeName:string]:{
+        [uniqueKey:string]:{
             en:number;
             farmer:string
             roadStation:string

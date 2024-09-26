@@ -11,6 +11,26 @@ import {useIconStore}from "../stores/icon"
 import gsap from 'gsap';
 import { useUserStore } from '@/stores/userData';
 import { usefireUserStore } from '@/stores/fireUserdata';
+import { useCartStore } from '@/stores/cart';
+interface CartTables{
+    [uid:string]:{
+         [uniqueKey: string]:{
+          [data:string]: CartElementTables;
+        }
+    }
+}
+interface CartElementTables{
+    en:number;
+    farmer:string
+    roadStation:string
+    unit:string
+    photo:string
+    unique:string
+    vegeName:string
+    amount:number
+    selectDate:string
+}
+
 interface Emits {
   (event: 'OnBurger', Next: boolean): void
 }
@@ -38,6 +58,11 @@ const isBurger = ref(false)
 const sidebar=ref(null)
 const myUserData=ref<Usertables>(fireUseStore.myUserData)
 const currentUser = ref(userStore.currentUser);
+const cartStore=useCartStore()
+const cartData=ref<CartTables>(cartStore.cartData)
+const cartCount=ref<number>(0)
+if(currentUser.value)
+cartCount.value=cartStore.getCountCart(currentUser.value.uid)
 const onClickBurger = (): void => {
   if(!isBurger.value){
     gsap.to(sidebar.value,{x:205,duration:0.5})
@@ -58,6 +83,9 @@ function logout() {
       router.push("/")
     })
 }
+function onPushCart(){
+  router.push("/cart")
+}
 watch(() => userStore.currentUser, (newUser) => {
   currentUser.value = newUser;
   if(currentUser.value)
@@ -66,6 +94,11 @@ watch(() => userStore.currentUser, (newUser) => {
 watch(() => fireUseStore.myUserData, (newUser) => {
   myUserData.value = newUser;
   myRole.value=myUserData.value.role
+});
+watch(() => cartStore.cartData, (newUser) => {
+  cartData.value = newUser;
+  if(currentUser.value)
+  cartCount.value=cartStore.getCountCart(currentUser.value.uid)
 });
 watch(
   () => iconStore.iconURL,
@@ -85,6 +118,7 @@ watch(
     </div>
     
     <nav>
+      <button v-if="cartCount!==0" v-on:click="onPushCart">カート:{{cartCount}}</button>
       <div v-if="iconURL != null&&iconURL != '' "><img v-bind:src="iconURL" alt="" class="aicon-image"></div>
       <p v-if="currentUser != null">{{ currentUser.displayName }}様</p>
       

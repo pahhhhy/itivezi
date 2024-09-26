@@ -7,6 +7,7 @@ import Signup from '../views/SignupPage.vue'
 import Login from '../views/LoginPage.vue'
 import Addinfo from '../views/AddInfo.vue'
 import Owner from '../views/OwnerPage.vue'
+import Cart from '../views/CartPage.vue'
 import {
   getAuth
 } from 'firebase/auth'
@@ -53,6 +54,11 @@ const router = createRouter({
       path: '/Owner',
       name: 'Owner',
       component: Owner
+    },
+    {
+      path: '/cart',
+      name: 'cart',
+      component: Cart
     }
   ]
 })
