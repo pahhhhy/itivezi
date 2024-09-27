@@ -144,10 +144,17 @@ function getJSTTimestamp() {
   // ISO 8601フォーマットに変換し、無効な文字を置き換える
   return jstDate.toISOString().replace(/[:.]/g, '-')
 }
+function deleteData(unique:string|number){
+  if(currentUser.value &&typeof unique=="string"){
+    delete cartData.value[currentUser.value.uid][unique]
+    cartStore.deleteCartData(currentUser.value.uid,unique)
+  }
+  
+}
 </script>
 <template>
 <h1>購入画面</h1>
-{{ cartData }}
+<!-- {{ cartData }} -->
 <table v-if="currentUser">
     <tbody>
         <tr>
@@ -155,11 +162,14 @@ function getJSTTimestamp() {
             <th>販売単位</th>
             <th>購入個数</th>
             <th>合計金額</th>
+            <th>削除</th>
         </tr>
         <tr v-for="(element,uniqueKey) in cartData[currentUser.uid]" :key="uniqueKey">
             <cartElement 
             v-bind:data="element"
-            v-on:get-total-money="getTotalMoney"></cartElement>
+            v-bind:unique-key="uniqueKey"
+            v-on:get-total-money="getTotalMoney"
+            v-on:delete-data="deleteData"></cartElement>
         </tr>
     </tbody>
     <h1>日付指定：{{ selectDate }}</h1>

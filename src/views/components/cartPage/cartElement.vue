@@ -13,15 +13,20 @@ interface CartElementTables{
 
 interface Props {
   data:CartElementTables
+  uniqueKey:string|number
 }
 interface Emits {
   (event: 'getTotalMoney', totalMoney: number): void
+  (event: 'deleteData', unique: string|number): void
 }
 const emit = defineEmits<Emits>()
 const props = defineProps<Props>()
 const totalMoney=ref<number>(props.data.en*props.data.amount)
 
 emit("getTotalMoney",totalMoney.value)
+function deleteData(){
+  emit("deleteData",props.uniqueKey)
+}
 </script>
 <template>
 <td>
@@ -36,6 +41,7 @@ emit("getTotalMoney",totalMoney.value)
 <td>{{props.data.unit}}</td>
 <td>{{props.data.amount}}</td>
 <td>{{totalMoney}}</td>
+<td><button class="btn btn-success" v-on:click="deleteData">削除</button></td>
 </template>
 <style scoped>
 td >img{

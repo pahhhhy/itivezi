@@ -67,6 +67,16 @@ export const useCartStore = defineStore({
               console.error('Error updating data:', error);
               return false; // エラーが発生したら false を返す
             }
+          },
+          async deleteCartData(uid: string,uniqueKey:string){
+            const db = getDatabase();
+            try {
+              await set(fireRef(db, `orderCart/${uid}/${uniqueKey}`), {});
+              return true; // 成功したら true を返す
+            } catch (error) {
+              console.error('Error updating data:', error);
+              return false; // エラーが発生したら false を返す
+            }
           }
     }
 

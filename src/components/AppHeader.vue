@@ -14,9 +14,8 @@ import { usefireUserStore } from '@/stores/fireUserdata';
 import { useCartStore } from '@/stores/cart';
 interface CartTables{
     [uid:string]:{
-         [uniqueKey: string]:{
-          [data:string]: CartElementTables;
-        }
+         [uniqueKey: string]:CartElementTables;
+        
     }
 }
 interface CartElementTables{
@@ -28,7 +27,6 @@ interface CartElementTables{
     unique:string
     vegeName:string
     amount:number
-    selectDate:string
 }
 
 interface Emits {
