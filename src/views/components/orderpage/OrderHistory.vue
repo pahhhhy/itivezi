@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref,  onMounted ,watch} from 'vue'
+import { ref ,watch} from 'vue'
 import { useFireOrderStore } from '@/stores/fireOrder'
 import { useUserStore } from '@/stores/userData';
 import { useVegeStore } from '@/stores/vege'

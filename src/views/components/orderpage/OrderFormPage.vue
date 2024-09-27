@@ -44,10 +44,6 @@ interface CartElementTables{
 interface Props {
   orderData: Vegetables
 }
-interface Emits {
-  (event: 'deleteOrderData'): void
-}
-const emit = defineEmits<Emits>()
 const props = defineProps<Props>()
 const VegeName=ref<string>(Object.keys(props.orderData)[0])
 const vegeCount=ref<number>(0)
