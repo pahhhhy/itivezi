@@ -92,7 +92,6 @@ function addCartToOrder(cartData: CartTables, uid: string, order: OrdertablesEle
 async function onPushBuy(){
     
     if(currentUser.value&&currentUser.value.email&&currentUser.value.displayName){
-        let  uniqueKey:string=Object.keys(cartData.value[currentUser.value.uid])[0]
         let now:timestamp=parseTimestamp(getJSTTimestamp())
         let currentTime:string=now.year + '-' + now.month + '-' + now.day + '-' + now.hours + '-' + now.day + '-' + now.seconds
         let uproadData: OrdertablesElement = {
@@ -178,7 +177,7 @@ function getJSTTimestamp() {
 
     <h2>総合金額:{{AllTotalMoney}}円</h2>
     <button class="btn btn-success" v-on:click="onPushBuy()">購入</button>
-    <article class="cart_popup" v-show="!isPopup">
+    <article class="cart_popup" v-show="isPopup">
         <h3>購入しました</h3>
         <button v-on:click="onPushBack()">買い物に戻る</button>
     </article>

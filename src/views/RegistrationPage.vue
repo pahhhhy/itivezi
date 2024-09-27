@@ -9,8 +9,8 @@ import { useVegeStore } from '@/stores/vege'
 import { useUserStore } from '@/stores/userData';
 
 interface Vegetables{
-    [key:string]:{
-        [key:string]:{
+    [vegeName:string]:{
+        [uniqueKey:string]:{
             en:number;
             farmer:string
             roadStation:string

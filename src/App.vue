@@ -6,10 +6,12 @@ import { useUserStore } from './stores/userData';
 import { usefireUserStore } from './stores/fireUserdata';
 import { useVegeStore } from './stores/vege';
 import { useCartStore } from '@/stores/cart';
+import { useFireOrderStore } from './stores/fireOrder';
 const isBurger=ref<boolean>()
 const background=ref(null)
 const userStore=useUserStore()
 const vegeStore=useVegeStore()
+const FireOrderStore=useFireOrderStore()
 const fireUseStore=usefireUserStore()
 const currentUser = ref(userStore.currentUser);
 const CartStore=useCartStore()
@@ -24,6 +26,7 @@ function OnBurger(bool:boolean){
 async function initData(){
   await userStore.roadUserData()
   await vegeStore.roadData()
+  await FireOrderStore.roadData()
   CartStore.roadData()
   currentUser.value=userStore.currentUser
   if(currentUser.value){

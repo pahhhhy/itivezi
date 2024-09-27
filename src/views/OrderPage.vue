@@ -41,15 +41,33 @@ const orderData=ref<Vegetables>(orderStore.orderData)
 const vegeAllData = ref<Vegetables>(vegeStore.VegeAllData)
 const cartStore=useCartStore()
 const cartData=ref<CartTables>(cartStore.cartData)
+vegeAllData.value=filterAvailableVegetables(vegeAllData.value)
 watch(() => cartStore.cartData, (newUser) => {
   cartData.value = newUser;
 });
 watch(() => vegeStore.VegeAllData, (newUser) => {
-  vegeAllData.value = newUser;
+  vegeAllData.value = filterAvailableVegetables(newUser);
+  
 });
 watch(() => orderStore.orderData, (newUser) => {
   orderData.value = newUser;
 });
+function filterAvailableVegetables(data: Vegetables): Vegetables {
+    const result: Vegetables = {};
+    for (const vegeName in data) {
+        const filteredEntries: { [uniqueKey: string]: any } = {};
+        for (const uniqueKey in data[vegeName]) {
+            if (data[vegeName][uniqueKey].state === "Available") {
+                filteredEntries[uniqueKey] = data[vegeName][uniqueKey];
+            }
+        }
+        // もしfilteredEntriesに要素があれば、resultに追加
+        if (Object.keys(filteredEntries).length > 0) {
+            result[vegeName] = filteredEntries;
+        }
+    }
+    return result;
+}
 </script>
 <template>
   <OrderHistory></OrderHistory>
