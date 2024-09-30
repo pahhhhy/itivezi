@@ -1,43 +1,36 @@
 <script setup lang="ts">
 import { getDatabase, ref as fireRef, onValue } from 'firebase/database'
 //Vueとfirebaseで同じrefという関数があって競合しているのでfirebaseの方をfireRefにしている
-import { ref,  onMounted } from 'vue'
+import { ref,  onMounted ,watch} from 'vue'
 import { getAuth, onAuthStateChanged, type User } from 'firebase/auth'
 import MyPageOrder from './components/mypage/MyPageOrder.vue'
 import MyPageUpdate from './components/mypage/MyPageUpdate.vue'
 import MyPageMyVege from './components/mypage/MyPageMyVege.vue'
-
-onMounted(() => {
-  initData()
-  const auth = getAuth()
-  // ログインしているユーザーを取得する
-  onAuthStateChanged(auth, (user) => {
-    if (user != null && user.emailVerified) {
-      currentUser.value = user
-      
-    } else {
-      currentUser.value = null
+import { useUserStore } from '@/stores/userData';
+import { useVegeStore } from '@/stores/vege'
+interface Vegetables{
+    [key:string]:{
+        [key:string]:{
+            en:number;
+            farmer:string
+            roadStation:string
+            state:string
+            uid:string
+            unit:string
+            photo:string
+        }
     }
-  })
-})
-const currentUser = ref<User | null>(null)
-function readvegeAllData(): Promise<any> {
-  return new Promise((resolve, reject) => {
-    const countRef = fireRef(getDatabase(), 'testVege/' )
-    onValue(countRef, (snapshot) => {
-      resolve(snapshot.val())
-    }, (error) => {
-      reject(error)
-    });
-  });
 }
-async function initData(){
-  vegeAllData.value=await readvegeAllData()
-  
-}
-const vegeAllData = ref<any>(null)
-
-
+const vegeStore=useVegeStore()
+const vegeAllData = ref<Vegetables>(vegeStore.VegeAllData)
+const userStore=useUserStore()
+const currentUser = ref<User|null>(userStore.currentUser);
+watch(() => userStore.currentUser, (newUser) => {
+  currentUser.value = newUser;
+});
+watch(() => vegeStore.VegeAllData, (newUser) => {
+  vegeAllData.value = newUser;
+});
 </script>
 
 <template>
@@ -48,11 +41,9 @@ const vegeAllData = ref<any>(null)
   <my-page-update v-bind:current-user="currentUser" v-bind:vege-all-data="vegeAllData" v-if="currentUser != null"></my-page-update>
   <my-page-my-vege
     v-bind:current-user="currentUser"
-    v-bind:vege-all-data="vegeAllData"
-    v-on:init-data="initData"
-    v-if="currentUser != null && (vegeAllData != null && vegeAllData.length !== 0)"
+    v-if="currentUser != null "
   ></my-page-my-vege>
-  <my-page-order v-bind:current-user="currentUser" v-if="currentUser != null"></my-page-order>
+  <!-- <my-page-order v-bind:current-user="currentUser" v-if="currentUser != null"></my-page-order> -->
 </template>
 <style>
 .title {

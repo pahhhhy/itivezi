@@ -34,7 +34,6 @@ export const usefireUserStore = defineStore({
                 const data = snapshot.val()
                 if (data) {
                   this.myUserData= data; 
-                  console.log(this.myUserData)
                   resolve(data)
                 } else {
                   reject(new Error("データがありません"))

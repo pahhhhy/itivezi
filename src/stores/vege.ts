@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { getDatabase, ref as fireRef,  onValue,push ,set} from 'firebase/database'
+import { getDatabase, ref as fireRef,  onValue,push ,set,update} from 'firebase/database'
 interface Vegetables{
     [vegeName:string]:{
         [uniqueKey:string]:{
@@ -69,6 +69,21 @@ export const useVegeStore = defineStore({
             return Promise.all(updatePromises)
               .then(() => true) // 全て成功
               .catch(() => false); // どこかで失敗
+          },
+          async deleteVegeData(vegeName:string,unique:string|number){
+            const db = getDatabase();
+            const path = `testVege2/${vegeName}/${unique}`
+            // 更新するデータを指定
+            const updates = {
+              state: "Discontinued"
+            };
+            try {
+              await update(fireRef(db, path), updates).then(() => {
+              })
+              
+            } catch (error) {
+              console.error("Error removing data:", error);
+            }
           }
     }
 
