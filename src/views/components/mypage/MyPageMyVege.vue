@@ -3,6 +3,7 @@ import { ref,watch} from 'vue'
 import { type User } from 'firebase/auth'
 import { useVegeStore } from '@/stores/vege'
 import MyVegeElement from './MyVegeElement.vue';
+import MyVegePopup from './MyVegePopup.vue';
 interface Vegetables{
     [vegeName:string]:{
         [uniqueKey:string]:{
@@ -28,6 +29,16 @@ interface MyVegeTables{
             VegeName:string
         }
 }
+interface datatable {
+  en:number;
+  farmer:string
+  roadStation:string
+  state:string
+  uid:string
+  unit:string
+  photo:string
+  VegeName:string
+}
   const vegeStore=useVegeStore()
 interface Props {
   currentUser: User
@@ -36,6 +47,9 @@ const props = defineProps<Props>()
 const isToggle = ref<boolean>(false)
 const MyVegeData=ref<MyVegeTables>({})
 const vegeAllData = ref<Vegetables>(vegeStore.VegeAllData)
+const IsPopup=ref<boolean>(false)
+const changeData=ref<datatable>()
+const Changeunique=ref<string|number>("")
 watch(() => vegeStore.VegeAllData, (newUser) => {
   vegeAllData.value = newUser;
   initData()
@@ -131,6 +145,14 @@ function convertToMyVegeTables(data: Vegetables): MyVegeTables {
 
   return result;
 }
+function changeVegeData(unique: string|number,vegedata:datatable){
+  IsPopup.value=true
+  changeData.value=vegedata
+  Changeunique.value=unique
+}
+async function onPushChange(uproadData:Vegetables){
+  IsPopup.value=!await vegeStore.updateVegeData(uproadData)
+}
 </script>
 <template>
   <!-- {{props.vegeAllData}} -->
@@ -150,6 +172,7 @@ function convertToMyVegeTables(data: Vegetables): MyVegeTables {
         <th>販売単位</th>
         <th>単価</th>
         <th>卸先</th>
+        <th>編集</th>
         <th>削除</th>
       </tr>
     </thead>
@@ -159,10 +182,17 @@ function convertToMyVegeTables(data: Vegetables): MyVegeTables {
         v-bind:-vege-data="elements"
         v-bind:unique="unique"
         v-on:delete-vege-data="deleteVegeData"
+        v-on:change-vege-data="changeVegeData"
         ></MyVegeElement>
       </tr>
     </tbody>
   </table>
+  <article v-if="IsPopup&&changeData" class="myvege_popup">
+    <MyVegePopup
+    v-bind:unique-key="Changeunique"
+    v-bind:vegedata="changeData"
+    v-on:on-push-change="onPushChange"></MyVegePopup>
+  </article>
 </template>
 <style>
 .uid {
@@ -174,5 +204,14 @@ function convertToMyVegeTables(data: Vegetables): MyVegeTables {
   background-color: white;
   display: flex;
   align-items: center;
+}
+.myvege_popup{
+  position: fixed;
+  top: 10%;
+  left: 30%;
+  background-color: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: rgba(0, 0, 0, 0.12) 0px 2px 10px;
 }
 </style>

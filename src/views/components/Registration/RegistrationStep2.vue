@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import RegStep2image from './RegStep2image.vue';
+import {useRoadStationStore}from "@/stores/roadStation"
 interface Vegetables{
     [key:string]:{
         [key:string]:{
@@ -42,9 +43,6 @@ enum Mode{
   Photo="Photo",
   RoadStation="RoadStation"
 }
-  
-
-import {useRoadStationStore}from "@/stores/roadStation"
 const emit = defineEmits<Emits>()
 const props = defineProps<Props>()
 const roadStationList = ref<string[]>([])

@@ -2,10 +2,9 @@
 import { ref } from 'vue'
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 interface Props {
-  vegekeys: string[]
   index:number
   vegeName:string
-  uniquwKeys:string|null
+  uniquwKeys:string|null|number
 }
 interface Emits {
   (event: 'uproadImage', URL:string,index:number): void
