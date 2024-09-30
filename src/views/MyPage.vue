@@ -43,7 +43,7 @@ watch(() => vegeStore.VegeAllData, (newUser) => {
     v-bind:current-user="currentUser"
     v-if="currentUser != null "
   ></my-page-my-vege>
-  <!-- <my-page-order v-bind:current-user="currentUser" v-if="currentUser != null"></my-page-order> -->
+  <my-page-order v-bind:current-user="currentUser" v-if="currentUser != null"></my-page-order>
 </template>
 <style>
 .title {
