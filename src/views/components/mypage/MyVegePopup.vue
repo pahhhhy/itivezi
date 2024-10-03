@@ -3,13 +3,17 @@ import { ref,watch} from 'vue'
 import RegStep2image from '../Registration/RegStep2image.vue';
 import {useRoadStationStore}from "@/stores/roadStation"
 import { useVegeStore } from '@/stores/vege'
+enum State{
+  Discontinued="Discontinued",
+  Available="Available"
+}
 interface Vegetables{
     [key:string]:{
         [key:string]:{
             en:number;
             farmer:string
             roadStation:string
-            state:string
+            state:State
             uid:string
             unit:string
             photo:string
@@ -20,7 +24,7 @@ interface datatable {
   en:number;
   farmer:string
   roadStation:string
-  state:string
+  state:State
   uid:string
   unit:string
   photo:string

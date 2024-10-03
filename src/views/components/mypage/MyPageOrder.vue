@@ -14,7 +14,7 @@ interface OrdertablesElement{
     en:number;
     farmer:string
     roadStation:string
-    state:string
+    state:State
     unique:string
     unit:string
     photo:string
@@ -25,7 +25,7 @@ interface OrdertablesElement{
   email:string
   orderName:string
   selectData:string
-  state:string
+  state:State
   totalMoney:number
 }
 

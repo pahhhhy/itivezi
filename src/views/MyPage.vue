@@ -8,13 +8,17 @@ import MyPageUpdate from './components/mypage/MyPageUpdate.vue'
 import MyPageMyVege from './components/mypage/MyPageMyVege.vue'
 import { useUserStore } from '@/stores/userData';
 import { useVegeStore } from '@/stores/vege'
+enum State{
+  Discontinued="Discontinued",
+  Available="Available"
+}
 interface Vegetables{
     [key:string]:{
         [key:string]:{
             en:number;
             farmer:string
             roadStation:string
-            state:string
+            state:State
             uid:string
             unit:string
             photo:string

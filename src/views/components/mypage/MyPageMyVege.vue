@@ -4,13 +4,17 @@ import { type User } from 'firebase/auth'
 import { useVegeStore } from '@/stores/vege'
 import MyVegeElement from './MyVegeElement.vue';
 import MyVegePopup from './MyVegePopup.vue';
+enum State{
+  Discontinued="Discontinued",
+  Available="Available"
+}
 interface Vegetables{
     [vegeName:string]:{
         [uniqueKey:string]:{
             en:number;
             farmer:string
             roadStation:string
-            state:string
+            state:State
             uid:string
             unit:string
             photo:string
@@ -22,7 +26,7 @@ interface MyVegeTables{
             en:number;
             farmer:string
             roadStation:string
-            state:string
+            state:State
             uid:string
             unit:string
             photo:string
@@ -33,7 +37,7 @@ interface datatable {
   en:number;
   farmer:string
   roadStation:string
-  state:string
+  state:State
   uid:string
   unit:string
   photo:string
@@ -78,7 +82,7 @@ function filterAvailableVegetables(data: Vegetables): Vegetables {
     for (const vegeName in data) {
         const filteredEntries: { [uniqueKey: string]: any } = {};
         for (const uniqueKey in data[vegeName]) {
-            if (data[vegeName][uniqueKey].state === "Available") {
+            if (data[vegeName][uniqueKey].state === State.Available) {
                 filteredEntries[uniqueKey] = data[vegeName][uniqueKey];
             }
         }

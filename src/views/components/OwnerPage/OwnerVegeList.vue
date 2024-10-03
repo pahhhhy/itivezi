@@ -1,13 +1,42 @@
 <script setup lang="ts">
-import {onMounted, ref} from 'vue'
+import {onMounted, ref,watch} from 'vue'
 import {getDatabase, onValue, ref as fireRef, set, update} from 'firebase/database'
 import {useRoadStationStore} from "../../../stores/roadStation"
 import draggable from 'vuedraggable'
 import {getAuth, onAuthStateChanged, type User} from 'firebase/auth'
-
+import { useVegeStore } from '@/stores/vege'
+enum State{
+  Discontinued="Discontinued",
+  Available="Available"
+}
+interface Vegetables{
+    [key:string]:{
+        [key:string]:{
+            en:number;
+            farmer:string
+            roadStation:string
+            state:State
+            uid:string
+            unit:string
+            photo:string
+        }
+    }
+}
+enum Role{
+    Onwer="管理者",
+    Buyer="飲食店",
+    Farmer="農家",
+    Murone="室根",
+    Kawasaki="川崎",
+    None=""
+  }
+const vegeStore=useVegeStore()
+const vegeAllData = ref<Vegetables>(vegeStore.VegeAllData)
+watch(() => vegeStore.VegeAllData, (newUser) => {
+  vegeAllData.value = newUser;
+});
 const roadStationUnitTempList = ref<string[]>(useRoadStationStore().roadStationTemp)
 const isActive = ref<boolean>(false)
-const vegeAllData = ref<any>(null)
 const vegeKeys = ref<string[]>([])
 const selectedRoadStation = ref<string>(roadStationUnitTempList.value[0])
 const excludedVegeList = ref<any>([])

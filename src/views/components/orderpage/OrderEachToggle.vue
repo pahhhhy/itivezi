@@ -6,7 +6,7 @@ interface datatables{
             en:number;
             farmer:string
             roadStation:string
-            state:string
+            state:State
             uid:string
             unit:string
             photo:string

@@ -1,11 +1,15 @@
 import { defineStore } from 'pinia'
+enum State{
+    Discontinued="Discontinued",
+    Available="Available"
+  }
 interface Vegetables{
     [vegeName:string]:{
         [uniqueKey:string]:{
             en:number;
             farmer:string
             roadStation:string
-            state:string
+            state:State
             uid:string
             unit:string
             photo:string

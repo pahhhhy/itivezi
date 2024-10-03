@@ -1,5 +1,9 @@
 import { defineStore } from 'pinia'
 import { getDatabase, ref as fireRef,  onValue,push ,set,update} from 'firebase/database'
+enum State{
+  Discontinued="Discontinued",
+  Available="Available"
+}
 interface Ordertables{
     [uid:string]:{
         [uniqueKey:string]:OrdertablesElement
@@ -10,7 +14,7 @@ interface OrdertablesElement{
     en:number;
     farmer:string
     roadStation:string
-    state:string
+    state:State
     unique:string
     unit:string
     photo:string

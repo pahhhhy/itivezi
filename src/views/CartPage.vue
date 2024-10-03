@@ -5,6 +5,10 @@ import { useUserStore } from '@/stores/userData';
 import { useFireOrderStore } from '@/stores/fireOrder';
 import cartElement from './components/cartPage/cartElement.vue';
 import router from '@/router'
+enum State{
+  Discontinued="Discontinued",
+  Available="Available"
+}
 interface CartTables{
     [uid:string]:{
          [uniqueKey: string]:CartElementTables;
@@ -35,7 +39,7 @@ interface OrdertablesElement{
     en:number;
     farmer:string
     roadStation:string
-    state:string
+    state:State
     unique:string
     unit:string
     photo:string
@@ -77,7 +81,7 @@ function addCartToOrder(cartData: CartTables, uid: string, order: OrdertablesEle
         en: item.en,
         farmer: item.farmer,
         roadStation: item.roadStation,
-        state: "Available", // state を追加
+        state: State.Available, // state を追加
         unique: item.unique,
         unit: item.unit,
         photo: item.photo,

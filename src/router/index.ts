@@ -12,6 +12,14 @@ import {
   getAuth
 } from 'firebase/auth'
 import {getCurrentRole} from "../utils/auth"
+enum Role{
+  Onwer="管理者",
+  Buyer="飲食店",
+  Farmer="農家",
+  Murone="室根",
+  Kawasaki="川崎",
+  None=""
+}
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -64,9 +72,9 @@ const router = createRouter({
 })
 // ここからガードの追加部分
 router.beforeEach(async (to, from, next) => {
-  if (to.name === 'Owner') {
+  if (to.name === Role.Onwer||to.name === Role.Kawasaki||to.name === Role.Murone) {
   // if (to.name === 'chat') {
-      if( await getCurrentRole(getAuth()) === "管理者" ) next();
+      if( await getCurrentRole(getAuth()) ===  Role.Onwer||await getCurrentRole(getAuth()) ===  Role.Murone||await getCurrentRole(getAuth()) ===  Role.Kawasaki) next();
       // if( await getCurrentRole(getAuth()) === "管理者" ) next();
       else next({name: 'login'})
   }else{

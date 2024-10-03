@@ -44,6 +44,8 @@ enum Role{
     Onwer="管理者",
     Buyer="飲食店",
     Farmer="農家",
+    Murone="室根",
+    Kawasaki="川崎",
     None=""
   }
 const userStore=useUserStore()
@@ -157,7 +159,7 @@ watch(
           <RouterLink v-bind:to="{ name: 'login' }" class="link">ログイン<br>新規登録</RouterLink>
         </button>
       </li>
-      <li v-if="currentUser != null && myRole == Role.Onwer">
+      <li v-if="currentUser != null && myRole == (Role.Onwer||Role.Kawasaki||Role.Murone)">
         <button v-on:click="onClickBurger" class="sidebar_element">
           <i class="bi bi-columns-gap"></i>
           <RouterLink v-bind:to="{ name: 'Owner' }" class="link">管理者画面</RouterLink>

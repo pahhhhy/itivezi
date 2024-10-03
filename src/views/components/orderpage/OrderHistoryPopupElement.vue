@@ -4,7 +4,7 @@ interface vegeElementTables{
   en:number
   farmer:string
   roadStation:string
-  state:string
+  state:State
   uid:string
   unit:string
   photo:string
@@ -23,7 +23,7 @@ interface orderVegeElementTables{
     en:number;
     farmer:string
     roadStation:string
-    state:string
+    state:State
     unique:string
     unit:string
     photo:string

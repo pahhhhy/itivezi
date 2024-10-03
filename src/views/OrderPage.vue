@@ -7,6 +7,10 @@ import OrderFormPage from './components/orderpage/OrderFormPage.vue';
 import OrderEachToggle from './components/orderpage/OrderEachToggle.vue';
 import { useCartStore } from '@/stores/cart';
 import router from '@/router'
+enum State{
+  Discontinued="Discontinued",
+  Available="Available"
+}
 interface CartTables{
     [uid:string]:{
          [uniqueKey: string]:CartElementTables;
@@ -29,7 +33,7 @@ interface Vegetables{
             en:number;
             farmer:string
             roadStation:string
-            state:string
+            state:State
             uid:string
             unit:string
             photo:string
@@ -58,7 +62,7 @@ function filterAvailableVegetables(data: Vegetables): Vegetables {
     for (const vegeName in data) {
         const filteredEntries: { [uniqueKey: string]: any } = {};
         for (const uniqueKey in data[vegeName]) {
-            if (data[vegeName][uniqueKey].state === "Available") {
+            if (data[vegeName][uniqueKey].state === State.Available) {
                 filteredEntries[uniqueKey] = data[vegeName][uniqueKey];
             }
         }
