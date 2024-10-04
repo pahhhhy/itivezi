@@ -3,12 +3,11 @@ import { ref,watch} from 'vue'
 import { useCartStore } from '@/stores/cart';
 import { useUserStore } from '@/stores/userData';
 import { useOrderDataStore } from '@/stores/orderData';
-const OrderDataStore=useOrderDataStore()
-const userStore=useUserStore()
-const currentUser = ref(userStore.currentUser);
-watch(() => userStore.currentUser, (newUser) => {
-  currentUser.value = newUser;
-});
+
+enum State{
+  Discontinued="Discontinued",
+  Available="Available"
+}
 interface Vegetables{
     [vegeName:string]:{
         [uniqueKey:string]:{
@@ -46,12 +45,19 @@ interface Props {
 }
 const props = defineProps<Props>()
 const VegeName=ref<string>(Object.keys(props.orderData)[0])
+const OrderData=ref<Vegetables>(props.orderData)
 const vegeCount=ref<number>(0)
 const totalMoney=ref<number>(0)
 const error=ref<boolean>(false)
 const CartStore=ref(useCartStore())
+const OrderDataStore=useOrderDataStore()
+const userStore=useUserStore()
+const currentUser = ref(userStore.currentUser);
 const uniqueKey=ref<string>(Object.keys(props.orderData[VegeName.value])[0])
 const orderDataElement=ref<Datatables>(props.orderData[VegeName.value][uniqueKey.value])
+  watch(() => userStore.currentUser, (newUser) => {
+  currentUser.value = newUser;
+});
     function changeMoney(money: number) {
   // マイナスの値になることを防ぐ
   if (vegeCount.value< 0) {
@@ -81,10 +87,14 @@ async function onPushCart(){
         
     }
 }
+function onPushBack(){
+  OrderDataStore.resetData()
+}
 </script>
 <template>
 <h1>商品詳細</h1>
 <!-- {{ props.orderData }} -->
+  {{ OrderData }}
 <h3>{{VegeName}}</h3>
 <p>販売単位:{{orderDataElement.unit}}</p>
 <p>値段:{{ orderDataElement.en }}円</p>
@@ -106,6 +116,7 @@ async function onPushCart(){
 
     <h1 style="color: red" v-show="error &&  totalMoney">全ての項目を入力してください</h1>
 <button class="btn btn-success" v-on:click="onPushCart()">カートに入れる</button>
+<button class="btn btn-success" v-on:click="onPushBack()">戻る</button>
 </template>
 <style scoped>
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { getAuth} from 'firebase/auth'
-import { ref,  onMounted } from 'vue'
+import { ref,  onMounted,watch } from 'vue'
 import { getDatabase, ref as fireRef,  onValue } from 'firebase/database'
 import {getCurrentRole} from "../utils/auth"
 import OwnerBuyerList from './components/OwnerPage/OwnerBuyerList.vue'
@@ -8,7 +8,28 @@ import OwnerData from './components/OwnerPage/OwnerData.vue'
 import OwnerFarmerList from './components/OwnerPage/OwnerFarmerList.vue'
 import OwnerVegeList from './components/OwnerPage/OwnerVegeList.vue'
 import OwnerOrderList from './components/OwnerPage/OwnerOrderList.vue'
-//読みこむデータの指定
+import { usefireUserStore } from '@/stores/fireUserdata';
+interface Usertables{
+    affiliation:String[]
+    gender:string
+    name:string
+    phoneNumber:number
+    place:string
+    role:Role
+}
+enum Role{
+    Onwer="管理者",
+    Buyer="飲食店",
+    Farmer="農家",
+    Murone="室根",
+    Kawasaki="川崎",
+    None=""
+  }
+  const fireUseStore=usefireUserStore()
+const myUserData=ref<Usertables>(fireUseStore.myUserData)
+watch(() => fireUseStore.myUserData, (newUser) => {
+  myUserData.value = newUser;
+});
 function readData(path:string,element: string) {
   const CountRef = fireRef(getDatabase(), path+'/' + element)
   const Data = ref<any>(null)
@@ -17,12 +38,6 @@ function readData(path:string,element: string) {
   })
   return Data
 }
-
-const myRole = ref<string | null>(null)
-const vegeAllOrder=ref<any>(readData("testOrders",""))
-onMounted(async () => {
-  myRole.value = await getCurrentRole(getAuth())
-})
 const navBarNumber=ref<number>(0)
 function changeNavBarNumber(number:number){
   navBarNumber.value=number
@@ -39,7 +54,7 @@ function changeNavBarNumber(number:number){
   購入者のリストをみる
   各データをみる（総利用者、注文数、生産者数、掲示板利用数、総購入金額、購入者数） -->
   
-    <section v-if="myRole == '管理者'">
+    <section v-if="[Role.Kawasaki, Role.Murone, Role.Onwer].includes(myUserData.role)">
     <div class="nav-bar">
     <button v-on:click="changeNavBarNumber(1)">野菜リスト</button>
     <button v-on:click="changeNavBarNumber(2)">注文リスト</button>
@@ -47,7 +62,7 @@ function changeNavBarNumber(number:number){
     <button v-on:click="changeNavBarNumber(4)">各データ</button>
   </div>
   <OwnerVegeList  v-if="navBarNumber==1"></OwnerVegeList>
-  <OwnerOrderList v-if="navBarNumber==2&&vegeAllOrder!=null" v-bind:vege-all-order="vegeAllOrder"></OwnerOrderList>
+  <!-- <OwnerOrderList v-if="navBarNumber==2&&vegeAllOrder!=null" ></OwnerOrderList> -->
   <OwnerFarmerList v-if="navBarNumber==3"></OwnerFarmerList>
   <OwnerBuyerList v-if="navBarNumber==3"></OwnerBuyerList>
   <OwnerData v-if="navBarNumber==4"></OwnerData>

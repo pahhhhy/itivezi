@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { ref} from 'vue'
 import OrderToggleElement from './OrderToggleElement.vue';
+enum State{
+  Discontinued="Discontinued",
+  Available="Available"
+}
 interface datatables{
         [key:string]:{
             en:number;

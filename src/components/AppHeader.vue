@@ -159,7 +159,7 @@ watch(
           <RouterLink v-bind:to="{ name: 'login' }" class="link">ログイン<br>新規登録</RouterLink>
         </button>
       </li>
-      <li v-if="currentUser != null && myRole == (Role.Onwer||Role.Kawasaki||Role.Murone)">
+      <li v-if="currentUser != null && [Role.Kawasaki, Role.Murone, Role.Onwer].includes(myUserData.role)">
         <button v-on:click="onClickBurger" class="sidebar_element">
           <i class="bi bi-columns-gap"></i>
           <RouterLink v-bind:to="{ name: 'Owner' }" class="link">管理者画面</RouterLink>

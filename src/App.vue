@@ -7,10 +7,18 @@ import { usefireUserStore } from './stores/fireUserdata';
 import { useVegeStore } from './stores/vege';
 import { useCartStore } from '@/stores/cart';
 import { useFireOrderStore } from './stores/fireOrder';
+import { useSortVegeStore } from './stores/sortByVege';
+enum SortMode{
+    All="all",
+    Kawasaki="川崎",
+    Murone="室根",
+    Other="その他"
+}
 const isBurger=ref<boolean>()
 const background=ref(null)
 const userStore=useUserStore()
 const vegeStore=useVegeStore()
+const sortVegeStore=useSortVegeStore()
 const FireOrderStore=useFireOrderStore()
 const fireUseStore=usefireUserStore()
 const currentUser = ref(userStore.currentUser);
@@ -27,6 +35,7 @@ async function initData(){
   await userStore.roadUserData()
   await vegeStore.roadData()
   await FireOrderStore.roadData()
+  await sortVegeStore.roadData(SortMode.All)
   CartStore.roadData()
   currentUser.value=userStore.currentUser
   if(currentUser.value){

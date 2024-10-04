@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { getDatabase, ref as fireRef,  onValue,push ,set,update} from 'firebase/database'
+import { getDatabase, ref as fireRef,  onValue,push ,set,update,get} from 'firebase/database'
 enum State{
   Discontinued="Discontinued",
   Available="Available"
@@ -87,6 +87,35 @@ export const useVegeStore = defineStore({
               
             } catch (error) {
               console.error("Error removing data:", error);
+            }
+          },
+          async deleteAllVegeData(vegeName: string) {
+            const db = getDatabase();
+            const path = `testVege2/${vegeName}`;
+            
+            try {
+              // まず、指定された vegeName に対応するすべての uniqueKey を取得する
+              const vegeSnapshot = await get(fireRef(db, path));
+              if (!vegeSnapshot.exists()) {
+                console.error("No data found for the specified vegeName.");
+                return;
+              }
+          
+              // 取得したデータの中から uniqueKey をリストアップして state を "Discontinued" にする
+              const updates: any = {};
+              vegeSnapshot.forEach((childSnapshot) => {
+                const uniqueKey = childSnapshot.key;
+                if (uniqueKey) {
+                  updates[`${path}/${uniqueKey}/state`] = "Discontinued";
+                }
+              });
+          
+              // 更新処理
+              await update(fireRef(db), updates);
+              console.log("All state values set to Discontinued.");
+              
+            } catch (error) {
+              console.error("Error updating data:", error);
             }
           }
     }
