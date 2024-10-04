@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { getDatabase, ref as fireRef,  onValue,push ,set,update} from 'firebase/database'
+import { getDatabase, ref as fireRef,  onValue,push } from 'firebase/database'
 enum State{
   Discontinued="Discontinued",
   Available="Available"

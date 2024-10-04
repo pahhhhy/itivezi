@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import { ref} from 'vue'
+enum State{
+  Discontinued="Discontinued",
+  Available="Available"
+}
 interface vegeElementTables{
   en:number
   farmer:string

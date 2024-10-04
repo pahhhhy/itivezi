@@ -2,6 +2,10 @@
 import { ref } from 'vue'
 import { type User } from 'firebase/auth'
 import { useVegeStore } from '@/stores/vege'
+enum State{
+  Discontinued="Discontinued",
+  Available="Available"
+}
 interface Vegetables{
     [vegeName:string]:{
         [uniqueKey:string]:{

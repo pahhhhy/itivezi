@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import { ref,watch} from 'vue'
+enum State{
+  Discontinued="Discontinued",
+  Available="Available"
+}
 interface datatables{
     en:number;
     farmer:string
@@ -27,12 +30,8 @@ interface Vegetables{
         }
     }
 }
-interface Emits {
-  (event: 'OnStep', Next: boolean): void
-}
 import { useOrderDataStore } from '@/stores/orderData';
 const OrderDataStore=useOrderDataStore()
-const emit = defineEmits<Emits>()
 const props = defineProps<Props>()
     
 function onPushCard(){

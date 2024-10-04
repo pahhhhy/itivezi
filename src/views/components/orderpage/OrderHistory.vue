@@ -5,6 +5,10 @@ import { useUserStore } from '@/stores/userData';
 import { useVegeStore } from '@/stores/vege'
 import OrderHistoryElement from './OrderHistoryElement.vue';
 import OrderHistoryPopupElement from './OrderHistoryPopupElement.vue';
+enum State{
+  Discontinued="Discontinued",
+  Available="Available"
+}
 interface Vegetables{
     [vegeName:string]:{
         [uniqueKey:string]:vegeElementTables
@@ -41,7 +45,7 @@ interface OrdertablesElement{
   email:string
   orderName:string
   selectData:string
-  state:State
+  state:string
   totalMoney:number
 }
 
@@ -132,7 +136,7 @@ function getNowSelectData(data: Vegetables, vegeName: string, uniqueKey: string)
     en: 0,                    
     farmer: "",                
     roadStation: "",           
-    state: "Unavailable",      
+    state: State.Discontinued,      
     uid: "",                  
     unit: "",                  
     photo: ""                  
@@ -214,7 +218,7 @@ function addCartToOrder(selectData: Vegetables,  order: OrdertablesElement) {
         en: DataElement.en,
         farmer: DataElement.farmer,
         roadStation: DataElement.roadStation,
-        state: "Available", // state を追加
+        state: State.Available, // state を追加
         unique: uniqueKey[0],
         unit: DataElement.unit,
         photo: DataElement.photo,

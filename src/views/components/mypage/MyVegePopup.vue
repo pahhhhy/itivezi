@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { ref,watch} from 'vue'
+import { ref} from 'vue'
 import RegStep2image from '../Registration/RegStep2image.vue';
 import {useRoadStationStore}from "@/stores/roadStation"
-import { useVegeStore } from '@/stores/vege'
 enum State{
   Discontinued="Discontinued",
   Available="Available"
@@ -62,7 +61,6 @@ const props = defineProps<Props>()
 const vegeunit=ref<unitdata>(splitNumberAndUnit(props.vegedata.unit))
 const vegeMoney=ref<number>(props.vegedata.en)
 const vegeRoadStation=ref<string>(props.vegedata.roadStation)
-const vegeStore=useVegeStore()
 const roadStationUnitTempList = ref<string[]>(useRoadStationStore().roadStationTemp)
 const initialVegetables: Vegetables = {
   [props.vegedata.VegeName]: {

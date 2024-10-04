@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { getDatabase, ref as fireRef, onValue } from 'firebase/database'
 //Vueとfirebaseで同じrefという関数があって競合しているのでfirebaseの方をfireRefにしている
-import { ref,  onMounted ,watch} from 'vue'
-import { getAuth, onAuthStateChanged, type User } from 'firebase/auth'
+import { ref ,watch} from 'vue'
+import {  type User } from 'firebase/auth'
 import MyPageOrder from './components/mypage/MyPageOrder.vue'
 import MyPageUpdate from './components/mypage/MyPageUpdate.vue'
 import MyPageMyVege from './components/mypage/MyPageMyVege.vue'

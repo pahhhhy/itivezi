@@ -1,5 +1,9 @@
 <script setup lang="ts">
-import { ref,watch} from 'vue'
+import { ref} from 'vue'
+enum State{
+  Discontinued="Discontinued",
+  Available="Available"
+}
 interface OrdertablesElement{
   [num:number]:{
     en:number;
@@ -16,7 +20,7 @@ interface OrdertablesElement{
   email:string
   orderName:string
   selectData:string
-  state:State
+  state:string
   totalMoney:number
 }
 interface orderVegeElementTables{

@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { ref,watch} from 'vue'
-
+enum State{
+  Discontinued="Discontinued",
+  Available="Available"
+}
 interface Props {
   VegeData:datatable
   unique:string|number

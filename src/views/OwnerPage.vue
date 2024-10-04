@@ -1,13 +1,10 @@
 <script setup lang="ts">
-import { getAuth} from 'firebase/auth'
-import { ref,  onMounted,watch } from 'vue'
-import { getDatabase, ref as fireRef,  onValue } from 'firebase/database'
-import {getCurrentRole} from "../utils/auth"
+import { ref,  watch } from 'vue'
+
 import OwnerBuyerList from './components/OwnerPage/OwnerBuyerList.vue'
 import OwnerData from './components/OwnerPage/OwnerData.vue'
 import OwnerFarmerList from './components/OwnerPage/OwnerFarmerList.vue'
 import OwnerVegeList from './components/OwnerPage/OwnerVegeList.vue'
-import OwnerOrderList from './components/OwnerPage/OwnerOrderList.vue'
 import { usefireUserStore } from '@/stores/fireUserdata';
 interface Usertables{
     affiliation:String[]

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { getDatabase, ref as fireRef,  onValue,push ,set,update} from 'firebase/database'
+import { getDatabase, ref as fireRef,  onValue,set} from 'firebase/database'
 enum SortMode{
     All="all",
     Kawasaki="川崎",

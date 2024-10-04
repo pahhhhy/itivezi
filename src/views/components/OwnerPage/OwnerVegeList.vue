@@ -1,9 +1,6 @@
 <script setup lang="ts">
-import {onMounted, ref,watch} from 'vue'
-import {getDatabase, onValue, ref as fireRef, set, update} from 'firebase/database'
-import {useRoadStationStore} from "../../../stores/roadStation"
-import draggable from 'vuedraggable'
-import {getAuth, onAuthStateChanged, type User} from 'firebase/auth'
+import { ref,watch} from 'vue'
+import { type User} from 'firebase/auth'
 import { useVegeStore } from '@/stores/vege'
 import { useUserStore } from '@/stores/userData';
 import { usefireUserStore } from '@/stores/fireUserdata';
@@ -165,7 +162,7 @@ function pushBack() {
 
 </script>
 <template>
-  <!-- {{ vegeAllData }} -->
+  {{ vegeAllData }}
   <!-- {{ farmerVegeList }}
   {{uniqueVegeList}} -->
   <!-- {{ CSVfile }} -->

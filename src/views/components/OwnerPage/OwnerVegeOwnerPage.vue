@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref,watch} from 'vue'
-import {getAuth, onAuthStateChanged, type User} from 'firebase/auth'
+import { ref} from 'vue'
+import { type User} from 'firebase/auth'
 import { useSortVegeStore } from '@/stores/sortByVege';
 
 import draggable from 'vuedraggable'

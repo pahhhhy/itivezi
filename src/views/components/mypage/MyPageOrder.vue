@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { getDatabase, ref as fireRef, onValue,  } from 'firebase/database'
 import { ref,watch } from 'vue'
 import { type User } from 'firebase/auth'
 import { useFireOrderStore } from '@/stores/fireOrder';
 import MyOrderElements from './MyOrderElements.vue';
+enum State{
+  Discontinued="Discontinued",
+  Available="Available"
+}
 interface Ordertables{
     [uid:string]:{
         [uniqueKey:string]:OrdertablesElement
@@ -25,7 +28,7 @@ interface OrdertablesElement{
   email:string
   orderName:string
   selectData:string
-  state:State
+  state:string
   totalMoney:number
 }
 
