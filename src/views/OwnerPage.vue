@@ -30,14 +30,6 @@ const myUserData=ref<Usertables>(fireUseStore.myUserData)
 watch(() => fireUseStore.myUserData, (newUser) => {
   myUserData.value = newUser;
 });
-function readData(path:string,element: string) {
-  const CountRef = fireRef(getDatabase(), path+'/' + element)
-  const Data = ref<any>(null)
-  onValue(CountRef, (snapshot) => {
-    Data.value = snapshot.val()
-  })
-  return Data
-}
 const navBarNumber=ref<number>(0)
 function changeNavBarNumber(number:number){
   navBarNumber.value=number
