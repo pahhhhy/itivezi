@@ -1,5 +1,5 @@
 <script setup lang="ts">
-enum State{
+enum VegeState{
   Discontinued="Discontinued",
   Available="Available"
 }
@@ -15,7 +15,7 @@ interface datatable {
   en:number;
   farmer:string
   roadStation:string
-  state:State
+  state:VegeState
   uid:string
   unit:string
   photo:string

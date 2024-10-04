@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import RegStep2image from './RegStep2image.vue';
 import {useRoadStationStore}from "@/stores/roadStation"
-enum State{
+enum VegeState{
   Discontinued="Discontinued",
   Available="Available"
 }
@@ -12,7 +12,7 @@ interface Vegetables{
             en:number;
             farmer:string
             roadStation:string
-            state:State
+            state:VegeState
             uid:string
             unit:string
             photo:string

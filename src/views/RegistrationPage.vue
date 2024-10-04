@@ -7,7 +7,7 @@ import RegistrationStep2 from './components/Registration/RegistrationStep2.vue'
 import RegistrationStep3 from './components/Registration/RegistrationStep3.vue'
 import { useVegeStore } from '@/stores/vege'
 import { useUserStore } from '@/stores/userData';
-enum State{
+enum VegeState{
   Discontinued="Discontinued",
   Available="Available"
 }
@@ -17,7 +17,7 @@ interface Vegetables{
             en:number;
             farmer:string
             roadStation:string
-            state:State
+            state:VegeState
             uid:string
             unit:string
             photo:string

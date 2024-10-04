@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { type User } from 'firebase/auth'
 import { useVegeStore } from '@/stores/vege'
-enum State{
+enum VegeState{
   Discontinued="Discontinued",
   Available="Available"
 }
@@ -12,7 +12,7 @@ interface Vegetables{
             en:number;
             farmer:string
             roadStation:string
-            state:State
+            state:VegeState
             uid:string
             unit:string
             photo:string

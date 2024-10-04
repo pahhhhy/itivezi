@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref,  watch } from 'vue'
-
+import OwnerOrderList from './components/OwnerPage/OwnerOrderList.vue'
 import OwnerBuyerList from './components/OwnerPage/OwnerBuyerList.vue'
 import OwnerData from './components/OwnerPage/OwnerData.vue'
 import OwnerFarmerList from './components/OwnerPage/OwnerFarmerList.vue'
@@ -51,7 +51,7 @@ function changeNavBarNumber(number:number){
     <button v-on:click="changeNavBarNumber(4)">各データ</button>
   </div>
   <OwnerVegeList  v-if="navBarNumber==1"></OwnerVegeList>
-  <!-- <OwnerOrderList v-if="navBarNumber==2&&vegeAllOrder!=null" ></OwnerOrderList> -->
+  <OwnerOrderList v-if="navBarNumber==2" ></OwnerOrderList>
   <OwnerFarmerList v-if="navBarNumber==3"></OwnerFarmerList>
   <OwnerBuyerList v-if="navBarNumber==3"></OwnerBuyerList>
   <OwnerData v-if="navBarNumber==4"></OwnerData>

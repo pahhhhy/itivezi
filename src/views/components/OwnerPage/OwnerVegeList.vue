@@ -14,7 +14,7 @@ interface Usertables{
     role:Role
 }
 
-enum State{
+enum VegeState{
   Discontinued="Discontinued",
   Available="Available"
 }
@@ -24,7 +24,7 @@ interface Vegetables{
             en:number;
             farmer:string
             roadStation:string
-            state:State
+            state:VegeState
             uid:string
             unit:string
             photo:string
@@ -82,7 +82,7 @@ function filterVegetablesByState(vegetables: Vegetables) {
     let hasAvailable = false;
     Object.keys(vegetables[outerKey]).forEach(innerKey => {
       const item = vegetables[outerKey][innerKey];
-      if (item.state === State.Available) {
+      if (item.state === VegeState.Available) {
         hasAvailable = true; // Available なデータがある場合にフラグを立てる
         if (!available[outerKey]) {
           available[outerKey] = {};

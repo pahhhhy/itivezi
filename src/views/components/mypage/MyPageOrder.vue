@@ -3,9 +3,15 @@ import { ref,watch } from 'vue'
 import { type User } from 'firebase/auth'
 import { useFireOrderStore } from '@/stores/fireOrder';
 import MyOrderElements from './MyOrderElements.vue';
-enum State{
+enum VegeState{
   Discontinued="Discontinued",
   Available="Available"
+}
+enum OrderStete{
+  Completed="取引完了",
+  Uncontacted="未連絡",
+  contacted="連絡済み",
+  cancel="取引取り消し"
 }
 interface Ordertables{
     [uid:string]:{
@@ -17,7 +23,7 @@ interface OrdertablesElement{
     en:number;
     farmer:string
     roadStation:string
-    state:State
+    state:VegeState
     unique:string
     unit:string
     photo:string
@@ -28,7 +34,7 @@ interface OrdertablesElement{
   email:string
   orderName:string
   selectData:string
-  state:string
+  state:OrderStete
   totalMoney:number
 }
 

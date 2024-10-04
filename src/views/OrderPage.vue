@@ -14,7 +14,7 @@ enum SortMode{
     Murone="室根",
     Other="その他"
 }
-enum State{
+enum VegeState{
   Discontinued="Discontinued",
   Available="Available"
 }
@@ -40,7 +40,7 @@ interface Vegetables{
             en:number;
             farmer:string
             roadStation:string
-            state:State
+            state:VegeState
             uid:string
             unit:string
             photo:string
@@ -77,7 +77,7 @@ function filterAvailableVegetables(data: Vegetables): Vegetables {
     for (const vegeName in data) {
         const filteredEntries: { [uniqueKey: string]: any } = {};
         for (const uniqueKey in data[vegeName]) {
-            if (data[vegeName][uniqueKey].state === State.Available) {
+            if (data[vegeName][uniqueKey].state === VegeState.Available) {
                 filteredEntries[uniqueKey] = data[vegeName][uniqueKey];
             }
         }

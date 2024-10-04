@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref} from 'vue'
 import OrderToggleElement from './OrderToggleElement.vue';
-enum State{
+enum VegeState{
   Discontinued="Discontinued",
   Available="Available"
 }
@@ -10,7 +10,7 @@ interface datatables{
             en:number;
             farmer:string
             roadStation:string
-            state:State
+            state:VegeState
             uid:string
             unit:string
             photo:string

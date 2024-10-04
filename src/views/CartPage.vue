@@ -5,10 +5,17 @@ import { useUserStore } from '@/stores/userData';
 import { useFireOrderStore } from '@/stores/fireOrder';
 import cartElement from './components/cartPage/cartElement.vue';
 import router from '@/router'
-enum State{
+enum VegeState{
   Discontinued="Discontinued",
   Available="Available"
 }
+enum OrderStete{
+  Completed="取引完了",
+  Uncontacted="未連絡",
+  contacted="連絡済み",
+  cancel="取引取り消し"
+}
+
 interface CartTables{
     [uid:string]:{
          [uniqueKey: string]:CartElementTables;
@@ -39,7 +46,7 @@ interface OrdertablesElement{
     en:number;
     farmer:string
     roadStation:string
-    state:State
+    state:VegeState
     unique:string
     unit:string
     photo:string
@@ -50,7 +57,7 @@ interface OrdertablesElement{
   email:string
   orderName:string
   selectData:string
-  state:string
+  state:OrderStete
   totalMoney:number
 }
 const today = new Date().toISOString().split('T')[0]
@@ -81,7 +88,7 @@ function addCartToOrder(cartData: CartTables, uid: string, order: OrdertablesEle
         en: item.en,
         farmer: item.farmer,
         roadStation: item.roadStation,
-        state: State.Available, // state を追加
+        state: VegeState.Available, // state を追加
         unique: item.unique,
         unit: item.unit,
         photo: item.photo,
@@ -103,7 +110,7 @@ async function onPushBuy(){
             email: currentUser.value.email,
             orderName: currentUser.value.displayName,
             selectData: selectDate.value,
-            state: "未連絡",
+            state: OrderStete.Uncontacted,
             totalMoney: AllTotalMoney.value
         };
         addCartToOrder(cartData.value,currentUser.value.uid,uproadData)

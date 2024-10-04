@@ -4,7 +4,7 @@ import { useCartStore } from '@/stores/cart';
 import { useUserStore } from '@/stores/userData';
 import { useOrderDataStore } from '@/stores/orderData';
 
-enum State{
+enum VegeState{
   Discontinued="Discontinued",
   Available="Available"
 }
@@ -14,7 +14,7 @@ interface Vegetables{
             en:number;
             farmer:string
             roadStation:string
-            state:State
+            state:VegeState
             uid:string
             unit:string
             photo:string
@@ -25,7 +25,7 @@ interface Datatables{
     en:number;
     farmer:string
     roadStation:string
-    state:State
+    state:VegeState
     uid:string
     unit:string
     photo:string

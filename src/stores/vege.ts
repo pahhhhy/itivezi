@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { getDatabase, ref as fireRef,  onValue,push ,set,update,get} from 'firebase/database'
-enum State{
+enum VegeState{
   Discontinued="Discontinued",
   Available="Available"
 }
@@ -10,7 +10,7 @@ interface Vegetables{
             en:number;
             farmer:string
             roadStation:string
-            state:State
+            state:VegeState
             uid:string
             unit:string
             photo:string

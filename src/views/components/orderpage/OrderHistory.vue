@@ -5,9 +5,15 @@ import { useUserStore } from '@/stores/userData';
 import { useVegeStore } from '@/stores/vege'
 import OrderHistoryElement from './OrderHistoryElement.vue';
 import OrderHistoryPopupElement from './OrderHistoryPopupElement.vue';
-enum State{
+enum VegeState{
   Discontinued="Discontinued",
   Available="Available"
+}
+enum OrderStete{
+  Completed="取引完了",
+  Uncontacted="未連絡",
+  contacted="連絡済み",
+  cancel="取引取り消し"
 }
 interface Vegetables{
     [vegeName:string]:{
@@ -18,7 +24,7 @@ interface vegeElementTables{
   en:number
   farmer:string
   roadStation:string
-  state:State
+  state:VegeState
   uid:string
   unit:string
   photo:string
@@ -34,7 +40,7 @@ interface OrdertablesElement{
     en:number;
     farmer:string
     roadStation:string
-    state:State
+    state:VegeState
     unique:string
     unit:string
     photo:string
@@ -45,7 +51,7 @@ interface OrdertablesElement{
   email:string
   orderName:string
   selectData:string
-  state:string
+  state:OrderStete
   totalMoney:number
 }
 
@@ -54,7 +60,7 @@ interface orderVegeElementTables{
     en:number;
     farmer:string
     roadStation:string
-    state:State
+    state:VegeState
     unique:string
     unit:string
     photo:string
@@ -136,7 +142,7 @@ function getNowSelectData(data: Vegetables, vegeName: string, uniqueKey: string)
     en: 0,                    
     farmer: "",                
     roadStation: "",           
-    state: State.Discontinued,      
+    state: VegeState.Discontinued,      
     uid: "",                  
     unit: "",                  
     photo: ""                  
@@ -201,7 +207,7 @@ async function onPushBuy(){
             email: currentUser.value.email,
             orderName: currentUser.value.displayName,
             selectData: selectDate.value,
-            state: "未連絡",
+            state: OrderStete.Uncontacted,
             totalMoney: AllTotalMoney.value
         };
         addCartToOrder(nowSelectData.value,uproadData)
@@ -218,7 +224,7 @@ function addCartToOrder(selectData: Vegetables,  order: OrdertablesElement) {
         en: DataElement.en,
         farmer: DataElement.farmer,
         roadStation: DataElement.roadStation,
-        state: State.Available, // state を追加
+        state: VegeState.Available, // state を追加
         unique: uniqueKey[0],
         unit: DataElement.unit,
         photo: DataElement.photo,

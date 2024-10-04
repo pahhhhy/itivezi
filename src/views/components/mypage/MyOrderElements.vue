@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref} from 'vue'
-enum State{
+enum VegeState{
   Discontinued="Discontinued",
   Available="Available"
 }
@@ -9,7 +9,7 @@ interface OrdertablesElement{
     en:number;
     farmer:string
     roadStation:string
-    state:State
+    state:VegeState
     unique:string
     unit:string
     photo:string
@@ -28,7 +28,7 @@ interface orderVegeElementTables{
     en:number;
     farmer:string
     roadStation:string
-    state:State
+    state:VegeState
     unique:string
     unit:string
     photo:string

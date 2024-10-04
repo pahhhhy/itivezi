@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref,watch } from 'vue'
-enum State{
+enum VegeState{
   Discontinued="Discontinued",
   Available="Available"
 }
@@ -10,7 +10,7 @@ interface Vegetables{
             en:number;
             farmer:string
             roadStation:string
-            state:State
+            state:VegeState
             uid:string
             unit:string
             photo:string
@@ -65,7 +65,7 @@ function changeVege() {
       en: -1,
       farmer: myName.value,
       roadStation: "",
-      state: State.Available,
+      state: VegeState.Available,
       uid: myUid.value,
       unit: "",
       photo: "none"

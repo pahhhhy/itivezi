@@ -1,81 +1,71 @@
 <script setup lang="ts">
-import {ref} from 'vue'
-import {useRoadStationStore} from "../../../stores/roadStation"
-import {getDatabase, ref as fireRef, update} from 'firebase/database'
-
-const roadStationUnitTempList = ref<string[]>(useRoadStationStore().roadStationTemp)
-const selectedRoadStation = ref<string>(roadStationUnitTempList.value[0])
-
-interface Props {
-  vegeAllOrder: any
+import {ref,watch} from 'vue'
+import { useFireOrderStore } from '@/stores/fireOrder';
+enum VegeState{
+  Discontinued="Discontinued",
+  Available="Available"
 }
-
-const props = defineProps<Props>()
-
+enum OrderStete{
+  Completed="取引完了",
+  Uncontacted="未連絡",
+  contacted="連絡済み",
+  cancel="取引取り消し"
+}
+interface Ordertables{
+    [uid:string]:{
+        [uniqueKey:string]:OrdertablesElement
+    }
+}
+interface OrdertablesElement{
+  [num:number]:{
+    en:number;
+    farmer:string
+    roadStation:string
+    state:VegeState
+    unique:string
+    unit:string
+    photo:string
+    amount:number
+    VegeName:string
+}
+  orderTime:string
+  email:string
+  orderName:string
+  selectData:string
+  state:OrderStete
+  totalMoney:number
+}
+interface titleDataTables{
+  orderTime: string, 
+  orderName: string, 
+  state: string
+}
+const FireOrderStore=useFireOrderStore()
+const AllOrderData=ref<Ordertables>(FireOrderStore.OrderAllData)
+const titleData=ref<titleDataTables[]>(extractOrderInfo(AllOrderData.value))
+  watch(() => FireOrderStore.OrderAllData, (newUser) => {
+  AllOrderData.value = newUser;
+  titleData.value=extractOrderInfo(AllOrderData.value)
+});
 function pushActive() {
   isActive.value = !isActive.value
 }
 
-function makeOrderList() {
-  let roadStationOrderData = props.vegeAllOrder[selectedRoadStation.value]
-  let orderKeys = Object.keys(roadStationOrderData);
-  let resultList: any = {};
-  for (let i = 0; i < orderKeys.length; i++) {
-    let timeKeys = Object.keys(roadStationOrderData[orderKeys[i]]);
+function extractOrderInfo(ordertables: Ordertables) {
+    const result: titleDataTables[] = [];
 
-    for (let j = 0; j < timeKeys.length; j++) {
-      // timeKeys[j]を使ってアクセスするように修正
-      resultList[timeKeys[j]] = roadStationOrderData[orderKeys[i]][timeKeys[j]];
-      const formattedKey = timeKeys[j].split('-').slice(0, 3).join('/');
-      resultList[timeKeys[j]] ["key"] = timeKeys[j]
-      resultList[timeKeys[j]] ["date"] = formattedKey
-      resultList[timeKeys[j]] ["unique"] = orderKeys[i]
+    for (const uid in ordertables) {
+        for (const uniqueKey in ordertables[uid]) {
+            const order = ordertables[uid][uniqueKey];
+            result.push({
+                orderTime: order.orderTime,
+                orderName: order.orderName,
+                state: order.state,
+            });
+        }
     }
-  }
-  // キーでソートする
-  const sortedData = Object.fromEntries(
-      Object.entries(resultList).sort(([keyA], [keyB]) => keyB.localeCompare(keyA))
-  );
-  let sortedDataKeys = Object.keys(sortedData)
-  selectedTableList.value = new Array(sortedDataKeys.length).fill(false)
-  selectedTableUnitList.value = Object.entries(sortedData).reduce((acc, [dateTime, data]) => {
-    // 数字キーだけを抽出
-    const numericKeysData = Object.entries(data as any)
-        .filter(([key]) => !isNaN(Number(key)))  // 数字キーだけをフィルタリング
-        .reduce((innerAcc, [key, value]) => {
-          innerAcc[key] = value;
-          return innerAcc;
-        }, {} as Record<string, any>);
-    // 日時をキーとして、新しいオブジェクトに追加
-    acc[dateTime] = numericKeysData;
-    return acc;
-  }, {} as Record<string, Record<string, any>>);
-  return sortedData;
-}
 
-function selectOrderData(index: number) {
-  selectedTableList.value[index] = !selectedTableList.value[index]
-}
-
-function updateState(element: string, unique: string, key: string): Promise<void> {
-  const db = getDatabase();
-
-  return new Promise((resolve, reject) => {
-    update(fireRef(db, 'testOrders/' + selectedRoadStation.value + "/" + unique + "/" + key), {state: element})
-        .then(() => {
-
-          resolve();
-        })
-        .catch((error) => {
-
-          reject(error);
-        });
-  });
-}
-
-async function changeState(element: string, unique: string, key: string) {
-  await updateState(element, unique, key)
-  initData()
+    return result.reverse();
 }
 
 // 選択されたインデックスを保存するための状態
@@ -85,17 +75,6 @@ const selectedTableUnitList = ref<any>([])
 const sortedOrderData = ref<any>({})
 const state = ref<string[]>([])
 const isFilter = ref<boolean>(false)
-
-function initData() {
-  sortedOrderData.value = makeOrderList()
-  let sortOrderDataKeys = Object.keys(sortedOrderData.value)
-  for (let i: number = 0; i < sortOrderDataKeys.length; i++) {
-    state.value[i] = sortedOrderData.value[sortOrderDataKeys[i]].state
-  }
-  sortedOrderData.value = getGroupData(sortedOrderData.value)
-}
-
-initData()
 
 function getGroupData(data: any) {
   // 結果を格納するオブジェクトを準備
@@ -128,11 +107,6 @@ function toggleClass(index: number) {
 </script>
 <template>
   <h1>注文履歴</h1>
-  <select class="form-select" aria-label="roadsideStationSelect" v-model="selectedRoadStation" @change="initData">
-    <option selected v-bind:value="roadStation" v-for="roadStation in roadStationUnitTempList" :key=roadStation>
-      {{ roadStation }}
-    </option>
-  </select>
   <!-- {{props.vegeAllOrder}} -->
   <!-- {{ sortedOrderData["全て"] }} -->
   <!-- {{selectedTableUnitList["2024-8-22-11-22-0"]}} -->
@@ -152,8 +126,8 @@ function toggleClass(index: number) {
         <p>名前</p>
         <p>連絡</p>
       </div>
-      <div v-for="(element) in sortedOrderData[labels[selectedClass]]" :key="element" class="order-table">
-        <p>{{ element["date"] }}</p>
+      <div v-for="(element,index) in titleData" :key="index" class="order-table">
+        <p>{{ element["orderTime"] }}</p>
         <p>{{ element["orderName"] }}</p>
         <p>{{ element["state"] }}</p>
       </div>
@@ -169,11 +143,10 @@ function toggleClass(index: number) {
         <p>状態</p>
         <p></p>
       </div>
-      <article v-if="!isFilter">
+      <!-- <article v-if="!isFilter">
         <div v-for="(element,time,index) in sortedOrderData[labels[selectedClass]]" :key="element"
              class="order-table-active">
           <div class="order-table-unit" v-on:click="selectOrderData(index)">
-            <!-- {{ element }} -->
 
             <p>{{ element["key"] }}</p>
             <p>{{ element["orderName"] }}</p>
@@ -185,9 +158,6 @@ function toggleClass(index: number) {
           <div class="order-table-selected" v-if="selectedTableList[index]">
             <div v-for="(vegeData,number) in selectedTableUnitList[time]" v-bind:key="number"
                  class="order-table-selected-unit">
-              <!-- {{vegeData}}[ "0", { "amount": 345, "farmerName": "三浦涼太郎", "price": 119025, "unit": "123本", "vegeName": "ジャガイモ" } ] -->
-              <!-- 上のような変数だから１を指定するとデータが取れる -->
-              <!-- {{ vegeData }} -->
               <h3>{{ vegeData["vegeName"] }}</h3>
               <p>単位：{{ vegeData["unit"] }}</p>
               <p>個数：{{ vegeData["amount"] }}組</p>
@@ -208,7 +178,7 @@ function toggleClass(index: number) {
             </select></p>
           </div>
         </div>
-      </article>
+      </article> -->
 
     </div>
     <button v-on:click="pushActive" class="orderList-button">更新する</button>

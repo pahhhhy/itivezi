@@ -4,7 +4,7 @@ import { type User} from 'firebase/auth'
 import { useSortVegeStore } from '@/stores/sortByVege';
 
 import draggable from 'vuedraggable'
-enum State{
+enum VegeState{
   Discontinued="Discontinued",
   Available="Available"
 }
@@ -28,7 +28,7 @@ interface Vegetables{
             en:number;
             farmer:string
             roadStation:string
-            state:State
+            state:VegeState
             uid:string
             unit:string
             photo:string

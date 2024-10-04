@@ -7,7 +7,7 @@ import MyPageUpdate from './components/mypage/MyPageUpdate.vue'
 import MyPageMyVege from './components/mypage/MyPageMyVege.vue'
 import { useUserStore } from '@/stores/userData';
 import { useVegeStore } from '@/stores/vege'
-enum State{
+enum VegeState{
   Discontinued="Discontinued",
   Available="Available"
 }
@@ -17,7 +17,7 @@ interface Vegetables{
             en:number;
             farmer:string
             roadStation:string
-            state:State
+            state:VegeState
             uid:string
             unit:string
             photo:string
