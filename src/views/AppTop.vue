@@ -55,7 +55,7 @@ watch(() => fireUseStore.myUserData, (newUser) => {
     <h1>ようこそ{{ currentUser.displayName }}様</h1>
     <AppTopBuyer v-if="myUserData.role==Role.Buyer&&myUserData.gender!=''"></AppTopBuyer>
     <AppTopFarmer v-if="myUserData.role==Role.Farmer&&myUserData.gender!=''"></AppTopFarmer>
-    <AppTopOwner v-if="[Role.Kawasaki, Role.Murone, Role.Onwer].includes(myUserData.role)&&myUserData.gender!=''"></AppTopOwner> 
+    <AppTopOwner v-if="(myUserData.role==Role.Onwer||myUserData.role==Role.Murone||myUserData.role==Role.Kawasaki)&&myUserData.gender!=''"></AppTopOwner> 
   </article>
 </template>
 <style>

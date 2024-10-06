@@ -126,7 +126,7 @@ function exportToCSV(data: string[][], fileName: string) {
 }
 </script>
 <template>
-  {{ VegeData }}
+  <!-- {{ VegeData }} -->
       <h1 class="vege-title" v-if="props.role==Role.Onwer">現在全ての注文可能な野菜のリスト</h1>
       <h1 class="vege-title" v-if="props.role!=Role.Onwer">現在{{props.role}}の注文可能な野菜のリスト</h1>
       <article v-if="!isActive">

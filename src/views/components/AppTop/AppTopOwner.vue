@@ -52,7 +52,7 @@ function logout() {
           <div class="card-body">
             <h5 class="card-title"><i class="bi bi-columns-gap"></i>管理者画面</h5>
             <p class="card-text">注文画面の野菜の並べ替えや各種データの出力や初期設定などをすることができます。</p>
-            <div  class="btn btn-primary"><RouterLink v-bind:to="{ name: 'Owner' }" class="link">マイページ</RouterLink></div>
+            <div  class="btn btn-primary"><RouterLink v-bind:to="{ name: 'Owner' }" class="link">管理画面</RouterLink></div>
           </div>
         </div>
       </div>

@@ -69,11 +69,21 @@ const cartStore=useCartStore()
 const cartData=ref<CartTables>(cartStore.cartData)
 const AllTotalMoney=ref<number>(0)
 const isPopup=ref<boolean>(false)
+const isNone=ref<boolean>(false)
+  if(Object.keys(cartData.value).length==0){
+    isNone.value=true
+  }
 watch(() => userStore.currentUser, (newUser) => {
   currentUser.value = newUser;
 });
 watch(() => cartStore.cartData, (newUser) => {
   cartData.value = newUser;
+  if(currentUser.value){
+    if(cartData.value[currentUser.value.uid]==undefined){
+    isNone.value=true
+  }
+  }
+  
 });
 function getTotalMoney(money:number){
     AllTotalMoney.value = AllTotalMoney.value + money
@@ -155,18 +165,20 @@ function getJSTTimestamp() {
   // ISO 8601フォーマットに変換し、無効な文字を置き換える
   return jstDate.toISOString().replace(/[:.]/g, '-')
 }
-function deleteData(unique:string|number){
+async function deleteData(unique:string|number){
   if(currentUser.value &&typeof unique=="string"){
     delete cartData.value[currentUser.value.uid][unique]
     cartStore.deleteCartData(currentUser.value.uid,unique)
   }
-  
+}
+function onPushOrder(){
+  router.push("/order")
 }
 </script>
 <template>
 <h1>購入画面</h1>
 <!-- {{ cartData }} -->
-<table v-if="currentUser">
+<table v-if="currentUser&&!isNone">
     <tbody>
         <tr>
             <th>商品詳細</th>
@@ -203,6 +215,10 @@ function deleteData(unique:string|number){
         <button v-on:click="onPushBack()">買い物に戻る</button>
     </article>
 </table>
+<article v-if="isNone">
+  <h2>カートに商品がありません。注文画面で再度注文してください</h2>
+  <button class="btn btn-success" v-on:click="onPushOrder()">注文へ</button>
+</article>
 </template>
 <style scoped>
 .cart_popup{

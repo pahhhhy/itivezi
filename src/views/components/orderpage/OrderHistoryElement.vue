@@ -81,7 +81,7 @@ function isAvailableState(vegetables: Vegetables, vegeName: string, uniqueKey: s
   // 指定された vegeName と uniqueKey が存在するか確認
   if (vegetables[vegeName] && vegetables[vegeName][uniqueKey]) {
     // state が "Available" かを判定
-    return vegetables[vegeName][uniqueKey].state === "Available";
+    return vegetables[vegeName][uniqueKey].state === VegeState.Available;
   }
   return false; // 存在しない場合や "Available" でない場合は false
 }
@@ -90,6 +90,8 @@ function onPushBuy(){
 }
 </script>
 <template>
+  <!-- {{ vegeElementList }} -->
+    <!-- {{ vegeAlldata }} -->
 <td>{{props.data.orderTime}}</td>
 <td> 
     <table>

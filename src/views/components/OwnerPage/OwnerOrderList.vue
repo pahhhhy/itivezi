@@ -40,8 +40,21 @@ interface titleDataTables{
   orderName: string, 
   state: string
 }
+interface orderVegeElementTables{
+    [num:number]:{
+    en:number;
+    farmer:string
+    roadStation:string
+    state:VegeState
+    unique:string
+    unit:string
+    photo:string
+    amount:number
+    VegeName:string
+}}
 const FireOrderStore=useFireOrderStore()
 const AllOrderData=ref<Ordertables>(FireOrderStore.OrderAllData)
+const vegeData=ref<orderVegeElementTables>(getNumData(AllOrderData.value))
 const titleData=ref<titleDataTables[]>(extractOrderInfo(AllOrderData.value))
   watch(() => FireOrderStore.OrderAllData, (newUser) => {
   AllOrderData.value = newUser;
@@ -67,7 +80,30 @@ function extractOrderInfo(ordertables: Ordertables) {
 
     return result.reverse();
 }
+function getNumData(orderTable: Ordertables): orderVegeElementTables {
+  const numData: orderVegeElementTables = {};
 
+  // Ordertablesの各UIDに対して処理
+  Object.values(orderTable).forEach((userOrders) => {
+    // 各uniqueKeyのOrdertablesElementに対して処理
+    Object.values(userOrders).forEach((orderElement) => {
+      // 数値キーに対応する部分を抽出
+      Object.keys(orderElement)
+        .filter((key) => !isNaN(Number(key))) // 数値のキーのみを抽出
+        .forEach((key) => {
+          const numKey = Number(key);
+          const element = orderElement[numKey];
+          
+          // 空でないことを確認して追加
+          if (element && Object.keys(element).length > 0) {
+            numData[numKey] = element; // 数値キーに対応するデータを追加
+          }
+        });
+    });
+  });
+
+  return numData;
+}
 // 選択されたインデックスを保存するための状態
 const isActive = ref<boolean>(false)
 const selectedTableList = ref<boolean[]>([])
@@ -106,6 +142,7 @@ function toggleClass(index: number) {
 }
 </script>
 <template>
+  {{ titleData }}
   <h1>注文履歴</h1>
   <!-- {{props.vegeAllOrder}} -->
   <!-- {{ sortedOrderData["全て"] }} -->

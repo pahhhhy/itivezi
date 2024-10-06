@@ -162,7 +162,7 @@ function pushBack() {
 
 </script>
 <template>
-  {{ vegeAllData }}
+  <!-- {{ vegeAllData }} -->
   <!-- {{ farmerVegeList }}
   {{uniqueVegeList}} -->
   <!-- {{ CSVfile }} -->

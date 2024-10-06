@@ -236,6 +236,9 @@ function addCartToOrder(selectData: Vegetables,  order: OrdertablesElement) {
   function getVegeCount(Count:number,index:number){
     selectCountList.value[index]=Count
   }
+  function onPushBuck(){
+    IsPopup.value=false
+  }
 </script>
 <template>
   <!-- {{OrderAllData}} -->
@@ -309,6 +312,7 @@ function addCartToOrder(selectData: Vegetables,  order: OrdertablesElement) {
     no-today
   />
   <button v-on:click="onPushBuy()">購入する</button>
+  <button v-on:click="onPushBuck()">戻る</button>
 </article>
 </template>
 <style>

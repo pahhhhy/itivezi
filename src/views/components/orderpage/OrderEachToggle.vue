@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref} from 'vue'
 import OrderToggleElement from './OrderToggleElement.vue';
+import router from '@/router'
+
 enum VegeState{
   Discontinued="Discontinued",
   Available="Available"
@@ -23,8 +25,18 @@ interface Props {
 }
 const props = defineProps<Props>()
 const isActive=ref<boolean>(false)
+const IsPopup=ref<boolean>(false)
 function OnPushTitle(){
     isActive.value=!isActive.value
+}
+function onPushPopup(){
+    IsPopup.value=true
+}
+function onPushOk(){
+    IsPopup.value=false
+}
+function onPushCart(){
+    router.push('/cart')
 }
 </script>
 <template>
@@ -39,13 +51,28 @@ function OnPushTitle(){
             <OrderToggleElement
             v-bind:data="element"
             v-bind:unique-key="unique"
-            v-bind:vege-name="vegeName"></OrderToggleElement>
+            v-bind:vege-name="vegeName"
+            v-on:on-push-popup="onPushPopup"></OrderToggleElement>
         </div>
     </article>
-    
+    <article v-if="IsPopup" class="Toggle_popup">
+        <h2>カードに入れました</h2>
+            <button v-on:click="onPushOk">了解</button>
+            <button v-on:click="onPushCart">カートへ</button>
+    </article>
     <!-- <h4>{{props.data}}</h4> -->
 </template>
 <style scoped>
+.Toggle_popup{
+    position: fixed;
+    z-index: 1;
+    border: 1px solid gray;
+    border-radius: 20px;
+    top: 20%;
+    left: 20%;
+    padding: 20px;
+    background-color: white;
+}
     .Order_title{
         border: none;
         background-color: white;

@@ -3,7 +3,6 @@ import { useVegeStore } from '@/stores/vege'
 import { ref,watch} from 'vue'
 import OrderHistory from './components/orderpage/OrderHistory.vue';
 import { useOrderDataStore } from '@/stores/orderData';
-import OrderFormPage from './components/orderpage/OrderFormPage.vue';
 import OrderEachToggle from './components/orderpage/OrderEachToggle.vue';
 import { useCartStore } from '@/stores/cart';
 import { useSortVegeStore } from '@/stores/sortByVege';
