@@ -9,7 +9,7 @@ interface CartTables{
 interface CartElementTables{
     en:number;
     farmer:string
-    roadStation:string
+    roadStation:string[]
     unit:string
     photo:string
     unique:string

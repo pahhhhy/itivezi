@@ -10,7 +10,7 @@ enum VegeState{
 interface datatables{
     en:number;
     farmer:string
-    roadStation:string
+    roadStation:string[]
     state:VegeState
     uid:string
     unit:string
@@ -21,23 +21,10 @@ interface Props {
   uniqueKey:string|number
   vegeName:string|number
 }
-interface Vegetables{
-    [vegeName:string]:{
-        [uniqueKey:string]:{
-            en:number;
-            farmer:string
-            roadStation:string
-            state:VegeState
-            uid:string
-            unit:string
-            photo:string
-        }
-    }
-}
 interface CartElementTables{
     en:number;
     farmer:string
-    roadStation:string
+    roadStation:string[]
     unit:string
     photo:string
     unique:string

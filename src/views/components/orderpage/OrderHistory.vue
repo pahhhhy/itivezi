@@ -23,7 +23,7 @@ interface Vegetables{
 interface vegeElementTables{
   en:number
   farmer:string
-  roadStation:string
+  roadStation:string[]
   state:VegeState
   uid:string
   unit:string
@@ -39,7 +39,7 @@ interface OrdertablesElement{
   [num:number]:{
     en:number;
     farmer:string
-    roadStation:string
+    roadStation:string[]
     state:VegeState
     unique:string
     unit:string
@@ -59,7 +59,7 @@ interface orderVegeElementTables{
     [num:number]:{
     en:number;
     farmer:string
-    roadStation:string
+    roadStation:string[]
     state:VegeState
     unique:string
     unit:string
@@ -141,7 +141,7 @@ function getNowSelectData(data: Vegetables, vegeName: string, uniqueKey: string)
   let result: vegeElementTables = {
     en: 0,                    
     farmer: "",                
-    roadStation: "",           
+    roadStation: [],           
     state: VegeState.Discontinued,      
     uid: "",                  
     unit: "",                  

@@ -7,22 +7,23 @@ enum VegeState{
   Available="Available"
 }
 interface Vegetables{
-    [key:string]:{
-        [key:string]:{
-            en:number;
-            farmer:string
-            roadStation:string
-            state:VegeState
-            uid:string
-            unit:string
-            photo:string
-        }
+    [vegeName:string]:{
+        [uniqueKey:string]:vegeElementTables
     }
+}
+interface vegeElementTables{
+  en:number
+  farmer:string
+  roadStation:string[]
+  state:VegeState
+  uid:string
+  unit:string
+  photo:string
 }
 interface datatable {
   en:number;
   farmer:string
-  roadStation:string
+  roadStation:string[]
   state:VegeState
   uid:string
   unit:string
@@ -60,7 +61,7 @@ const emit = defineEmits<Emits>()
 const props = defineProps<Props>()
 const vegeunit=ref<unitdata>(splitNumberAndUnit(props.vegedata.unit))
 const vegeMoney=ref<number>(props.vegedata.en)
-const vegeRoadStation=ref<string>(props.vegedata.roadStation)
+const vegeRoadStation=ref<string[]>(props.vegedata.roadStation)
 const roadStationUnitTempList = ref<string[]>(useRoadStationStore().roadStationTemp)
 const initialVegetables: Vegetables = {
   [props.vegedata.VegeName]: {

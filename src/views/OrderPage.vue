@@ -26,7 +26,7 @@ interface CartTables{
 interface CartElementTables{
     en:number;
     farmer:string
-    roadStation:string
+    roadStation:string[]
     unit:string
     photo:string
     unique:string
@@ -38,7 +38,7 @@ interface Vegetables{
         [uniqueKey:string]:{
             en:number;
             farmer:string
-            roadStation:string
+            roadStation:string[]
             state:VegeState
             uid:string
             unit:string
@@ -106,11 +106,12 @@ async function onPushfilter(mode:SortMode){
   
 
 }
-function filterByRoadStation(vegetables: Vegetables,mode:SortMode) {
+function filterByRoadStation(vegetables: Vegetables, role: SortMode) {
     const result: Vegetables = {};
+    
     for (const vegeName in vegetables) {
         const filteredEntries = Object.entries(vegetables[vegeName]).filter(
-            ([uniqueKey, data]) => data.roadStation === mode
+            ([uniqueKey, data]) => data.roadStation.includes(role)
         );
 
         if (filteredEntries.length > 0) {

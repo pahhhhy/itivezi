@@ -7,7 +7,7 @@ enum VegeState{
 interface vegeElementTables{
   en:number
   farmer:string
-  roadStation:string
+  roadStation:string[]
   state:VegeState
   uid:string
   unit:string
@@ -26,7 +26,7 @@ interface Emits {
 interface orderVegeElementTables{
     en:number;
     farmer:string
-    roadStation:string
+    roadStation:string[]
     state:VegeState
     unique:string
     unit:string

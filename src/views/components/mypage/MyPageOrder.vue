@@ -22,7 +22,7 @@ interface OrdertablesElement{
   [num:number]:{
     en:number;
     farmer:string
-    roadStation:string
+    roadStation:string[]
     state:VegeState
     unique:string
     unit:string

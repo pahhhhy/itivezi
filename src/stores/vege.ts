@@ -6,16 +6,17 @@ enum VegeState{
 }
 interface Vegetables{
     [vegeName:string]:{
-        [uniqueKey:string]:{
-            en:number;
-            farmer:string
-            roadStation:string
-            state:VegeState
-            uid:string
-            unit:string
-            photo:string
-        }
+        [uniqueKey:string]:vegeElementTables
     }
+}
+interface vegeElementTables{
+  en:number
+  farmer:string
+  roadStation:string[]
+  state:VegeState
+  uid:string
+  unit:string
+  photo:string
 }
 export const useVegeStore = defineStore({
     id:"VegeAllData",

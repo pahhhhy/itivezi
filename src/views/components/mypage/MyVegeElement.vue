@@ -14,7 +14,7 @@ interface Emits {
 interface datatable {
   en:number;
   farmer:string
-  roadStation:string
+  roadStation:string[]
   state:VegeState
   uid:string
   unit:string

@@ -5,17 +5,18 @@ enum VegeState{
   Available="Available"
 }
 interface Vegetables{
-    [key:string]:{
-        [key:string]:{
-            en:number;
-            farmer:string
-            roadStation:string
-            state:VegeState
-            uid:string
-            unit:string
-            photo:string
-        }
+    [vegeName:string]:{
+        [uniqueKey:string]:vegeElementTables
     }
+}
+interface vegeElementTables{
+  en:number
+  farmer:string
+  roadStation:string[]
+  state:VegeState
+  uid:string
+  unit:string
+  photo:string
 }
 interface Props {
   vegeList: number[]
@@ -64,7 +65,7 @@ function changeVege() {
     [props.uniquwKey]:{
       en: -1,
       farmer: myName.value,
-      roadStation: "",
+      roadStation: [],
       state: VegeState.Available,
       uid: myUid.value,
       unit: "",

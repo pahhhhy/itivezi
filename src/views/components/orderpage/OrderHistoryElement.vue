@@ -8,7 +8,7 @@ interface orderVegeElementTables{
     [num:number]:{
     en:number;
     farmer:string
-    roadStation:string
+    roadStation:string[]
     state:VegeState
     unique:string
     unit:string
@@ -21,7 +21,7 @@ interface OrdertablesElement{
   [num:number]:{
     en:number;
     farmer:string
-    roadStation:string
+    roadStation:string[]
     state:VegeState
     unique:string
     unit:string
@@ -45,7 +45,7 @@ interface Vegetables{
         [uniqueKey:string]:{
             en:number;
             farmer:string
-            roadStation:string
+            roadStation:string[]
             state:VegeState
             uid:string
             unit:string

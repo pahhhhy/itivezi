@@ -23,7 +23,7 @@ interface Vegetables{
         [uniqueKey:string]:{
             en:number;
             farmer:string
-            roadStation:string
+            roadStation:string[]
             state:VegeState
             uid:string
             unit:string
@@ -60,11 +60,12 @@ watch(() => fireUseStore.myUserData, (newUser) => {
 watch(() => vegeStore.VegeAllData, (newUser) => {
   vegeAllData.value = newUser;
 });
-function filterByRoadStation(vegetables: Vegetables,role:Role) {
+function filterByRoadStation(vegetables: Vegetables, role: Role) {
     const result: Vegetables = {};
+    
     for (const vegeName in vegetables) {
         const filteredEntries = Object.entries(vegetables[vegeName]).filter(
-            ([uniqueKey, data]) => data.roadStation === role
+            ([uniqueKey, data]) => data.roadStation.includes(role)
         );
 
         if (filteredEntries.length > 0) {

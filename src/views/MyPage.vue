@@ -12,17 +12,18 @@ enum VegeState{
   Available="Available"
 }
 interface Vegetables{
-    [key:string]:{
-        [key:string]:{
-            en:number;
-            farmer:string
-            roadStation:string
-            state:VegeState
-            uid:string
-            unit:string
-            photo:string
-        }
+    [vegeName:string]:{
+        [uniqueKey:string]:vegeElementTables
     }
+}
+interface vegeElementTables{
+  en:number
+  farmer:string
+  roadStation:string[]
+  state:VegeState
+  uid:string
+  unit:string
+  photo:string
 }
 const vegeStore=useVegeStore()
 const vegeAllData = ref<Vegetables>(vegeStore.VegeAllData)

@@ -13,7 +13,7 @@ interface Vegetables{
         [uniqueKey:string]:{
             en:number;
             farmer:string
-            roadStation:string
+            roadStation:string[]
             state:VegeState
             uid:string
             unit:string
@@ -25,7 +25,7 @@ interface MyVegeTables{
   [uniqueKey:string]:{
             en:number;
             farmer:string
-            roadStation:string
+            roadStation:string[]
             state:VegeState
             uid:string
             unit:string
@@ -36,7 +36,7 @@ interface MyVegeTables{
 interface datatable {
   en:number;
   farmer:string
-  roadStation:string
+  roadStation:string[]
   state:VegeState
   uid:string
   unit:string
