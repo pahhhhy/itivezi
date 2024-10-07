@@ -80,7 +80,7 @@ function pushExport() {
   exportToCSV(CSVfile, "vegeList_" + currentTime)
 }
 function convertVegetablesToCSV(vegetables: Vegetables): string[][] {
-  const headers = ["野菜の名前", "個数", "金額"]; // CSVのヘッダー
+  const headers = ["野菜の名前","農家名", "金額", "個数"]; // CSVのヘッダー
   const csvData: string[][] = [headers]; // ヘッダーを最初に追加
 
   Object.keys(vegetables).forEach(vegeName => {
@@ -88,8 +88,9 @@ function convertVegetablesToCSV(vegetables: Vegetables): string[][] {
       const item = vegetables[vegeName][uniqueKey];
       csvData.push([
         vegeName,           // "野菜の名前"
-        item.unit,          // "unit"
-        item.en.toString()  // "money" (en は number なので文字列に変換)
+        item.farmer,
+        item.en.toString()  ,
+        item.unit, 
       ]);
     });
   });
