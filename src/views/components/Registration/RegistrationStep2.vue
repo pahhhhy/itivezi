@@ -21,7 +21,7 @@ interface vegeElementTables{
 }
 interface Props {
   vegeKeys: string[]
-  vegeList: number[]
+  vegeList: string[]
   uproadData:Vegetables
   uniqueKey:string|null
 }

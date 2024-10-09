@@ -21,9 +21,9 @@ interface vegeElementTables{
   photo:string
 }
 interface Props {
-  vegeName:number
+  vegeName:string
   vegeKeys: string[]
-  vegeList: number[]
+  vegeList: string[]
   uproadData:Vegetables
   uniqueKey:string|null
   index:number
@@ -83,7 +83,7 @@ function updateStep2List(action:string,index:number) {
     unit=vegeAmount.value+vegeUnit.value
     console.log(unit)
     if(props.uniqueKey)
-    uproadData.value[props.vegeKeys[props.vegeList[index]]][props.uniqueKey].unit=unit
+    uproadData.value[props.vegeList[index]][props.uniqueKey].unit=unit
     emit("updateUproadData",uproadData.value,index)
   }
  }
@@ -92,8 +92,8 @@ function updateStep2List(action:string,index:number) {
     unit=vegeAmount.value+vegeUnit.value
     console.log(unit)
     if(props.uniqueKey){
-      console.log(props.vegeKeys[props.vegeList[index]])
-    uproadData.value[props.vegeKeys[props.vegeList[index]]][props.uniqueKey].unit=unit
+      console.log(props.vegeList[index])
+    uproadData.value[props.vegeList[index]][props.uniqueKey].unit=unit
     emit("updateUproadData",uproadData.value,index)
   }
     }
@@ -101,18 +101,18 @@ function updateStep2List(action:string,index:number) {
  }
  if(action==Mode.Money){
   if(props.uniqueKey)
-  uproadData.value[props.vegeKeys[props.vegeList[index]]][props.uniqueKey].en=vegeMoney.value
+  uproadData.value[props.vegeList[index]][props.uniqueKey].en=vegeMoney.value
   emit("updateUproadData",uproadData.value,index)
  }
  if(action==Mode.RoadStation){
   if(props.uniqueKey)
-  uproadData.value[props.vegeKeys[props.vegeList[index]]][props.uniqueKey].roadStation=roadStationList.value
+  uproadData.value[props.vegeList[index]][props.uniqueKey].roadStation=roadStationList.value
   emit("updateUproadData",uproadData.value,index)
  }
 }
 function uproadImage(URL:string,index:number){
   if(props.uniqueKey)
-  uproadData.value[props.vegeKeys[props.vegeList[index]]][props.uniqueKey].photo=URL
+  uproadData.value[props.vegeList[index]][props.uniqueKey].photo=URL
 }
 watch(roadStationList, (newValue) => {
   updateStep2List(Mode.RoadStation, props.index);
@@ -120,7 +120,7 @@ watch(roadStationList, (newValue) => {
 </script>
 
 <template>
-<h1>{{ vegeKeys[vegeName] }}</h1>
+<h1>{{ props.vegeName}}</h1>
       <h4>どのぐらいの量ですか？</h4>
       <div class="unit">
         <input
@@ -174,7 +174,7 @@ watch(roadStationList, (newValue) => {
         v-bind:index="index"
         v-bind:vegekeys="vegeKeys"
         v-bind:uniquw-keys="props.uniqueKey"
-        v-bind:vege-name="vegeKeys[vegeName]"
+        v-bind:vege-name="props.vegeName"
         v-on:uproad-image="uproadImage"></RegStep2image>
 </template>
 <style scoped>

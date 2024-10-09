@@ -21,7 +21,7 @@ interface Vegetables{
 }
 interface Props {
   vegeKeys: string[]
-  vegeList: number[]
+  vegeList: string[]
   uproadData:Vegetables
   currentUser: User | null
   uniqueKey:string|null

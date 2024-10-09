@@ -5,6 +5,7 @@ import OwnerBuyerList from './components/OwnerPage/OwnerBuyerList.vue'
 import OwnerData from './components/OwnerPage/OwnerData.vue'
 import OwnerFarmerList from './components/OwnerPage/OwnerFarmerList.vue'
 import OwnerVegeList from './components/OwnerPage/OwnerVegeList.vue'
+import OwnerNewVegeAdd from './components/OwnerPage/OwnerNewVegeAdd.vue'
 import { usefireUserStore } from '@/stores/fireUserdata';
 interface Usertables{
     affiliation:String[]
@@ -48,13 +49,15 @@ function changeNavBarNumber(number:number){
     <button v-on:click="changeNavBarNumber(1)">野菜リスト</button>
     <button v-on:click="changeNavBarNumber(2)">注文リスト</button>
     <button v-on:click="changeNavBarNumber(3)">利用者リスト</button>
-    <button v-on:click="changeNavBarNumber(4)">各データ</button>
+    <button v-on:click="changeNavBarNumber(4)">新しい野菜の追加</button>
+    <button v-on:click="changeNavBarNumber(5)">各データ</button>
   </div>
   <OwnerVegeList  v-if="navBarNumber==1"></OwnerVegeList>
   <OwnerOrderList v-if="navBarNumber==2" ></OwnerOrderList>
   <OwnerFarmerList v-if="navBarNumber==3"></OwnerFarmerList>
   <OwnerBuyerList v-if="navBarNumber==3"></OwnerBuyerList>
-  <OwnerData v-if="navBarNumber==4"></OwnerData>
+  <OwnerNewVegeAdd v-if="navBarNumber==4"></OwnerNewVegeAdd>
+  <OwnerData v-if="navBarNumber==5"></OwnerData>
   </section>
   <section v-else>
     エラーが発生しました。管理者ではない人が閲覧しました。
