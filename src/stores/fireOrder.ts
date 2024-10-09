@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { getDatabase, ref as fireRef,  onValue,push } from 'firebase/database'
+import { getDatabase, ref as fireRef,  onValue,push ,update} from 'firebase/database'
 enum VegeState{
   Discontinued="Discontinued",
   Available="Available"
@@ -62,6 +62,15 @@ export const useFireOrderStore = defineStore({
             const db = getDatabase();
             try {
               await push(fireRef(db, `Orders/${uid}`), data);
+              return true; // 成功したら true を返す
+            } catch (error) {
+              console.error('Error updating data:', error);
+              return false; // エラーが発生したら false を返す
+            }
+          },async updateOrderState(data: OrdertablesElement,uid:string,unique:string ): Promise<boolean> {
+            const db = getDatabase();
+            try {
+              await update(fireRef(db, `Orders/${uid}/${unique}`), data);
               return true; // 成功したら true を返す
             } catch (error) {
               console.error('Error updating data:', error);
