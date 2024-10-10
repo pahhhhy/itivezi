@@ -12,6 +12,7 @@ interface Usertables{
     phoneNumber:number
     place:string
     role:Role
+    email:string
 }
 
 enum VegeState{

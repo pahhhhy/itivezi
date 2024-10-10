@@ -10,31 +10,50 @@ import {
   type User
 } from 'firebase/auth'
 import { getDatabase, ref as fireRef, onValue} from 'firebase/database'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted,watch } from 'vue'
 import LoginForm from './components/LoginForm.vue'
 import { getStorage, ref as storageRef, getMetadata } from 'firebase/storage';
 import '../assets/main.css'
-// ログインしているユーザーデータ
-const currentUser = ref<User | null>()
+import { usefireUserStore } from '@/stores/fireUserdata';
+import { useUserStore } from '@/stores/userData';
+interface AllUserTables{
+  [uid:string]:Usertables
+}
+interface Usertables{
+    affiliation:String[]
+    gender:string
+    name:string
+    phoneNumber:number
+    place:string
+    role:Role
+    email:string
+}
+enum Role{
+    Onwer="管理者",
+    Buyer="飲食店",
+    Farmer="農家",
+    None=""
+  }
+const userStore=useUserStore()
+const currentUser = ref<User|null>(userStore.currentUser);
+
+const fireUseStore=usefireUserStore()
 const email = ref<string>('')
 const password = ref<string>('')
 const errorMes = ref<string>('')
-const userData = ref<any>(readUserData(''))
+const userData = ref<AllUserTables>({})
 
-// 読み込むデータの指定
-function readUserData(element: string) {
-  const countRef = fireRef(getDatabase(), 'testUser/' + element)
-  const data = ref<any>(null)
-  onValue(countRef, (snapshot) => {
-    data.value = snapshot.val()
-  })
-  return data
+  watch(() => userStore.currentUser, (newUser) => {
+  currentUser.value = newUser;
+});
+async function initData(){
+  userData.value=await fireUseStore.AllroadFireUseData()
 }
+initData()
 async function checkMyData() {
   let isOk = true
  
   if (currentUser.value != null) {
-    console.log(currentUser.value.photoURL)
     if (userData.value[currentUser.value.uid] == null) {
       isOk = false
     } else {
@@ -54,7 +73,7 @@ async function checkMyData() {
         userData.value[currentUser.value.uid].phoneNumber == null ||
         userData.value[currentUser.value.uid].phoneNumber == 0||
         userData.value[currentUser.value.uid].affiliation == null||
-        userData.value[currentUser.value.uid].affiliation == ""
+        userData.value[currentUser.value.uid].affiliation.length == 0
       ) {
         isOk = false
       }
@@ -91,12 +110,12 @@ async function signin(email: string, password: string) {
         errorMes.value = ''
         if (currentUser.value != null) {
           if (!await checkMyData()) {
-
             router.push('/add-info')
           } else {
             window.scrollTo({
               top: 0,       // 一番上に移動
             });
+            await fireUseStore.roadFireUseData(currentUser.value.uid)
             router.push('/')
           }
         } else {

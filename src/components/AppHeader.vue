@@ -21,7 +21,7 @@ interface CartTables{
 interface CartElementTables{
     en:number;
     farmer:string
-    roadStation:string
+    roadStation:string[]
     unit:string
     photo:string
     unique:string
@@ -39,6 +39,7 @@ interface Usertables{
     phoneNumber:number
     place:string
     role:Role
+    email:string
 }
 enum Role{
     Onwer="管理者",

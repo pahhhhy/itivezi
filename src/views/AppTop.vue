@@ -13,6 +13,7 @@ interface Usertables{
     phoneNumber:number
     place:string
     role:Role
+    email:string
 }
 enum Role{
     Onwer="管理者",
