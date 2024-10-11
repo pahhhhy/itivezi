@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { getDatabase, ref as fireRef,  onValue,set} from 'firebase/database'
+import { getDatabase, ref as fireRef,  onValue,set,remove} from 'firebase/database'
 interface AllUserTables{
   [uid:string]:Usertables
 }
@@ -73,7 +73,18 @@ export const usefireUserStore = defineStore({
                   reject(error); // エラーが発生した場合は reject を呼び出す
                 });
             });
+          },async delete(uid:string|number): Promise<void> {
+            const db = getDatabase();
+            return new Promise((resolve, reject) => {
+              remove(fireRef(db, `testUser/${uid}`))
+                .then(() => {
+                  resolve(); // 成功した場合に resolve を呼び出す
+                })
+                .catch((error) => {
+                  console.error("Error updating data:", error);
+                  reject(error); // エラーが発生した場合は reject を呼び出す
+                });
+            });
           }
     }
-
 })

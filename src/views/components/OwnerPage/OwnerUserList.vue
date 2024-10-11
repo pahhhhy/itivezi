@@ -43,6 +43,7 @@ initData()
         <th scope="col">役職</th>
         <th scope="col">所属</th>
         <th scope="col">住所</th>
+        <!-- <th scope="col">削除</th> -->
       </tr>
     </thead>
     <tbody>

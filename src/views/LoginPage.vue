@@ -7,6 +7,7 @@ import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   sendEmailVerification,
+  sendPasswordResetEmail,
   type User
 } from 'firebase/auth'
 import { getDatabase, ref as fireRef, onValue} from 'firebase/database'
@@ -42,7 +43,8 @@ const email = ref<string>('')
 const password = ref<string>('')
 const errorMes = ref<string>('')
 const userData = ref<AllUserTables>({})
-
+const changeemail=ref<string>("")
+const isForget=ref<boolean>(false)
   watch(() => userStore.currentUser, (newUser) => {
   currentUser.value = newUser;
 });
@@ -164,22 +166,27 @@ async function checkImageExistsInFirebase(path: string): Promise<boolean> {
     return false;
   }
 }
-onMounted(() => {
-  const auth = getAuth()
-  // ログインしているユーザーを取得する
-  onAuthStateChanged(auth, (user) => {
-    if (user != null && user.emailVerified) {
-      currentUser.value = user
-      
-    } else {
-      currentUser.value = null
-    }
-  })
-})
+const auth = getAuth();
 
+function resetPassword() {
+  sendPasswordResetEmail(auth, changeemail.value)
+    .then(() => {
+      console.log('パスワードリセットメールが送信されました');
+    })
+    .catch((error) => {
+      if (error.code === 'auth/user-not-found') {
+      console.error('このメールアドレスのユーザーが存在しません');
+    } else {
+      console.error('エラーが発生しました:', error);
+    }
+    });
+  }
+function onPushChangePass(){
+  isForget.value=!isForget.value
+}
 </script>
 <template>
-  <article class="login_page">
+  <article class="login_page" v-if="!isForget">
     <div class="title">
       <h1>ログイン</h1>
     </div>
@@ -189,7 +196,22 @@ onMounted(() => {
       <h2 v-if="errorMes != ''" style="color: red">{{ errorMes }}</h2>
       <div class="form_link_group">
         <button type="button" class="btn btn-success" @click="signin(email, password)">ログイン</button>
+        <button @click="onPushChangePass">パスワードを忘れた</button>
         <p><RouterLink v-bind:to="{ name: 'signup' }" class="link">アカウントの新規登録</RouterLink></p>
+      </div>
+      
+    </article>
+  </article>
+  <article class="login_page" v-if="isForget">
+    <div class="title">
+      <h1>パスワードの変更</h1>
+    </div>
+    <article class="form_card">
+      <h2 v-if="errorMes != ''" style="color: red">{{ errorMes }}</h2>
+      <input type="email" id="email" placeholder="メールアドレスを入力" required v-model="changeemail">
+      <div class="form_link_group">
+        <button type="button" class="btn btn-success" @click="resetPassword()">パスワードの変更メールの送信</button>
+        <button type="button" class="btn btn-success" @click="onPushChangePass">戻る</button>
       </div>
       
     </article>
