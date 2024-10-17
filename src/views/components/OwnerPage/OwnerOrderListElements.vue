@@ -90,6 +90,7 @@ function changeState(){
       <p>単位：{{ Data.unit }}</p>
       <p>個数：{{ Data.amount }}組</p>
       <p>農家名：{{ Data.farmer }}</p>
+      <p>卸先：{{ Data.roadStation }}</p>
       <p>料金：{{ Data.en }}円</p>
     </div>
   </div>
