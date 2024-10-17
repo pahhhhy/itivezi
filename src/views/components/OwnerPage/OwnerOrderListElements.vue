@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref,watch} from 'vue'
+import { ref} from 'vue'
 import { useFireOrderStore } from '@/stores/fireOrder';
 interface Props {
   titleData: titleDataTables
@@ -7,9 +7,6 @@ interface Props {
   OrderData:OrdertablesElement
   unique:string
   uid:string
-}
-interface Emits {
-  (event: 'OnStep', Next: boolean): void
 }
 enum OrderStete{
   Completed="取引完了",
@@ -61,7 +58,6 @@ interface titleDataTables{
   uid:string,
   unique:string
 }
-const emit = defineEmits<Emits>()
 const props = defineProps<Props>()
 const isActive=ref<boolean>(false)
 const FireOrderStore=useFireOrderStore()

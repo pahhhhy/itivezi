@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
-import { getAuth, onAuthStateChanged, updateProfile, type User } from 'firebase/auth'
+import { ref, watch } from 'vue'
+import { getAuth, updateProfile, type User } from 'firebase/auth'
 import router from '@/router'
 import { usefireUserStore } from '@/stores/fireUserdata'
 import {useIconStore}from "../stores/icon"

@@ -4,14 +4,12 @@ import router from '../router'
 import {
   getAuth,
   signOut,
-  onAuthStateChanged,
   signInWithEmailAndPassword,
   sendEmailVerification,
   sendPasswordResetEmail,
   type User
 } from 'firebase/auth'
-import { getDatabase, ref as fireRef, onValue} from 'firebase/database'
-import { ref, onMounted,watch } from 'vue'
+import { ref, watch } from 'vue'
 import LoginForm from './components/LoginForm.vue'
 import { getStorage, ref as storageRef, getMetadata } from 'firebase/storage';
 import '../assets/main.css'

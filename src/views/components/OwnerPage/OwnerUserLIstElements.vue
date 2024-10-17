@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { ref,watch} from 'vue'
-import { usefireUserStore } from '@/stores/fireUserdata';
 enum Role{
     Onwer="管理者",
     Buyer="飲食店",
@@ -23,10 +21,6 @@ interface Props {
   uid:string|number
 }
 const props = defineProps<Props>()
-const fireUserStore=usefireUserStore()
-// async function deleteAcount(){
-//   await fireUserStore.delete(props.uid)
-// }
 </script>
 <template>
 <th>{{props.UserData.name}}</th>

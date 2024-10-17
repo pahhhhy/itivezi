@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref,watch} from 'vue'
+import { ref} from 'vue'
 interface FarmerListElement{
     [VegeName:string]:{
     unit:string
@@ -10,10 +10,6 @@ interface Props {
   VegeData:FarmerListElement
   FarmerName:string|number
 }
-interface Emits {
-  (event: 'OnStep', Next: boolean): void
-}
-const emit = defineEmits<Emits>()
 const props = defineProps<Props>()
 const isActive=ref<boolean>(false)
 function pushFarmer() {
