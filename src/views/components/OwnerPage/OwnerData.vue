@@ -199,5 +199,6 @@ function getTotalMoney(data: Ordertables) {
   <h2>農家数:{{ totalFarmer }}</h2>
   <h2>合計金額:{{ totalMoney }}円</h2>
   <h2>購入者数:{{ totalOrderHuman }}</h2>
+  <p>※合計金額は取引完了したものの総額です。</p>
 </template>
 <style></style>

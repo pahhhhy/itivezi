@@ -61,12 +61,62 @@ watch(() => fireOrderStore.OrderAllData, (newUser) => {
   initData()
 }); 
 async function initData() {
+  //道の駅ごとにフィルターをやって
+  if(selectedRoadStation.value=="全て"){
+
+    fliterOrderData.value=orderAllData.value
+  }else{
+    fliterOrderData.value=filterRoadStationByRoomne(orderAllData.value,selectedRoadStation.value)
+  }
   //全体のデータから年代の種類を取得する
-  yearList.value = extractUniqueYears(orderAllData.value)
+  yearList.value = extractUniqueYears(fliterOrderData.value)
   //全体のデータからある範囲のデータに抽出する
-  fliterOrderData.value= filterOrdersByDateRange(orderAllData.value,startDate.value,endDate.value)
+  fliterOrderData.value= filterOrdersByDateRange(fliterOrderData.value,startDate.value,endDate.value)
   //抽出したデータからBuyerListの作成
   orderNumList.value = generateBuyerListTable(fliterOrderData.value)
+}
+//取引完了のものの総額を計算する
+function getTotalMoney(data: Ordertables) {
+  let totalCompletedMoney = 0;
+  let countConplateOrder=0
+  for (const orderId in data) {
+    const orderDetails = data[orderId];
+    for (const orderDate in orderDetails) {
+      const order = orderDetails[orderDate];
+      if (order.state === OrderStete.Completed) {
+        totalCompletedMoney += order.totalMoney;
+        countConplateOrder += 1
+      }
+    }
+  }
+  return totalCompletedMoney
+}
+function filterRoadStationByRoomne(orderTables: Ordertables, roadStation: string): Ordertables {
+  // Create a deep copy of orderTables
+  const filteredOrderTables: Ordertables = JSON.parse(JSON.stringify(orderTables));
+  // Loop through each user's uid
+  Object.entries(filteredOrderTables).forEach(([uid, uniqueEntries]) => {
+    // Loop through each uniqueKey
+    Object.entries(uniqueEntries).forEach(([uniqueKey, orderElement]) => {
+      let fliterKey = Object.keys(orderElement);
+      let fliternum = fliterKey.length - 6;
+
+      for (let i: number = 0; i < fliternum; i++) {
+        if (!orderElement[Number(fliterKey[i])].roadStation.includes(roadStation)) {
+          delete filteredOrderTables[uid][uniqueKey][Number(fliterKey[i])];
+        }
+      }
+
+      let afterfliterKey = Object.keys(filteredOrderTables[uid][uniqueKey]);
+      let afterfilternum = afterfliterKey.length - 6;
+
+      if (afterfilternum == 0) {
+        delete filteredOrderTables[uid][uniqueKey];
+      }
+    });
+  });
+
+  return filteredOrderTables;
 }
 // 指定した範囲のデータを抽出する関数
 function filterOrdersByDateRange(
@@ -128,7 +178,6 @@ function extractUniqueYears(orders: Ordertables): number[] {
   return Array.from(yearsSet);
 }
 
-// 注文者ごとの注文件数と総額を集計する関数
 function generateBuyerListTable(orders: Ordertables): BuyerListTable[] {
   const buyerList: { [orderName: string]: { count: number, totalMoney: number } } = {};
 
@@ -139,17 +188,21 @@ function generateBuyerListTable(orders: Ordertables): BuyerListTable[] {
     // uniqueKey ごとに注文情報を集計
     for (const uniqueKey in uniqueKeyOrders) {
       const order = uniqueKeyOrders[uniqueKey];
-      const { orderName, totalMoney } = order;
 
-      // 既に orderName が buyerList に存在するか確認
-      if (!buyerList[orderName]) {
-        // 初めての場合、初期値を設定
-        buyerList[orderName] = { count: 0, totalMoney: 0 };
+      // state が OrderStete.Completed の場合のみ処理する
+      if (order.state === OrderStete.Completed) {
+        const { orderName, totalMoney } = order;
+
+        // 既に orderName が buyerList に存在するか確認
+        if (!buyerList[orderName]) {
+          // 初めての場合、初期値を設定
+          buyerList[orderName] = { count: 0, totalMoney: 0 };
+        }
+
+        // 注文件数をカウントし、総額を加算
+        buyerList[orderName].count += 1;
+        buyerList[orderName].totalMoney += totalMoney; // Use totalMoney from the order
       }
-
-      // 注文件数をカウントし、総額を加算
-      buyerList[orderName].count += 1;
-      buyerList[orderName].totalMoney += totalMoney;
     }
   }
 
@@ -160,6 +213,7 @@ function generateBuyerListTable(orders: Ordertables): BuyerListTable[] {
     totalMoney: buyerList[orderName].totalMoney
   }));
 }
+
 
 type Order = {
   orderName: string;
@@ -278,6 +332,7 @@ function parseOrderTime(orderTime: string | undefined): Date  {
       <h3>{{ element.totalMoney }}円</h3>
     </div>
   </div>
+  <p>※取引完了の総額です。</p>
   <button v-on:click="pushExport" class="buyer-button">出力する</button>
 </template>
 <style>
