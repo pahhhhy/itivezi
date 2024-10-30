@@ -63,7 +63,6 @@ function onStep(next: boolean) {
 }
 </script>
 <template>
-  {{ uproadData }}
   <section>
     <div v-for="(vegeName, index) in props.vegeList" :key="vegeName + index">
       <RegStep2Element

@@ -7,6 +7,10 @@ enum Role{
     Kawasaki="川崎",
     None=""
   }
+  interface deletedata{
+    uid:string|number,
+    email:string
+}
 interface Usertables{
     affiliation:String[]
     gender:string
@@ -20,7 +24,15 @@ interface Props {
   UserData:Usertables
   uid:string|number
 }
+interface Emits {
+  (event: 'onPushDelete', data:deletedata): void
+}
+const emit = defineEmits<Emits>()
 const props = defineProps<Props>()
+async function onPushDelete(){
+  let deletedata:deletedata={email:props.UserData.email,uid:props.uid}
+  emit("onPushDelete",deletedata)
+}
 </script>
 <template>
 <th>{{props.UserData.name}}</th>
@@ -31,7 +43,7 @@ const props = defineProps<Props>()
 <th>{{props.UserData.role}}</th>
 <th>{{props.UserData.affiliation}}</th>
 <th>{{props.UserData.place}}</th>
-<!-- <th><button v-on:click="deleteAcount">削除</button></th> -->
+<th><button v-on:click="onPushDelete">削除</button></th>
 </template>
 <style scoped>
 
