@@ -178,21 +178,18 @@ function onPushChange(){
           @input="updateVegeMoney(vegeMoney, Mode.Money)"
         />
         <h4>道の駅を選択してください</h4>
-        <select
-            class="form-select"
-            aria-label="roadStation from"
-            v-model="vegeRoadStation "
-            @change="updateStep2List(Mode.RoadStation)"
-          >
-            <option selected value="" disabled hidden>道の駅</option>
-            <option
-              v-for="(roadStationName) in roadStationUnitTempList"
-              :key="roadStationName"
-              v-bind:value="roadStationName"
-            >
-              {{ roadStationName }}
-            </option>
-          </select>
+      <div class="form-check" v-for="(element, index) in roadStationUnitTempList" :key="element">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          :value="element"
+          v-model="vegeRoadStation"
+          :id="'flexCheckIndeterminate' + index"
+        />
+        <label class="form-check-label" :for="'flexCheckIndeterminate' + index">
+          {{ element }}
+        </label>
+      </div>
           <RegStep2image
           v-bind:index="0"
           v-bind:vegekeys="props.vegedata.VegeName"
