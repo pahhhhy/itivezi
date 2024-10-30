@@ -67,6 +67,7 @@ watch(() => cartStore.cartData, (newUser) => {
 watch(() => vegeStore.VegeAllData, (newUser) => {
   vegeAllData.value = filterAvailableVegetables(newUser);
   filterVegeData.value=vegeAllData.value
+  filterVegeData.value=makeSortData(filterVegeData.value,sortVegeOrder.value)
 });
 watch(() => orderStore.orderData, (newUser) => {
   orderData.value = newUser;
@@ -94,8 +95,12 @@ async function onPushfilter(mode:SortMode){
   selectedFilter.value=mode
   if(mode==SortMode.All){
     filterVegeData.value=vegeAllData.value
+    await sortVegeStore.roadData(mode)
+    filterVegeData.value=makeSortData(filterVegeData.value,sortVegeOrder.value)
   }else{
     filterVegeData.value=filterByRoadStation(vegeAllData.value,mode)
+    await sortVegeStore.roadData(mode)
+    filterVegeData.value=makeSortData(filterVegeData.value,sortVegeOrder.value)
   }
   if(mode==SortMode.Other){
     sortVegeOrder.value= Object.keys(filterVegeData.value)
@@ -121,15 +126,33 @@ function filterByRoadStation(vegetables: Vegetables, role: SortMode) {
 
     return result;
 }
+function makeSortData(data: Vegetables, order: string[]): Vegetables {
+  // 指定された順番で並べ替え、他の野菜を最後に追加
+  const sortedData = Object.keys(data)
+    .sort((a, b) => {
+      const indexA = order.indexOf(a);
+      const indexB = order.indexOf(b);
+      if (indexA === -1) return 1; // orderにない場合は後ろに
+      if (indexB === -1) return -1;
+      return indexA - indexB;
+    })
+    .reduce((acc, key) => {
+      acc[key] = data[key];
+      return acc;
+    }, {} as Vegetables);
+
+  return sortedData;
+}
+
 </script>
 <template>
   <OrderHistory></OrderHistory>
 <h1>注文画面</h1>
 <button class="btn btn-success" v-on:click="onPushCart"> カートへ</button>
 
-<!-- {{ vegeAllData }}
-<p></p>
-<p>{{filterVegeData}}</p> -->
+<!-- {{ vegeAllData }} -->
+<p>{{filterVegeData}}</p>
+<p>{{sortVegeOrder}}</p>
   <!-- {{ orderData }}
   <p>{{cartData}}</p> -->
   <article v-if="Object.keys(orderData).length===0">
@@ -138,12 +161,12 @@ function filterByRoadStation(vegetables: Vegetables, role: SortMode) {
 <button v-on:click="onPushfilter(SortMode.Kawasaki)" class="filter_button" v-bind:class="{fliter_active:selectedFilter==SortMode.Kawasaki}">川崎</button>
 <button v-on:click="onPushfilter(SortMode.Murone)" class="filter_button" v-bind:class="{fliter_active:selectedFilter==SortMode.Murone}">室根</button>
 <button v-on:click="onPushfilter(SortMode.Other)" class="filter_button" v-bind:class="{fliter_active:selectedFilter==SortMode.Other}">その他</button>
-    <div v-for="(data,vegeName,index) in filterVegeData" :key=vegeName>
+    <div v-for="(data,vegeName,index) in filterVegeData" :key=index>
       <!-- {{ data }}
       <p>{{vegeName}}</p> -->
     <OrderEachToggle
     v-bind:data="data"
-    v-bind:vege-name="sortVegeOrder[index]"></OrderEachToggle>
+    v-bind:vege-name="vegeName"></OrderEachToggle>
   </div>
   </article>
   <article v-if="Object.keys(orderData).length!==0">

@@ -36,6 +36,7 @@ interface Props {
 }
 interface Emits {
   (event: 'onPushChange',uproadData:Vegetables): void
+  (event: 'onPushBack'): void
 }
 interface unitdata{
     number: number, 
@@ -199,6 +200,7 @@ function onPushChange(){
           v-bind:vege-name="props.vegedata.VegeName"
           v-on:uproad-image="uproadImage"></RegStep2image>
           <button v-on:click="onPushChange">編集する</button>
+          <button v-on:click="emit('onPushBack')">戻る</button>
 </template>
 <style scoped>
 

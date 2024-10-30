@@ -157,6 +157,9 @@ function changeVegeData(unique: string|number,vegedata:datatable){
 async function onPushChange(uproadData:Vegetables){
   IsPopup.value=!await vegeStore.updateVegeData(uproadData)
 }
+function onPushBack(){
+  IsPopup.value=false
+}
 </script>
 <template>
   <!-- {{props.vegeAllData}} -->
@@ -195,7 +198,8 @@ async function onPushChange(uproadData:Vegetables){
     <MyVegePopup
     v-bind:unique-key="Changeunique"
     v-bind:vegedata="changeData"
-    v-on:on-push-change="onPushChange"></MyVegePopup>
+    v-on:on-push-change="onPushChange"
+    v-on:on-push-back="onPushBack"></MyVegePopup>
   </article>
 </template>
 <style>
