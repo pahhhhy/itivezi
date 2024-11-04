@@ -10,7 +10,7 @@ import router from "@/router";
 import {useAnnouncementFiles} from "@/utils/announcement/useAnnouncementFilesHook";
 import {storageURLPattern} from "@/types/files";
 import {useAnnouncementCommentEditor} from "@/utils/announcement/useAnnouncementCommentEditorHook";
-import {getUserIconURL, getUserName} from "@/utils/userData";
+import {getUserIconURL, getUserName} from "@/utils/common/userData";
 import KebabMenu from "@/views/components/common/kebabMenu.vue";
 import type {AnnouncementCommentWithViewData} from "@/types/announcement/announcementComments";
 import AnnouncementComment from "@/views/components/announcementPage/announcementComment.vue";
@@ -59,7 +59,7 @@ onMounted(() => {
     })
 
     const comments = snapshot.val().comments
-    if (!comments){
+    if (!comments) {
       commentsWithViewData.value = {};
       return
     }
@@ -292,15 +292,15 @@ const commentInputField = commentHooks.commentInputField
               @imgAdd="imgAdd"
           />
 
-<!--                内容-->
-<!--          <div class="announcement-content" v-html="content"></div>-->
+          <!--                内容-->
+          <!--          <div class="announcement-content" v-html="content"></div>-->
 
 
         </div>
 
         <!--    ここからコメント-->
         <div class="comment-wrapper" v-if="commentsWithViewData">
-          <announcementComment  v-for="comment in commentsWithViewData" :key="(comment.createdAt as number)" :user="user"
+          <announcementComment v-for="comment in commentsWithViewData" :key="(comment.createdAt as number)" :user="user"
                                :comment="comment" :commentHooks="commentHooks"/>
         </div>
       </div>
@@ -430,6 +430,7 @@ p {
   //background-color: white;
   //box-shadow: none;
 }
+
 .scroll-style {
   background-color: white !important;
 }

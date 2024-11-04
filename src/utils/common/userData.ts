@@ -15,3 +15,4 @@ export const getUserIconURL = (userId: string): Promise<string | null> => {
 export const getUserName = (userId: string): Promise<string | null> => {
     return readUserData(userId, "name");
 }
+

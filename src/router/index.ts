@@ -62,6 +62,11 @@ const router = createRouter({
             component: Chat,
         },
         {
+            path: '/chat/:roomId',
+            name: 'chat-room',
+            component: Chat,
+        },
+        {
             path: '/announcements',
             name: 'announcements',
             component: AnnouncementsPage,

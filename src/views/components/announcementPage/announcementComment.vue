@@ -3,8 +3,6 @@ import type {AnnouncementCommentWithViewData} from "@/types/announcement/announc
 import KebabMenu from "@/views/components/common/kebabMenu.vue";
 import {formatServerTimestamp} from "../../../utils/database";
 import type {User} from "firebase/auth";
-import {onMounted, ref} from "vue";
-import {getUserIconURL, getUserName} from "@/utils/userData";
 
 interface Props {
   user: User | null
@@ -24,7 +22,7 @@ const {user, comment, commentHooks} = defineProps<Props>()
       <div class="comment-head">
         <p>{{ comment.userName }}</p>
         <p>{{ formatServerTimestamp(comment.createdAt) }}</p>
-        <small v-if="comment.updatedAt">編集済 ({{ formatServerTimestamp(comment.updatedAt)}})</small>
+        <small v-if="comment.updatedAt">編集済 ({{ formatServerTimestamp(comment.updatedAt) }})</small>
 
         <KebabMenu class="kebab" v-if="comment.userId === user?.uid">
           <!--編集-->
@@ -95,12 +93,13 @@ const {user, comment, commentHooks} = defineProps<Props>()
 
 .comment-content {
   white-space: pre-wrap;
-  word-wrap:break-word
+  word-wrap: break-word
 }
 
 .comment-replying {
   border: 1px dashed blue;
 }
+
 .comment-editing {
   border: 1px dashed green;
 }
