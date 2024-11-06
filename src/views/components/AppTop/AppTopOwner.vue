@@ -20,7 +20,7 @@ function logout() {
 <template>
 <h1>管理者</h1>
 <div class="row">
-    <div class="col-sm-6 mb-3 mb-sm-0">
+    <div class="col-sm-4 mb-6 mb-sm-0">
       <div class="card">
         <div class="card-body">
           <h5 class="card-title"><i class="bi bi-cart"></i>注文</h5>
@@ -29,7 +29,7 @@ function logout() {
         </div>
       </div>
     </div>
-    <div class="col-sm-6 mb-3 mb-sm-0">
+    <div class="col-sm-4 mb-6 mb-sm-0">
         <div class="card">
           <div class="card-body">
             <h5 class="card-title"><i class="bi bi-cart"></i>登録</h5>
@@ -38,7 +38,7 @@ function logout() {
           </div>
         </div>
       </div>
-    <div class="col-sm-6">
+    <div class="col-sm-4">
       <div class="card">
         <div class="card-body">
           <h5 class="card-title"><i class="bi bi-person"></i>マイページ</h5>
@@ -47,7 +47,7 @@ function logout() {
         </div>
       </div>
     </div>
-    <div class="col-sm-6">
+    <div class="col-sm-4">
         <div class="card">
           <div class="card-body">
             <h5 class="card-title"><i class="bi bi-columns-gap"></i>管理者画面</h5>
@@ -56,7 +56,7 @@ function logout() {
           </div>
         </div>
       </div>
-    <div class="col-sm-6">
+    <div class="col-sm-4">
         <div class="card">
           <div class="card-body">
             <h5 class="card-title"><i class="bi bi-box-arrow-in-left"></i>ログアウト</h5>
@@ -73,5 +73,11 @@ function logout() {
 }
 p{
     margin: 0;
+}
+.card{
+  width: 370px;
+  height: 200px;
+  padding: 3%;
+  margin: 3%;
 }
 </style>

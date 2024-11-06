@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref,watch } from 'vue'
-import { RouterLink } from 'vue-router'
+import { RouterLink,useRoute } from 'vue-router'
 import {
   getAuth,
   signOut,
@@ -49,6 +49,17 @@ enum Role{
     Kawasaki="川崎",
     None=""
   }
+enum PageMode{
+  home="Home",
+  order="Order",
+  registration="Registation",
+  mypage="Mypage",
+  owner="Onwer",
+  None="null",
+  login="login",
+  logout="Logout"
+}
+
 const userStore=useUserStore()
 const fireUseStore=usefireUserStore()
 const emit = defineEmits<Emits>()
@@ -62,13 +73,39 @@ const currentUser = ref(userStore.currentUser);
 const cartStore=useCartStore()
 const cartData=ref<CartTables>(cartStore.cartData)
 const cartCount=ref<number>(0)
+  const route = useRoute();
 if(currentUser.value)
 cartCount.value=cartStore.getCountCart(currentUser.value.uid)
-const onClickBurger = (): void => {
+function onClickBurger(mode:PageMode){
   if(!isBurger.value){
     gsap.to(sidebar.value,{x:205,duration:0.5})
   }else{
     gsap.to(sidebar.value,{x:-205,duration:0.5})
+  }
+  switch (mode){
+    case PageMode.home:
+      router.push("/")
+      break;
+      case PageMode.order:
+      router.push("/order")
+      break;
+      case PageMode.registration:
+      router.push("/registration")
+      break;
+      case PageMode.mypage:
+      router.push("/my-page")
+      break;
+      case PageMode.owner:
+      router.push("/Owner")
+      break;
+      case PageMode.login:
+      router.push("/login")
+      break;
+      case PageMode.logout:
+      logout()
+      break;
+      default:
+        break;
   }
   isBurger.value = !isBurger.value
   
@@ -84,8 +121,29 @@ function logout() {
       router.push("/")
     })
 }
+function isActive(page: PageMode): boolean {
+  switch (page) {
+    case PageMode.home:
+      return route.path === '/';
+    case PageMode.order:
+      return route.path === '/order';
+    case PageMode.registration:
+      return route.path === '/registration';
+    case PageMode.mypage:
+      return route.path === '/my-page';
+    case PageMode.owner:
+      return route.path === '/Owner';
+    case PageMode.login:
+      return route.path === '/login';
+    default:
+      return false;
+  }
+}
 function onPushCart(){
   router.push("/cart")
+}
+function onPuskMyPage(){
+  router.push("/my-page")
 }
 watch(() => userStore.currentUser, (newUser) => {
   currentUser.value = newUser;
@@ -119,55 +177,62 @@ watch(
     </div>
     
     <nav>
-      <button v-if="cartCount!==0" v-on:click="onPushCart">カート:{{cartCount}}</button>
-      <div v-if="iconURL != null&&iconURL != '' "><img v-bind:src="iconURL" alt="" class="aicon-image"></div>
-      <p v-if="currentUser != null">{{ currentUser.displayName }}様</p>
-      
-      <i v-if="!isBurger" v-on:click="onClickBurger" class="bi bi-justify burger"></i>
-      <i v-if="isBurger" v-on:click="onClickBurger" class="bi bi-x-lg burger"></i>
+        <div class="cart "  v-on:click="onPushCart">
+          <div class="cart_icon">
+            <i class="bi bi-cart"></i>
+            <p>{{cartCount}}</p>
+          </div>
+          <p class="d-none d-sm-block">買い物かご</p>
+        </div>
+        <div class="myacount" v-on:click="onPuskMyPage">
+          <div v-if="iconURL != null&&iconURL != '' "><img v-bind:src="iconURL" alt="" class="aicon-image"></div>
+          <p v-if="currentUser != null" class="d-none d-sm-block">{{ currentUser.displayName }}様</p>
+        </div>
+      <i v-if="!isBurger" v-on:click="onClickBurger(PageMode.None)" class="bi bi-justify burger"></i>
+      <i v-if="isBurger" v-on:click="onClickBurger(PageMode.None)" class="bi bi-x-lg burger"></i>
     </nav>
   </header>
   <aside  ref="sidebar">
     <ul>
-      <li>
-        <button v-on:click="onClickBurger" class="sidebar_element">
+      <li :class="{ 'active': isActive(PageMode.home) }">
+        <button v-on:click="onClickBurger(PageMode.home)" class="sidebar_element" >
           <i class="bi bi-house"></i>
-          <RouterLink v-bind:to="{ name: 'top' }" class="link">ホーム</RouterLink>
+          <p>ホーム</p>
         </button>
       </li>
 
-      <li v-if="currentUser != null">
-        <button v-on:click="onClickBurger" class="sidebar_element">
+      <li v-if="currentUser != null" :class="{ 'active': isActive(PageMode.order) }">
+        <button v-on:click="onClickBurger(PageMode.order)" class="sidebar_element" >
           <i class="bi bi-cart"></i>
-          <RouterLink v-bind:to="{ name: 'order' }" class="link">注文</RouterLink>
+          <p>注文</p>
         </button>
       </li>
-      <li v-if="currentUser != null&& myRole != Role.Buyer">
-        <button v-on:click="onClickBurger" class="sidebar_element">
+      <li v-if="currentUser != null&& myRole != Role.Buyer" :class="{ 'active': isActive(PageMode.registration) }">
+        <button v-on:click="onClickBurger(PageMode.registration)" class="sidebar_element" >
           <i class="bi bi-pencil-square"></i>
-          <RouterLink v-bind:to="{ name: 'registration' }" class="link">登録</RouterLink>
+          <p>登録</p>
         </button>
       </li>
-      <li v-if="currentUser != null">
-        <button v-on:click="onClickBurger" class="sidebar_element">
+      <li v-if="currentUser != null" :class="{ 'active': isActive(PageMode.mypage) }">
+        <button v-on:click="onClickBurger(PageMode.mypage)" class="sidebar_element" >
           <i class="bi bi-person"></i>
-          <RouterLink v-bind:to="{ name: 'my-page' }" class="link">マイページ</RouterLink>
+          <p>マイページ</p>
         </button>
       </li>
-      <li v-if="currentUser == null">
-        <button v-on:click="onClickBurger" class="sidebar_element">
+      <li v-if="currentUser == null" :class="{ 'active': isActive(PageMode.login) }">
+        <button v-on:click="onClickBurger(PageMode.login)" class="sidebar_element" >
           <i class="bi bi-box-arrow-in-right"></i>
-          <RouterLink v-bind:to="{ name: 'login' }" class="link">ログイン<br>新規登録</RouterLink>
+          <p>ログイン<br>新規登録</p>
         </button>
       </li>
-      <li v-if="currentUser != null && [Role.Kawasaki, Role.Murone, Role.Onwer].includes(myUserData.role)">
-        <button v-on:click="onClickBurger" class="sidebar_element">
+      <li v-if="currentUser != null && [Role.Kawasaki, Role.Murone, Role.Onwer].includes(myUserData.role)" :class="{ 'active': isActive(PageMode.owner) }">
+        <button v-on:click="onClickBurger(PageMode.owner)" class="sidebar_element" >
           <i class="bi bi-columns-gap"></i>
-          <RouterLink v-bind:to="{ name: 'Owner' }" class="link">管理者画面</RouterLink>
+          <p>管理者画面</p>
         </button>
       </li>
       <li v-if="currentUser != null">
-        <button v-on:click="onClickBurger" class="sidebar_element" style="display: flex">
+        <button v-on:click="onClickBurger(PageMode.logout)" class="sidebar_element" style="display: flex">
           <i class="bi bi-box-arrow-in-left"></i>
           <p @click="logout" class="link">ログアウト</p>
         </button>
@@ -184,6 +249,9 @@ body {
 ul{
   padding: 0;
 }
+p{
+  margin: 0;
+}
 header {
   height: 80px;
   width: 100%;
@@ -193,9 +261,35 @@ header {
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.26);
   padding: 0 3%;
   overflow-x: hidden;
+  overflow-y: hidden;
 }
 .header-icon{
   width: 50%;
+}
+.myacount{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 100%;
+}
+
+.cart{
+  display: flex;
+  position: relative;
+  flex-direction: column;
+}
+.cart_icon i{
+  text-align: center;
+  font-size: 40px;
+  margin: 20%;
+}
+.cart_icon p{
+  position: absolute;
+  top: 17%;
+  left: 42%;
+    font-size: 21px;
+  color: var(--main-color);
+  margin: 0;
 }
 nav {
   width: 50%;
@@ -240,6 +334,7 @@ aside li {
   padding: 10px 5px 10px 10px;
   border-top: 1px solid rgba(128, 128, 128, 0.24);
   border-bottom: 1px solid rgba(128, 128, 128, 0.24);
+  
 }
 .link {
   text-decoration: none;
@@ -250,5 +345,26 @@ aside li {
 .sidebar_element {
   border: none;
   background-color: white;
+  width: 100%;
+  text-align: left;
+  display: flex;
+  align-items: center;
 }
+li.active{
+  background-color: #F5F5F5;
+}
+li.active .sidebar_element{
+  background-color: #F5F5F5;
+}
+.sidebar_element p{
+  margin-bottom: 10px;
+  font-size: 24px;
+  color: var(--other-color);
+}
+@media (max-width: 575.98px) { 
+  .cart_icon p{
+    top: 21%;
+    left: 57%;
+  }
+ }
 </style>

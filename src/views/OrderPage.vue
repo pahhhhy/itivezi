@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useVegeStore } from '@/stores/vege'
-import { ref,watch} from 'vue'
+import { ref,watch,onMounted} from 'vue'
 import OrderHistory from './components/orderpage/OrderHistory.vue';
 import { useOrderDataStore } from '@/stores/orderData';
 import OrderEachToggle from './components/orderpage/OrderEachToggle.vue';
@@ -55,7 +55,13 @@ const vegeAllData = ref<Vegetables>(vegeStore.VegeAllData)
 const cartStore=useCartStore()
 const cartData=ref<CartTables>(cartStore.cartData)
 const selectedFilter=ref<SortMode>(SortMode.All)
-
+  onMounted(() => {
+    sortVegeOrder.value=sortVegeStore.sortbyVege
+    vegeAllData.value=vegeStore.VegeAllData
+    vegeAllData.value = filterAvailableVegetables(vegeAllData.value);
+    filterVegeData.value=vegeAllData.value
+    filterVegeData.value=makeSortData(filterVegeData.value,sortVegeOrder.value)
+})
 vegeAllData.value=filterAvailableVegetables(vegeAllData.value)
 const filterVegeData=ref<Vegetables>(vegeAllData.value)
 watch(() => sortVegeStore.sortbyVege, (newUser) => {
@@ -151,8 +157,8 @@ function makeSortData(data: Vegetables, order: string[]): Vegetables {
 <button class="btn btn-success" v-on:click="onPushCart"> カートへ</button>
 
 <!-- {{ vegeAllData }} -->
-<p>{{filterVegeData}}</p>
-<p>{{sortVegeOrder}}</p>
+<!-- <p>{{filterVegeData}}</p>
+<p>{{sortVegeOrder}}</p> -->
   <!-- {{ orderData }}
   <p>{{cartData}}</p> -->
   <article v-if="Object.keys(orderData).length===0">
