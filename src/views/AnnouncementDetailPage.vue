@@ -14,6 +14,7 @@ import {getUserIconURL, getUserName} from "@/utils/common/userData";
 import KebabMenu from "@/views/components/common/kebabMenu.vue";
 import type {AnnouncementCommentWithViewData} from "@/types/announcement/announcementComments";
 import AnnouncementComment from "@/views/components/announcementPage/announcementComment.vue";
+import type {Category} from "@/types/announcement/categories";
 
 const route = useRoute()
 // 実際に表示するお知らせ内容。編集する場合はこちらが変更される
@@ -35,6 +36,14 @@ const authorUserIconRef = ref<null | string>(null);
 // 投稿者のname
 const authorName = ref<null | string>(null);
 
+// categoriesをpropsで受け取る
+const {categories} = defineProps<{
+  categories: Category[]
+}>();
+
+
+
+
 
 // -----表示関連機能-----
 
@@ -48,6 +57,8 @@ onMounted(() => {
   // お知らせを非同期で取得
   onValue(announcementRef, async (snapshot) => {
     console.log("onvalue")
+    console.log(snapshot.val())
+    console.log("categories", categories)
     originalAnnouncement.value = snapshot.val()
     title.value = snapshot.val().title
     content.value = snapshot.val().content

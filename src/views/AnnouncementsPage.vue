@@ -42,7 +42,7 @@ onMounted(() => {
 <template>
   <h1>掲示板</h1>
   <div class="announcements" v-if="categories !== undefined">
-<!--    {{categories}}-->
+    {{categories}}
     <CategoriesManager :categories="categories" v-if="role === '管理者'"/>
     <PostAnnouncementForm :categories="categories" v-if="role === '管理者'"/>
     <AnnouncementsList :categories="categories"/>
