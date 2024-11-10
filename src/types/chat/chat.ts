@@ -7,6 +7,9 @@ export interface ChatRoom {
     roomId: string;
     roomName: string | null;
     users: Record<string, boolean>;
+    createdAt: ServerTimestamp;
+    lastMessage?: ChatMessage;
+    lastUpdateAt?: ServerTimestamp;
 }
 
 export interface ChatUser {

@@ -1,13 +1,24 @@
 import {ref as fireRef} from "@firebase/database";
-import {equalTo, getDatabase, onValue, orderByChild, push, query, update} from "firebase/database";
+import {
+    child,
+    equalTo,
+    getDatabase,
+    onValue,
+    orderByChild,
+    push,
+    query,
+    serverTimestamp,
+    update
+} from 'firebase/database'
 import {onMounted, ref} from "vue";
 import type {ChatMessage} from "@/types/chat/chat";
 
 export const useChatMessageHook = (roomId: string, onMessageUpdated?: (data: Record<string, ChatMessage>) => void) => {
     const db = getDatabase();
     const messagesRef = fireRef(db, 'testChat/messages');// roomIdをキーにしてさらにmessageIdをキーにしたメッセージ情報を保持
+    const roomsRef = fireRef(db, 'testChat/rooms');
 
-    const messages = ref([]);
+    const messages = ref<ChatMessage[]>([]);
 
     onMounted(() => {
         const q = query(messagesRef, orderByChild('roomId'), equalTo(roomId));
@@ -22,10 +33,16 @@ export const useChatMessageHook = (roomId: string, onMessageUpdated?: (data: Rec
         });
     });
 
-    const sendMessage = async (message: Omit<ChatMessage, messageId>) => {
+    const sendMessage = async (message: ChatMessage) => {
         const newMessageRef = push(messagesRef);
+        if (!newMessageRef.key) return;
         message.messageId = newMessageRef.key;
         await update(newMessageRef, message);
+    //     room側のlastMessageとlastUpdateAtを更新する
+        await update(child(roomsRef, roomId), {
+            lastMessage: message,
+            lastUpdateAt: serverTimestamp(),
+        });
     };
 
     return {messages, sendMessage};

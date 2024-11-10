@@ -6,6 +6,8 @@ import {serverTimestamp} from "firebase/database";
 import type {User} from "firebase/auth";
 import {formatServerTimestamp} from "@/utils/database";
 import {useUserDataStore} from "@/stores/userPublicData";
+import { RouterLink } from 'vue-router'
+import type { UserPublicData } from '@/types/common/userPublicData'
 
 
 const {user, roomId} = defineProps<{
@@ -17,7 +19,7 @@ const userid = ref<string>(user.uid);
 // piniaのuseUserStoreから登場ユーザーをすべて取得
 const {getUserPublicData} = useUserDataStore();
 
-const usersPublicData = ref<Record<string, PublicUserData> | undefined>(undefined);
+const usersPublicData = ref<Record<string, UserPublicData> | undefined>(undefined);
 
 const {
   messages,
@@ -26,8 +28,10 @@ const {
   // dataは{messageId: ChatMessage}の形式
   const allMessageSenders = Object.values(data).map(message => message.senderUid);
   const uniqueMessageSenders = Array.from(new Set(allMessageSenders));
-  uniqueMessageSenders.forEach(uid => {
+  uniqueMessageSenders.forEach((uid: string) => {
     getUserPublicData(uid).then(data => {
+      if (!usersPublicData.value) usersPublicData.value = {};
+      if (!usersPublicData.value[uid] && data)
       usersPublicData.value = {
         ...usersPublicData.value,
         [uid]: data
@@ -39,8 +43,9 @@ const {
 
 const sendMessageCallback = () => {
   const createdAt = serverTimestamp();
-  const messageData: Omit<ChatMessage, messageId> = {
+  const messageData: ChatMessage = {
     senderUid: userid.value,
+    messageId: '',
     message: message.value,
     roomId,
     createdAt,
@@ -56,14 +61,10 @@ const message = ref<string>('')
 <template>
   <div>
     <h1>chat detail</h1>
+    <router-link to="/chat">&lg;戻る</router-link>
     <div class="chat">
-
-      <p>roomId: {{ roomId }}</p>
-      <p>userid: {{ userid }}</p>
-
-
       <div v-if="messages">
-        <div v-for="message in messages" :key="message.messageId">
+        <div v-for="message in messages" :key="message.messageId" style="margin-top: 20px;">
           <div v-if="usersPublicData && usersPublicData[message.senderUid]" class="message-container">
             <div class="message-header">
               <img :src="usersPublicData[message.senderUid].iconURL" alt="user icon">
