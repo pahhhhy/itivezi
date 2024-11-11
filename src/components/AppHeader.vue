@@ -171,14 +171,14 @@ watch(
     </div>
     
     <nav>
-        <div class="cart "  v-on:click="onPushCart">
+        <div class="cart "  v-on:click="onPushCart" v-if="currentUser != null">
           <div class="cart_icon">
             <i class="bi bi-cart"></i>
             <p>{{cartCount}}</p>
           </div>
           <p class="d-none d-sm-block">買い物かご</p>
         </div>
-        <div class="myacount" >
+        <div class="myacount" v-if="currentUser != null" >
           <div v-if="iconURL != null&&iconURL != '' "><img v-bind:src="iconURL" alt="" class="aicon-image"></div>
           <p v-if="currentUser != null" class="d-none d-sm-block">{{ currentUser.displayName }}様</p>
         </div>

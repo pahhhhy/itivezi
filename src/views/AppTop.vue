@@ -40,11 +40,11 @@ watch(() => fireUseStore.myUserData, (newUser) => {
   <article v-if="currentUser == null">
     
     <div class="login-form">
-      <h3>ログイン、会員登録することでこのアプリを使うことができます。</h3>
-      <h2>ログインしてください。</h2>
-      <p class="btn btn-success">
+      <h3>ログインすることでこのアプリを使うことができます。</h3>
+      
+      <button class="btn btn-success p-2 m-3">
         <RouterLink v-bind:to="{ name: 'login' }">新規登録/ログイン</RouterLink>
-      </p>
+      </button>
     </div>
     
     
@@ -56,8 +56,8 @@ watch(() => fireUseStore.myUserData, (newUser) => {
   </article>
 </template>
 <style>
-.title {
-  text-align: center;
+.login-form h3{
+  margin-top:24px ;
 }
 .login-form a{
   color: white;
@@ -67,5 +67,16 @@ watch(() => fireUseStore.myUserData, (newUser) => {
   display: flex;
   align-items: center;
   flex-direction:column;
+  margin: 0 20px;
+}
+.card_button{
+  padding: 15px;
+  width: 150px;
+  margin-top: 30px;
+  border-radius: 30px;
+  background-color: var(--main-color);
+  color: white;
+  font-size: 18px;
+  border: none;
 }
 </style>

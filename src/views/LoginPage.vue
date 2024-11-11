@@ -13,8 +13,12 @@ import { ref, watch } from 'vue'
 import LoginForm from './components/LoginForm.vue'
 import { getStorage, ref as storageRef, getMetadata } from 'firebase/storage';
 import '../assets/main.css'
-import { usefireUserStore } from '@/stores/fireUserdata';
 import { useUserStore } from '@/stores/userData';
+import { usefireUserStore } from '@/stores/fireUserdata';
+import { useVegeStore } from '@/stores/vege';
+import { useCartStore } from '@/stores/cart';
+import { useFireOrderStore } from '@/stores/fireOrder';
+import { useSortVegeStore } from '@/stores/sortByVege';
 interface AllUserTables{
   [uid:string]:Usertables
 }
@@ -33,6 +37,12 @@ enum Role{
     Farmer="農家",
     None=""
   }
+  enum SortMode{
+    All="all",
+    Kawasaki="川崎",
+    Murone="室根",
+    Other="その他"
+}
 const userStore=useUserStore()
 const currentUser = ref<User|null>(userStore.currentUser);
 
@@ -43,6 +53,24 @@ const errorMes = ref<string>('')
 const userData = ref<AllUserTables>({})
 const changeemail=ref<string>("")
 const isForget=ref<boolean>(false)
+const vegeStore=useVegeStore()
+const sortVegeStore=useSortVegeStore()
+const FireOrderStore=useFireOrderStore()
+const CartStore=useCartStore()
+  async function roadData(){
+  await userStore.roadUserData()
+  await vegeStore.roadData()
+  await FireOrderStore.roadData()
+  await sortVegeStore.roadData(SortMode.All)
+  CartStore.roadData()
+  currentUser.value=userStore.currentUser
+  if(currentUser.value){
+    await fireUseStore.roadFireUseData(currentUser.value.uid)
+  }
+  
+else
+console.log("error")
+}
   watch(() => userStore.currentUser, (newUser) => {
   currentUser.value = newUser;
 });
@@ -115,7 +143,7 @@ async function signin(email: string, password: string) {
             window.scrollTo({
               top: 0,       // 一番上に移動
             });
-            await fireUseStore.roadFireUseData(currentUser.value.uid)
+            roadData()
             router.push('/')
           }
         } else {
@@ -194,7 +222,7 @@ function onPushChangePass(){
       <h2 v-if="errorMes != ''" style="color: red">{{ errorMes }}</h2>
       <div class="form_link_group">
         <button type="button" class="btn btn-success" @click="signin(email, password)">ログイン</button>
-        <button @click="onPushChangePass">パスワードを忘れた</button>
+        <button class="passforget_button" @click="onPushChangePass">パスワードを忘れた</button>
         <p><RouterLink v-bind:to="{ name: 'signup' }" class="link">アカウントの新規登録</RouterLink></p>
       </div>
       
@@ -206,9 +234,10 @@ function onPushChangePass(){
     </div>
     <article class="form_card">
       <h2 v-if="errorMes != ''" style="color: red">{{ errorMes }}</h2>
-      <input type="email" id="email" placeholder="メールアドレスを入力" required v-model="changeemail">
+      <label for="exampleFormControlInput1" class="form-label">メールアドレス</label>
+      <input type="email" id="email" placeholder="name@example.com" required v-model="changeemail" class="form-control">
       <div class="form_link_group">
-        <button type="button" class="btn btn-success" @click="resetPassword()">パスワードの変更メールの送信</button>
+        <button type="button" class="btn btn-success" @click="resetPassword()">送信</button>
         <button type="button" class="btn btn-success" @click="onPushChangePass">戻る</button>
       </div>
       
@@ -262,9 +291,33 @@ function onPushChangePass(){
     transition-duration: 150ms;
     transition-timing-function: ease-in-out;
 }
+.passforget_button{
+  border: none;
+  color: var(--other-color);
+  box-shadow: none!important;
+  background-color: white;
+}
 .title{
   display: flex;
   align-items: center;
   padding: 30px 0;
 }
+@media (max-width: 536px) { 
+  .title{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .login_page{
+    width: 380px;
+    margin: auto;
+  }
+  .form_card{
+    padding: 36px;
+  }
+  .form_link_group >button{
+    height: 48px;
+    margin-bottom: 18px;
+  }
+  }
 </style>
