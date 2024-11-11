@@ -36,9 +36,6 @@ watch(() => fireUseStore.myUserData, (newUser) => {
 </script>
 
 <template>
-  <div class="title">
-    <h1>TOP</h1>
-  </div>
   
   <article v-if="currentUser == null">
     
@@ -53,7 +50,6 @@ watch(() => fireUseStore.myUserData, (newUser) => {
     
   </article>
   <article v-if="currentUser != null">
-    <h1>ようこそ{{ currentUser.displayName }}様</h1>
     <AppTopBuyer v-if="myUserData.role==Role.Buyer&&myUserData.gender!=''"></AppTopBuyer>
     <AppTopFarmer v-if="myUserData.role==Role.Farmer&&myUserData.gender!=''"></AppTopFarmer>
     <AppTopOwner v-if="(myUserData.role==Role.Onwer||myUserData.role==Role.Murone||myUserData.role==Role.Kawasaki)&&myUserData.gender!=''"></AppTopOwner> 

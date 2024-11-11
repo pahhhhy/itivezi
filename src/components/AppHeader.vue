@@ -5,7 +5,6 @@ import {
   getAuth,
   signOut,
 } from 'firebase/auth'
-
 import router from '@/router'
 import {useIconStore}from "../stores/icon"
 import gsap from 'gsap';
@@ -27,10 +26,6 @@ interface CartElementTables{
     unique:string
     vegeName:string
     amount:number
-}
-
-interface Emits {
-  (event: 'OnBurger', Next: boolean): void
 }
 interface Usertables{
     affiliation:String[]
@@ -62,11 +57,9 @@ enum PageMode{
 
 const userStore=useUserStore()
 const fireUseStore=usefireUserStore()
-const emit = defineEmits<Emits>()
 const iconStore = (useIconStore())
 const iconURL=ref<string|null|undefined>(iconStore.iconURL)
 const myRole = ref<string>("")
-const isBurger = ref(false)
 const sidebar=ref(null)
 const myUserData=ref<Usertables>(fireUseStore.myUserData)
 const currentUser = ref(userStore.currentUser);
@@ -74,6 +67,8 @@ const cartStore=useCartStore()
 const cartData=ref<CartTables>(cartStore.cartData)
 const cartCount=ref<number>(0)
   const route = useRoute();
+  const isBurger=ref<boolean>()
+const background=ref(null)
 if(currentUser.value)
 cartCount.value=cartStore.getCountCart(currentUser.value.uid)
 function onClickBurger(mode:PageMode){
@@ -108,9 +103,6 @@ function onClickBurger(mode:PageMode){
         break;
   }
   isBurger.value = !isBurger.value
-  
-  
-  emit("OnBurger",isBurger.value)
 }
 const auth = getAuth()
 function logout() {
@@ -171,6 +163,8 @@ watch(
 </script>
 
 <template>
+  <div v-bind:class="{black_back:isBurger,active:isBurger}" class="background" ref="background" >
+  </div>
   <header>
     <div class="header-icon">
       <img src="..\\assets\\itivezilogo.png" alt="" />
@@ -184,7 +178,7 @@ watch(
           </div>
           <p class="d-none d-sm-block">買い物かご</p>
         </div>
-        <div class="myacount" v-on:click="onPuskMyPage">
+        <div class="myacount" >
           <div v-if="iconURL != null&&iconURL != '' "><img v-bind:src="iconURL" alt="" class="aicon-image"></div>
           <p v-if="currentUser != null" class="d-none d-sm-block">{{ currentUser.displayName }}様</p>
         </div>
@@ -195,10 +189,10 @@ watch(
   <aside  ref="sidebar">
     <ul>
       <li :class="{ 'active': isActive(PageMode.home) }">
-        <button v-on:click="onClickBurger(PageMode.home)" class="sidebar_element" >
+        <div v-on:click="onClickBurger(PageMode.home)" class="sidebar_element" >
           <i class="bi bi-house"></i>
           <p>ホーム</p>
-        </button>
+        </div>
       </li>
 
       <li v-if="currentUser != null" :class="{ 'active': isActive(PageMode.order) }">
@@ -257,11 +251,13 @@ header {
   width: 100%;
   display: flex;
   justify-content: space-between;
+  position: relative;
   border-bottom: 1px solid rgb(223, 223, 223);
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.26);
   padding: 0 3%;
   overflow-x: hidden;
   overflow-y: hidden;
+  z-index: 20;
 }
 .header-icon{
   width: 50%;
@@ -320,7 +316,7 @@ aside {
   width: 200px;
   position: absolute;
   background-color: white;
-  z-index: 1;
+  z-index: 20;
   box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.25);
 }
 aside i {
@@ -360,6 +356,35 @@ li.active .sidebar_element{
   margin-bottom: 10px;
   font-size: 24px;
   color: var(--other-color);
+}
+.background{
+  position: fixed;
+  display: block;
+  top: 80px;
+  left: 0;
+  background-color:rgba(248,248,248,0.1) ;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  transition: all 0.5s ease;
+}
+.background.active{
+  top: 80px;
+  left: 0;
+  background-color:rgba(3,3,3,.5); ;
+  width: 100vw;
+  height: 100vh;
+  z-index: 10;
+  transition: all  0.5s ease;
+}
+.black_back{
+  position: fixed;
+  top: 80px;
+  left: 0;
+  background-color:#f8f8f8 ;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
 }
 @media (max-width: 575.98px) { 
   .cart_icon p{
