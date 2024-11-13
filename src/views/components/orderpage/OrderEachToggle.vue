@@ -24,11 +24,7 @@ interface Props {
     vegeName:string|number
 }
 const props = defineProps<Props>()
-const isActive=ref<boolean>(false)
 const IsPopup=ref<boolean>(false)
-function OnPushTitle(){
-    isActive.value=!isActive.value
-}
 function onPushPopup(){
     IsPopup.value=true
 }
@@ -40,13 +36,10 @@ function onPushCart(){
 }
 </script>
 <template>
-    <button class="Order_title" v-on:click="OnPushTitle">
+    <button class="Order_title">
         <h1>{{props.vegeName}}</h1>
-        
-        <i class="bi bi-chevron-down" v-if="!isActive"></i>
-        <i class="bi bi-chevron-up" v-if="isActive"></i>
     </button>
-    <article class="vege_group" v-if="isActive">
+    <article class="vege_group" >
         <div v-for="(element,unique) in data" :key="unique" >
             <OrderToggleElement
             v-bind:data="element"
@@ -75,9 +68,10 @@ function onPushCart(){
 }
     .Order_title{
         border: none;
-        background-color: white;
+        background-color: var(--background-color);
         display: flex;
         align-items: center;
+        color: var(--text-color);
     }
     .vege_group{
         display: flex;

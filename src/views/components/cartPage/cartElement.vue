@@ -31,8 +31,11 @@ function deleteData(){
 <template>
 <td>
     <div>
+      <div class="cart_img">
         <img :src="props.data.photo" class="card-img-top" alt="..." v-if="props.data.photo!='none'">
         <img src="../../../assets/Noimage.jpeg" class="card-img-top" alt="..." v-if="props.data.photo=='none'">
+      </div>
+        
         <h4>【 {{props.data.farmer}} 産】{{props.data.vegeName}}</h4>
         <p>価格: {{props.data.en}} 円</p>
         <p>卸先:{{props.data.roadStation}}</p>
@@ -45,6 +48,12 @@ function deleteData(){
 </template>
 <style scoped>
 td >img{
-    height: 30%;
+    height: 100%;
+    width: 100%;
+    object-fit: contain;
+}
+.cart_img{
+  height: 150px;
+  width: 200px;
 }
 </style>

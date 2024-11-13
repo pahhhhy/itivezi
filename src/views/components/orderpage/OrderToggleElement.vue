@@ -44,6 +44,7 @@ const error=ref<boolean>(false)
 const userStore=useUserStore()
 const currentUser = ref(userStore.currentUser);
 const CartStore=ref(useCartStore())
+const isPopup=ref<boolean>(false)
 watch(() => userStore.currentUser, (newUser) => {
   currentUser.value = newUser;
 });
@@ -78,20 +79,33 @@ function changeMoney(money: number) {
     } 
   totalMoney.value = vegeCount.value* money
 }
+function OnpushElement(){
+  isPopup.value=!isPopup.value
+}
+function onPushBuck(){
+  isPopup.value=false
+}
 </script>
 <template>
 <!-- <h4>{{props.data}}</h4>
 <p>{{props.uniqueKey}}</p> -->
 
-  <div class="card" style="width: 18rem;">
+  <button class="card" style="width: 18rem;" v-on:click="OnpushElement">
     <img :src="props.data.photo" class="card-img-top" alt="..." v-if="props.data.photo!='none'">
     <img src="../../../assets/Noimage.jpeg" class="card-img-top" alt="..." v-if="props.data.photo=='none'">
     <div class="card-body">
-        <h5 class="card-title">{{props.data.farmer}}</h5>
-      <p class="card-text">値段:{{props.data.en}}</p>
-      <p class="card-text">単価:{{props.data.unit}}</p>
-      <p class="card-text">卸先:{{props.data.roadStation}}</p>
-      <input
+        <p class="card-title">{{props.data.farmer}}</p>
+        <div class="card_money">
+          <h5 class="card-text">{{props.data.unit}}  </h5>
+          <h5 class="card-text">  {{props.data.en}}円</h5>
+        </div>
+    </div>
+  </button>
+<article class="popup_order" v-if="isPopup">
+  <h1>{{props.vegeName}}</h1>
+  <p>卸先： {{props.data.roadStation}}</p>
+  <h4>{{props.data.unit}}     {{props.data.en}}円</h4>
+   <input
         class="form-control"
         type="number"
         placeholder="何組買いますか？"
@@ -102,22 +116,63 @@ function changeMoney(money: number) {
         "
         />
     <p>合計金額：{{totalMoney}}円</p>
+    <button class="btn btn-success" v-on:click="onPushBuck()">戻る</button>
     <button class="btn btn-success" v-on:click="onPushCart()" v-bind:class="{disable:totalMoney==0}">購入</button>
-    </div>
-  </div>
-
+</article>
 </template>
 <style scoped>
 .disable{
     pointer-events: none;
     opacity: 0.5;
 }
-    .card{
-        margin: 10px;
-        width: 280px;
-        height: 500px;
-    }
-    .card img{
-        height: 40%;
-    }
+.card-body{
+  margin-top: 5px;
+  padding: 0 10px;
+  width: 100%;
+}
+.card_money{
+  display: flex;
+  justify-content: space-between;
+  
+}
+.card-body h5{
+  font-size: 18px;
+  text-align: right;
+  color: var(--other-color);
+}
+.card img{
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.card-body p{
+  font-size: 16px;
+  border-radius: 8px;
+  margin: 0;
+  width: 60px;
+  text-align: center;
+  border: 2px solid var(--main-color);
+}
+.card{
+  margin: 10px;
+  width: 150px!important;
+  height: 150px;
+  border: none;
+  background-color: white;
+}
+.card img{
+  height: 50%;
+}
+.popup_order{
+  position: fixed;
+  width: 400px;
+  height: 300px;
+  z-index: 1;
+  border: 1px solid gray;
+  border-radius: 20px;
+  top: 20%;
+  left: 20%;
+  padding: 20px;
+  background-color: white;
+}
 </style>

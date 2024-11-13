@@ -116,7 +116,7 @@ watch(selectVegeList, (newVal, oldVal) => {
       </div>
     </div>
 
-    <p>Selected Vegetables: {{ selectVegeList }}</p>
+    <!-- <p>Selected Vegetables: {{ selectVegeList }}</p> -->
     <h1 style="color: red" v-show="step1Error && selectVegeList.length == 0">
       野菜を選択してください
     </h1>

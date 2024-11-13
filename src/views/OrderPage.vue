@@ -153,23 +153,13 @@ function makeSortData(data: Vegetables, order: string[]): Vegetables {
 </script>
 <template>
   <OrderHistory></OrderHistory>
-<h1>注文画面</h1>
-<button class="btn btn-success" v-on:click="onPushCart"> カートへ</button>
-
-<!-- {{ vegeAllData }} -->
-<!-- <p>{{filterVegeData}}</p>
-<p>{{sortVegeOrder}}</p> -->
-  <!-- {{ orderData }}
-  <p>{{cartData}}</p> -->
   <article v-if="Object.keys(orderData).length===0">
-    <h3>フィルター</h3>
+    <!-- <h3>フィルター</h3>
 <button v-on:click="onPushfilter(SortMode.All)" class="filter_button" v-bind:class="{fliter_active:selectedFilter==SortMode.All}">全て</button>
 <button v-on:click="onPushfilter(SortMode.Kawasaki)" class="filter_button" v-bind:class="{fliter_active:selectedFilter==SortMode.Kawasaki}">川崎</button>
 <button v-on:click="onPushfilter(SortMode.Murone)" class="filter_button" v-bind:class="{fliter_active:selectedFilter==SortMode.Murone}">室根</button>
-<button v-on:click="onPushfilter(SortMode.Other)" class="filter_button" v-bind:class="{fliter_active:selectedFilter==SortMode.Other}">その他</button>
+<button v-on:click="onPushfilter(SortMode.Other)" class="filter_button" v-bind:class="{fliter_active:selectedFilter==SortMode.Other}">その他</button> -->
     <div v-for="(data,vegeName,index) in filterVegeData" :key=index>
-      <!-- {{ data }}
-      <p>{{vegeName}}</p> -->
     <OrderEachToggle
     v-bind:data="data"
     v-bind:vege-name="vegeName"></OrderEachToggle>
@@ -179,6 +169,7 @@ function makeSortData(data: Vegetables, order: string[]): Vegetables {
     <OrderFormPage
     v-bind:order-data="orderData"></OrderFormPage>
   </article>
+  <article class="order_backgroud"></article>
 </template>
 <style scoped>
 
@@ -188,5 +179,14 @@ function makeSortData(data: Vegetables, order: string[]): Vegetables {
 }
 .fliter_active{
   background-color: rgb(209, 209, 209);
+}
+.order_backgroud{
+  background-color: var(--background-color);
+  z-index: -1;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+  position: fixed;
 }
 </style>

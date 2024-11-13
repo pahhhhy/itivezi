@@ -362,7 +362,7 @@ li.active .sidebar_element{
   display: block;
   top: 80px;
   left: 0;
-  background-color:rgba(248,248,248,0.1) ;
+  background-color:rgba(255, 255, 255, 0) ;
   width: 100vw;
   height: 100vh;
   z-index: -1;

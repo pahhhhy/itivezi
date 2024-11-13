@@ -279,7 +279,7 @@ function onPushChangePass(){
     transition: color 250ms cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 .form_link_group >button{
-  width: 50%;
+  width: 70%;
   padding: 0.625rem;
   margin-bottom: 1.5rem;
   height: 48px;
