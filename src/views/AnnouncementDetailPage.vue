@@ -12,7 +12,7 @@ import {storageURLPattern} from "@/types/files";
 import {useAnnouncementCommentEditor} from "@/utils/announcement/useAnnouncementCommentEditorHook";
 import {getUserIconURL, getUserName} from "@/utils/common/userData";
 import KebabMenu from "@/views/components/common/kebabMenu.vue";
-import type {AnnouncementCommentWithViewData} from "@/types/announcement/announcementComments";
+import type {AnnouncementCommentWithViewData, AnnouncementCommentType} from "@/types/announcement/announcementComments";
 import AnnouncementComment from "@/views/components/announcementPage/announcementComment.vue";
 import type {Category} from "@/types/announcement/categories";
 
@@ -22,7 +22,7 @@ const title = ref('');
 // 編集差分の検知などで使うバックアップお知らせ
 const originalAnnouncement = ref<Announcement>();
 // ユーザーアイコンつきコメントを保管する変数
-const commentsWithViewData = ref<AnnouncementCommentWithViewData | null>({});
+const commentsWithViewData = ref<AnnouncementCommentWithViewData | null>(null);
 // 画像やファイルを扱うHooks
 const {files, content, imgAdd, deleteImgFromStorage, splitFiles} = useAnnouncementFiles()
 // 編集モードかどうかを保管する変数
@@ -62,6 +62,7 @@ onMounted(() => {
     originalAnnouncement.value = snapshot.val()
     title.value = snapshot.val().title
     content.value = snapshot.val().content
+    // TODO:
     getUserIconURL(snapshot.val().userId).then((url) => { // 投稿者のアイコンを取得
       authorUserIconRef.value = url
     })
@@ -71,14 +72,14 @@ onMounted(() => {
 
     const comments = snapshot.val().comments
     if (!comments) {
-      commentsWithViewData.value = {};
+      commentsWithViewData.value = null;
       return
     }
 
-    function sortComments(comments: AnnouncementComment[]): AnnouncementComment[] {
+    function sortComments(comments: AnnouncementCommentType[]): AnnouncementCommentType[] {
       // 親コメントと子コメントを分離
-      const parentComments: AnnouncementComment[] = [];
-      const childComments: Record<string, AnnouncementComment[]> = {};
+      const parentComments: AnnouncementCommentType[] = [];
+      const childComments: Record<string, AnnouncementCommentType[]> = {};
 
       comments.forEach(comment => {
         if (!comment.replyTo) {
@@ -92,15 +93,15 @@ onMounted(() => {
       });
 
       // 親コメントを日時順にソート
-      parentComments.sort((a, b) => a.datetime - b.datetime);
+      parentComments.sort((a, b) => ((typeof a.updatedAt === "number" ? a.updatedAt : (typeof a.createdAt === "number" ? a.createdAt : 0)) - (typeof b.updatedAt === "number" ? b.updatedAt : (typeof b.createdAt === "number" ? b.createdAt : 0))));
 
       // ソート済みの配列に結果を格納
-      const sortedComments: AnnouncementComment[] = [];
+      const sortedComments: AnnouncementCommentType[] = [];
 
       parentComments.forEach(parent => {
         sortedComments.push(parent);
         if (childComments[parent.commentId]) {
-          childComments[parent.commentId].sort((a, b) => a.datetime - b.datetime);
+          childComments[parent.commentId].sort((a, b) => ((typeof a.updatedAt === "number" ? a.updatedAt : (typeof a.createdAt === "number" ? a.createdAt : 0)) - (typeof b.updatedAt === "number" ? b.updatedAt : (typeof b.createdAt === "number" ? b.createdAt : 0))));
           sortedComments.push(...childComments[parent.commentId]);
         }
       });

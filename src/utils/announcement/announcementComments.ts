@@ -1,9 +1,9 @@
 import type {DatabaseReference} from "firebase/database";
 import {child, push, serverTimestamp, update} from "firebase/database";
-import type {AnnouncementComment} from "@/types/announcement/announcementComments";
+import type {AnnouncementCommentType} from "@/types/announcement/announcementComments";
 
 
-export const addAnnouncementComment = (announcementRef: DatabaseReference, commentData: Omit<AnnouncementComment, "commentId">) => {
+export const addAnnouncementComment = (announcementRef: DatabaseReference, commentData: Omit<AnnouncementCommentType, "commentId">) => {
     const newCommentKey = push(child(announcementRef, 'comments')).key
     if (!newCommentKey) {
         throw new Error('Failed to push new comment')
@@ -23,7 +23,7 @@ export const editAnnouncementComment = (announcementRef: DatabaseReference, comm
     return update(announcementRef, pushData)
 }
 
-export const deleteAnnouncementComment = (announcementRef: DatabaseReference, comment: AnnouncementComment) => {
+export const deleteAnnouncementComment = (announcementRef: DatabaseReference, comment: AnnouncementCommentType) => {
     const pushData = {}
     if (comment.replies) { // もしこれに返信があるなら消す
         for (const replyId in comment.replies) {
@@ -39,7 +39,7 @@ export const deleteAnnouncementComment = (announcementRef: DatabaseReference, co
     return update(announcementRef, pushData)
 }
 
-export const addAnnouncementCommentReply = (announcementRef: DatabaseReference, replyingCommentId: string, replyData: Omit<AnnouncementComment, "commentId">) => {
+export const addAnnouncementCommentReply = (announcementRef: DatabaseReference, replyingCommentId: string, replyData: Omit<AnnouncementCommentType, "commentId">) => {
     const newCommentKey = addAnnouncementComment(announcementRef, replyData);
     // replyされた方のコメントのrepliesに追加する
     const pushData = {

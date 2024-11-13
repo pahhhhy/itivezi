@@ -1,13 +1,19 @@
 <script setup lang="ts">
 import type {AnnouncementCommentWithViewData} from "@/types/announcement/announcementComments";
 import KebabMenu from "@/views/components/common/kebabMenu.vue";
-import {formatServerTimestamp} from "../../../utils/database";
+import {formatServerTimestamp} from '@/utils/database';
 import type {User} from "firebase/auth";
 
 interface Props {
   user: User | null
   comment: AnnouncementCommentWithViewData
-  commentHooks,
+  commentHooks: {
+    setEditingMessage: (comment: AnnouncementCommentWithViewData) => void
+    deleteComment: (comment: AnnouncementCommentWithViewData) => void
+    setReplyingMessage: (commentId: string) => void
+    replyingCommentId: { value: string }
+    editingCommentId: { value: string }
+  },
 }
 
 const {user, comment, commentHooks} = defineProps<Props>()

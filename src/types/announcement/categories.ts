@@ -9,7 +9,7 @@ export interface Category {
     };
 }
 
-export interface NestedAnnouncements {
+export interface CategorizedAnnouncements {
     [categoryName: string]: {
         [announceId: string]: Announcement;
     };

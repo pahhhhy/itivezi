@@ -7,7 +7,7 @@ import {
 import type {User} from "firebase/auth";
 import {defineComponent, h, ref, type Ref} from "vue";
 import smallTextInputField from "@/views/components/common/smallTextInputField.vue";
-import type {AnnouncementComment} from "@/types/announcement/announcementComments";
+import type {AnnouncementCommentType} from "@/types/announcement/announcementComments";
 
 export const useAnnouncementCommentEditor = (announcementRef: DatabaseReference, user: Ref<User | null>) => {
     // 返信しようとしているコメント(返信先)のID (nullは返信しようとしていないことを表す)
@@ -52,7 +52,7 @@ export const useAnnouncementCommentEditor = (announcementRef: DatabaseReference,
 
     }
 
-    const deleteComment = (comment: AnnouncementComment) => {
+    const deleteComment = (comment: AnnouncementCommentType) => {
         if (!user.value) return;
         deleteAnnouncementComment(announcementRef, comment);
     }
@@ -65,7 +65,7 @@ export const useAnnouncementCommentEditor = (announcementRef: DatabaseReference,
     }
 
     // ----- 編集関連 -----
-    const setEditingMessage = (comment: AnnouncementComment | null) => {
+    const setEditingMessage = (comment: AnnouncementCommentType | null) => {
         replyingCommentId.value = null;
         editingCommentId.value = comment ? comment.commentId : null;
         commentContent.value = comment ? comment.content : '';

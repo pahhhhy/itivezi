@@ -1,6 +1,6 @@
 import type {ServerTimestamp} from "@/types/announcement/announcement";
 
-export interface AnnouncementComment {
+export interface AnnouncementCommentType {
     userId: string;
     commentId: string;
     content: string;
@@ -8,11 +8,11 @@ export interface AnnouncementComment {
     updatedAt?: ServerTimestamp;
     replyTo?: string;
     replies?: {
-        [string]: AnnouncementComment
+        [string]: AnnouncementCommentType
     };
 }
 
-export interface AnnouncementCommentWithViewData extends AnnouncementComment {
+export interface AnnouncementCommentWithViewData extends AnnouncementCommentType {
     userName: string;
     userIconURL: string;
 }
