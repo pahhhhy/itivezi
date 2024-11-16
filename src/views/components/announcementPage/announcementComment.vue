@@ -7,13 +7,7 @@ import type {User} from "firebase/auth";
 interface Props {
   user: User | null
   comment: AnnouncementCommentWithViewData
-  commentHooks: {
-    setEditingMessage: (comment: AnnouncementCommentWithViewData) => void
-    deleteComment: (comment: AnnouncementCommentWithViewData) => void
-    setReplyingMessage: (commentId: string) => void
-    replyingCommentId: { value: string }
-    editingCommentId: { value: string }
-  },
+  commentHooks: any // 関数
 }
 
 const {user, comment, commentHooks} = defineProps<Props>()

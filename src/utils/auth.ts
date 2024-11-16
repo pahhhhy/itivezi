@@ -1,9 +1,9 @@
 import {onAuthStateChanged, type User, type Auth, getAuth} from "firebase/auth";
 import type {Role} from "@/types/auth";
 import {readUserData} from "@/utils/database";
-import {onMounted, ref} from "vue";
+import { onMounted, type Ref, ref } from 'vue'
 
-export const useAuthData = () => {
+export const useAuthData = (): {user: Ref<User | null | undefined>, role: Ref<Role | null | undefined>} => {
     const auth = getAuth();
     const user = ref<User | null | undefined>(undefined);
     const role = ref<Role | null | undefined>(undefined);

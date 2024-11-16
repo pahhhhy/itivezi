@@ -21,7 +21,8 @@ export interface ChatMessage {
     roomId: string;
     senderUid: string;
     message: string;
-    images?: string[];
+    // images?: string[];
+    fileUrls?: string[];
     createdAt: ServerTimestamp;
     updatedAt?: ServerTimestamp;
 }

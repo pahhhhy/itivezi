@@ -24,7 +24,7 @@ export const editAnnouncementComment = (announcementRef: DatabaseReference, comm
 }
 
 export const deleteAnnouncementComment = (announcementRef: DatabaseReference, comment: AnnouncementCommentType) => {
-    const pushData = {}
+    const pushData: { [key: string]: null} = {}
     if (comment.replies) { // もしこれに返信があるなら消す
         for (const replyId in comment.replies) {
             pushData[`/comments/${replyId}`] = null

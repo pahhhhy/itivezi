@@ -1,6 +1,8 @@
 <script setup lang="ts">
 
-const model = defineModel()
+// const model = defineModel()
+const model = ref<string>('');
+
 // props
 interface Props {
     placeholder: string

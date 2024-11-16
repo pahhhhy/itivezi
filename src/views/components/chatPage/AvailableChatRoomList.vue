@@ -6,7 +6,7 @@ import type { User } from 'firebase/auth'
 import { get, getDatabase, ref as fireRef } from 'firebase/database'
 import { useUserDataStore } from '@/stores/userPublicData'
 import type { UserPublicData } from '@/types/common/userPublicData'
-import { formatServerTimestamp } from '../../../utils/database'
+import { formatServerTimestamp } from '@/utils/database'
 
 const { user } = defineProps<{
   user: User

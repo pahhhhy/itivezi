@@ -8,7 +8,7 @@ export interface AnnouncementCommentType {
     updatedAt?: ServerTimestamp;
     replyTo?: string;
     replies?: {
-        [string]: AnnouncementCommentType
+        [key: string]: AnnouncementCommentType
     };
 }
 

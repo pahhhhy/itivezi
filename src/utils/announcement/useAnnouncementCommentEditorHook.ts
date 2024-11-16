@@ -41,7 +41,7 @@ export const useAnnouncementCommentEditor = (announcementRef: DatabaseReference,
                 content: commentContent.value,
                 createdAt: serverTimestamp(),
                 userId: user.value.uid,
-                replies: [],
+                replies: {},
             }
             addAnnouncementComment(announcementRef, data);
         }
