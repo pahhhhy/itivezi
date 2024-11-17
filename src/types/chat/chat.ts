@@ -10,6 +10,16 @@ export interface ChatRoom {
     createdAt: ServerTimestamp;
     lastMessage?: ChatMessage;
     lastUpdateAt?: ServerTimestamp;
+    lastReadAt: Record<string, ServerTimestamp>; // userIdをキーにして最後に表示されたメッセージのtimestampを保持
+}
+
+export interface ChatFile {
+    fileId: string;
+    messageId: string;
+    fileName: string;
+    fileUrl: string;
+    fileType: string;
+    createdAt: ServerTimestamp;
 }
 
 export interface ChatUser {
@@ -21,8 +31,8 @@ export interface ChatMessage {
     roomId: string;
     senderUid: string;
     message: string;
-    // images?: string[];
-    fileUrls?: string[];
+    attachedFiles?: {[fileId: string]: ChatFile};
     createdAt: ServerTimestamp;
     updatedAt?: ServerTimestamp;
+    undo?: boolean;
 }

@@ -1,37 +1,34 @@
 <script setup lang="ts">
-import { useChatRoomHook } from '@/utils/chat/useChatRoomHook'
-import { type ChatRoom } from '@/types/chat/chat'
-import { onMounted, ref } from 'vue'
-import type { User } from 'firebase/auth'
-import { get, getDatabase, ref as fireRef } from 'firebase/database'
-import { useUserDataStore } from '@/stores/userPublicData'
-import type { UserPublicData } from '@/types/common/userPublicData'
-import { formatServerTimestamp } from '@/utils/database'
+import {useChatRoomHook} from '@/utils/chat/useChatRoomHook'
+import {type ChatRoom} from '@/types/chat/chat'
+import {onMounted, ref} from 'vue'
+import type {User} from 'firebase/auth'
+import {get, getDatabase, ref as fireRef} from 'firebase/database'
+import {useUserDataStore} from '@/stores/userPublicData'
+import type {UserPublicData} from '@/types/common/userPublicData'
+import {formatServerTimestamp} from '@/utils/database'
 
-const { user } = defineProps<{
+const {user} = defineProps<{
   user: User
 }>()
 
 const {
-  createChatRoom,
   deleteChatRoom,
   leaveChatRoom,
   addUserToChatRoom,
   createDMRoom,
-  getJoinedRooms
+  getJoinedRooms,
+  getUnreadCount,
 } = useChatRoomHook(user)
 
 const selectedUser = ref<string>(user.uid)
 
 const chatRooms = ref<ChatRoom[] | undefined>(undefined)
 
-// getJoinedRoomsOnce().then(rooms => {
-//   chatRooms.value = rooms;
-// });
-
 // piniaのuseUserStoreから登場ユーザーをすべて取得
-const { getUserPublicData } = useUserDataStore()
+const {getUserPublicData} = useUserDataStore()
 const usersPublicData = ref<Record<string, UserPublicData> | undefined>(undefined)
+const unreadCount = ref<Record<string, number>>({}); // ルームID: 未読数
 
 // 参加可能なチャットルームを常に取得
 getJoinedRooms((value) => {
@@ -47,12 +44,29 @@ getJoinedRooms((value) => {
         }
     })
   })
-
   chatRooms.value = value
+  // 未読件数について走査
+  // もしすでに未読数があるものが更新されたならインクリメント
+  // そうでないなら既読か未読かを判定、未読なら未読数を取得
+  value.forEach((room) => {
+    if (unreadCount.value[room.roomId] && room.lastUpdateAt && unreadCount.value[room.roomId] < (room.lastUpdateAt as number)) { // 未読数があるものが更新された
+      getUnreadCount(room.roomId).then((count) => {
+        unreadCount.value[room.roomId] = count // 未読数を取得
+      })
+    } else {
+      if (room.lastReadAt[user.uid] && room.lastUpdateAt && room.lastReadAt[user.uid] < room.lastUpdateAt) { // 未読
+        getUnreadCount(room.roomId).then((count) => {
+          unreadCount.value[room.roomId] = count // 未読数を取得
+        })
+      } else {
+        unreadCount.value[room.roomId] = 0 // 既読
+      }
+    }
+  })
+
 })
 
-// TODO: 今できたこと: チャットルームの作成、削除、退出、追加, 参加中のチャットルームの取得
-// TODO: 今後やるべきこと: /messages以下の機能(メッセージ送信, 受信, 編集, 削除, 画像送信...)
+// 定期的に参加済みのルームの
 
 // ----- 切り分け&セキュリティルール整備予定 -----
 
@@ -61,10 +75,16 @@ const db = getDatabase()
 const usersRef = fireRef(db, 'testUser/')
 
 const users = ref<string[]>([])
+
+
+
 onMounted(async () => {
   const snapshot = await get(usersRef)
   users.value = snapshot.val() ? Object.keys(snapshot.val()) : []
 })
+
+
+
 </script>
 
 <template>
@@ -80,11 +100,11 @@ onMounted(async () => {
           {{
             room.roomName ??
             Object.keys(room.users)
-              .filter((u) => u !== user.uid)
-              .map((u: string) =>
-                usersPublicData && usersPublicData[u] ? usersPublicData[u].userName : u
-              )
-              .join(', ')
+                .filter((u) => u !== user.uid)
+                .map((u: string) =>
+                    usersPublicData && usersPublicData[u] ? usersPublicData[u].userName : u
+                )
+                .join(', ')
           }}
         </div>
 
@@ -94,11 +114,16 @@ onMounted(async () => {
               usersPublicData &&
               room.lastMessage &&
               (usersPublicData[room.lastMessage.senderUid]
-                ? usersPublicData[room.lastMessage.senderUid].userName
-                : room.lastMessage.senderUid)
+                  ? usersPublicData[room.lastMessage.senderUid].userName
+                  : room.lastMessage.senderUid)
             }}: {{ room.lastMessage?.message }} ({{
               room.lastUpdateAt && formatServerTimestamp(room.lastUpdateAt)
             }})
+          </div>
+          <div v-if="room.lastReadAt[user.uid]">
+            <p>最終閲覧{{ room.lastReadAt[user.uid] }}</p>
+            <p>最終更新{{ room.lastUpdateAt }}</p>
+            <p>{{ unreadCount[room.roomId] === 0 ? '既読' : `${unreadCount[room.roomId]}件の未読` }}</p>
           </div>
         </div>
 

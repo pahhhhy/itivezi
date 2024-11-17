@@ -14,20 +14,22 @@ export const useUserDataStore = defineStore({
             if (!userId) {
                 return null;
             }
-            const user = this._users.find(user => user.userId === userId);
+            const user = this._users.find(user => user.uid === userId);
             if (user) {
                 return user as UserPublicData;
             }
 
             const userData: UserPublicData = {
-                userId: userId,
+                uid: userId,
+                userName: "",
+                iconURL: "",
             };
 
             await getUserIconURL(userId).then((url) => {
-                userData.iconURL = url
+                if (url !== null) userData.iconURL = url;
             })
             await getUserName(userId).then((name) => {
-                userData.userName = name
+                if (name !== null) userData.userName = name;
             })
 
             this._users.push(userData);

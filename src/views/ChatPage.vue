@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import AvailableChatRoomList from '@/views/components/chatPage/AvailableChatRoomList.vue'
-import { useAuthData } from '@/utils/auth'
-import { useRoute } from 'vue-router'
+import {useAuthData} from '@/utils/auth'
+import {useRoute} from 'vue-router'
 import ChatDetailPage from '@/views/ChatDetailPage.vue'
-import { ref, watch } from 'vue'
-import { get, getDatabase, ref as fireRef } from 'firebase/database'
+import {ref, watch} from 'vue'
 
 const getRoomId = (): undefined | string => {
   const roomId: undefined | string | string[] = route.params.roomId
@@ -14,7 +13,7 @@ const getRoomId = (): undefined | string => {
   else return roomId
 }
 
-const { user } = useAuthData()
+const {user} = useAuthData()
 const route = useRoute()
 // URLの末尾からこのページのroomIdを取得して保管
 const roomId = ref<string | undefined>(getRoomId())
@@ -32,9 +31,9 @@ watch(route, () => {
 
   <div class="chat" v-if="user">
     <p>{{ roomId }}</p>
-    <AvailableChatRoomList v-if="!roomId" :user="user" />
+    <AvailableChatRoomList v-if="!roomId" :user="user"/>
     <div v-else>
-      <ChatDetailPage :roomId="roomId" :user="user" />
+      <ChatDetailPage :roomId="roomId" :user="user"/>
     </div>
   </div>
 </template>
