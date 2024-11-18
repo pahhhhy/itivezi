@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref} from 'vue'
-import OrderToggleElement from './OrderToggleElement.vue';
+import OrderToggleElement from '/OrderToggleElement.vue';
 import router from '@/router'
 
 enum VegeState{

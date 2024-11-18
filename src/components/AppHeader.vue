@@ -52,7 +52,9 @@ enum PageMode{
   owner="Onwer",
   None="null",
   login="login",
-  logout="Logout"
+  logout="Logout",
+  chat="Chat",
+  announcements="Announcements"
 }
 
 const userStore=useUserStore()
@@ -71,6 +73,8 @@ const cartCount=ref<number>(0)
 const background=ref(null)
 if(currentUser.value)
 cartCount.value=cartStore.getCountCart(currentUser.value.uid)
+//バーガーの押したときにはアニメーションを走らせ、
+//ついでにサイドバーのボタンを押したときに対応したページに飛ぶコードも一緒に書いた。
 function onClickBurger(mode:PageMode){
   if(!isBurger.value){
     gsap.to(sidebar.value,{x:205,duration:0.5})
@@ -96,6 +100,12 @@ function onClickBurger(mode:PageMode){
       case PageMode.login:
       router.push("/login")
       break;
+      case PageMode.chat:
+      router.push("/chat")
+      break;
+      case PageMode.announcements:
+      router.push("/announcements")
+      break;
       case PageMode.logout:
       logout()
       break;
@@ -113,6 +123,7 @@ function logout() {
       router.push("/")
     })
 }
+//今なんのページにいるかを判定する。
 function isActive(page: PageMode): boolean {
   switch (page) {
     case PageMode.home:
@@ -125,6 +136,10 @@ function isActive(page: PageMode): boolean {
       return route.path === '/my-page';
     case PageMode.owner:
       return route.path === '/Owner';
+      case PageMode.announcements:
+      return route.path === '/announcements';
+      case PageMode.chat:
+      return route.path === '/chat';
     case PageMode.login:
       return route.path === '/login';
     default:
@@ -133,9 +148,6 @@ function isActive(page: PageMode): boolean {
 }
 function onPushCart(){
   router.push("/cart")
-}
-function onPuskMyPage(){
-  router.push("/my-page")
 }
 watch(() => userStore.currentUser, (newUser) => {
   currentUser.value = newUser;
@@ -160,10 +172,13 @@ watch(
     }
   }
 );
+function onPushComment(){
+  router.push("/chat")
+}
 </script>
 
 <template>
-  <div v-bind:class="{black_back:isBurger,active:isBurger}" class="background" ref="background" >
+  <div v-bind:class="{black_back:isBurger,active:isBurger}" class="background" ref="background" v-on:click="onClickBurger(PageMode.None)">
   </div>
   <header>
     <div class="header-icon">
@@ -171,11 +186,13 @@ watch(
     </div>
     
     <nav>
+      <button v-on:click="onPushComment"><i class="bi bi-chat-right-text comment"  ></i></button>
         <div class="cart "  v-on:click="onPushCart" v-if="currentUser != null">
           <div class="cart_icon">
             <i class="bi bi-cart"></i>
             <p>{{cartCount}}</p>
           </div>
+          
           <p class="d-none d-sm-block">買い物かご</p>
         </div>
         <div class="myacount" v-if="currentUser != null" >
@@ -205,6 +222,18 @@ watch(
         <button v-on:click="onClickBurger(PageMode.registration)" class="sidebar_element" >
           <i class="bi bi-pencil-square"></i>
           <p>登録</p>
+        </button>
+      </li>
+      <li v-if="currentUser != null" :class="{ 'active': isActive(PageMode.chat) }">
+        <button v-on:click="onClickBurger(PageMode.chat)" class="sidebar_element" >
+          <i class="bi bi-chat-right-text"></i>
+          <p>チャット</p>
+        </button>
+      </li>
+      <li v-if="currentUser != null" :class="{ 'active': isActive(PageMode.announcements) }">
+        <button v-on:click="onClickBurger(PageMode.announcements)" class="sidebar_element" >
+          <i class="bi bi-clipboard2-minus"></i>
+          <p>掲示板</p>
         </button>
       </li>
       <li v-if="currentUser != null" :class="{ 'active': isActive(PageMode.mypage) }">
@@ -246,6 +275,10 @@ ul{
 p{
   margin: 0;
 }
+button{
+  border: none;
+  background-color: white
+}
 header {
   height: 80px;
   width: 100%;
@@ -260,7 +293,13 @@ header {
   z-index: 20;
 }
 .header-icon{
-  width: 50%;
+  width: 38%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+.header-icon image{
+  width: 100%;
 }
 .myacount{
   display: flex;
@@ -288,11 +327,18 @@ header {
   margin: 0;
 }
 nav {
-  width: 50%;
+  width: 62%;
   display: flex;
   align-items: center;
   justify-content: right;
   padding: 5px;
+}
+.comment{
+  width: 35px;
+  height: 40px;
+  text-align: center;
+  font-size: 35px;
+  margin-right: 10px;
 }
 .aicon-image{
   width: 50px;
@@ -390,6 +436,12 @@ li.active .sidebar_element{
   .cart_icon p{
     top: 21%;
     left: 57%;
+  }
+  .header{
+    height: 80px;
+  }
+  .comment{
+    margin-right: 0px;
   }
  }
 </style>
