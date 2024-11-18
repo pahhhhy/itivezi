@@ -70,7 +70,7 @@ const cartData=ref<CartTables>(cartStore.cartData)
 const cartCount=ref<number>(0)
   const route = useRoute();
   const isBurger=ref<boolean>()
-const background=ref(null)
+const blackback=ref(null)
 if(currentUser.value)
 cartCount.value=cartStore.getCountCart(currentUser.value.uid)
 //バーガーの押したときにはアニメーションを走らせ、
@@ -178,7 +178,9 @@ function onPushComment(){
 </script>
 
 <template>
-  <div v-bind:class="{black_back:isBurger,active:isBurger}" class="background" ref="background" v-on:click="onClickBurger(PageMode.None)">
+  <div class="background"></div>
+  <div class="blank"> </div>
+  <div v-bind:class="{black_back:isBurger,active:isBurger}" class="blackback" ref="blackback" v-on:click="onClickBurger(PageMode.None)">
   </div>
   <header>
     <div class="header-icon">
@@ -279,18 +281,24 @@ button{
   border: none;
   background-color: white
 }
+.blank{
+  width: 100%;
+  height: 80px;
+}
 header {
   height: 80px;
-  width: 100%;
+  width: 100vw;
   display: flex;
+  top:0;
   justify-content: space-between;
-  position: relative;
+  position: fixed;
   border-bottom: 1px solid rgb(223, 223, 223);
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.26);
   padding: 0 3%;
   overflow-x: hidden;
   overflow-y: hidden;
   z-index: 20;
+  background-color: white;
 }
 .header-icon{
   width: 38%;
@@ -403,42 +411,47 @@ li.active .sidebar_element{
   font-size: 24px;
   color: var(--other-color);
 }
+.blackback{
+  position: fixed;
+  display: block;
+  top: 80px;
+  left: 0;
+  background-color:rgba(3,3,3); ;
+  opacity: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 10;
+  transition: all 0.5s ease;
+  pointer-events: none;
+}
+
+.blackback.active{
+  top: 80px;
+  left: 0;
+  background-color:rgba(3,3,3); ;
+  width: 100vw;
+  height: 100vh;
+  opacity: 0.5;
+  z-index: 10;
+  pointer-events: all;
+  transition: all  0.5s ease;
+}
 .background{
   position: fixed;
   display: block;
   top: 80px;
   left: 0;
-  background-color:rgba(255, 255, 255, 0) ;
+  background-color:var(--background-color) ;
   width: 100vw;
   height: 100vh;
-  z-index: -1;
+  z-index: -3;
   transition: all 0.5s ease;
 }
-.background.active{
-  top: 80px;
-  left: 0;
-  background-color:rgba(3,3,3,.5); ;
-  width: 100vw;
-  height: 100vh;
-  z-index: 10;
-  transition: all  0.5s ease;
-}
-.black_back{
-  position: fixed;
-  top: 80px;
-  left: 0;
-  background-color:#f8f8f8 ;
-  width: 100vw;
-  height: 100vh;
-  z-index: -1;
-}
+
 @media (max-width: 575.98px) {
   .cart_icon p{
     top: 21%;
     left: 57%;
-  }
-  .header{
-    height: 80px;
   }
   .comment{
     margin-right: 0px;
