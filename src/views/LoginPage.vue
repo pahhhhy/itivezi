@@ -80,7 +80,7 @@ async function initData(){
 initData()
 async function checkMyData() {
   let isOk = true
- 
+
   if (currentUser.value != null) {
     if (userData.value[currentUser.value.uid] == null) {
       isOk = false
@@ -118,7 +118,7 @@ async function checkMyData() {
         console.log(isOk)
       }
       }
-      
+
     }
   }
   return isOk

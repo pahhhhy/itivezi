@@ -14,7 +14,7 @@ import { useCartStore } from '@/stores/cart';
 interface CartTables{
     [uid:string]:{
          [uniqueKey: string]:CartElementTables;
-        
+
     }
 }
 interface CartElementTables{
@@ -330,7 +330,7 @@ aside li {
   padding: 10px 5px 10px 10px;
   border-top: 1px solid rgba(128, 128, 128, 0.24);
   border-bottom: 1px solid rgba(128, 128, 128, 0.24);
-  
+
 }
 .link {
   text-decoration: none;
@@ -386,7 +386,7 @@ li.active .sidebar_element{
   height: 100vh;
   z-index: -1;
 }
-@media (max-width: 575.98px) { 
+@media (max-width: 575.98px) {
   .cart_icon p{
     top: 21%;
     left: 57%;

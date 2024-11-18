@@ -9,19 +9,19 @@
     }
   ],
 
-  "compilerOptions": {
+  "compileroptions": {
     // 他のオプション
     "strict": true,
     // 必要に応じて追加のオプションを有効にする
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "strictBindCallApply": true,
-    "strictPropertyInitialization": true,
-    "noImplicitAny": true,
-    "noImplicitThis": true,
-    "alwaysStrict": true,
-    "moduleResolution": "node",
-    "baseUrl": ".",
+    "strictnullchecks": true,
+    "strictfunctiontypes": true,
+    "strictbindcallapply": true,
+    "strictpropertyinitialization": true,
+    "noimplicitany": true,
+    "noimplicitthis": true,
+    "alwaysstrict": true,
+    "moduleresolution": "node",
+    "baseurl": ".",
     "paths": {
       "@/*": ["src/*"]
     },

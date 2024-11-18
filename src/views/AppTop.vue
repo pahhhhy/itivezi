@@ -36,23 +36,23 @@ watch(() => fireUseStore.myUserData, (newUser) => {
 </script>
 
 <template>
-  
+
   <article v-if="currentUser == null">
-    
+
     <div class="login-form">
       <h3>ログインすることでこのアプリを使うことができます。</h3>
-      
+
       <button class="btn btn-success p-2 m-3">
         <RouterLink v-bind:to="{ name: 'login' }">新規登録/ログイン</RouterLink>
       </button>
     </div>
-    
-    
+
+
   </article>
   <article v-if="currentUser != null">
     <AppTopBuyer v-if="myUserData.role==Role.Buyer&&myUserData.gender!=''"></AppTopBuyer>
     <AppTopFarmer v-if="myUserData.role==Role.Farmer&&myUserData.gender!=''"></AppTopFarmer>
-    <AppTopOwner v-if="(myUserData.role==Role.Onwer||myUserData.role==Role.Murone||myUserData.role==Role.Kawasaki)&&myUserData.gender!=''"></AppTopOwner> 
+    <AppTopOwner v-if="(myUserData.role==Role.Onwer||myUserData.role==Role.Murone||myUserData.role==Role.Kawasaki)&&myUserData.gender!=''"></AppTopOwner>
   </article>
 </template>
 <style>
