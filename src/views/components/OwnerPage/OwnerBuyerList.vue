@@ -1,90 +1,219 @@
 <script setup lang="ts">
-import {ref} from 'vue'
-import {getDatabase, onValue, ref as fireRef} from 'firebase/database'
+import {ref,watch} from 'vue'
 import {useRoadStationStore} from "../../../stores/roadStation"
-
+import { useFireOrderStore } from '@/stores/fireOrder';
+enum VegeState{
+  Discontinued="Discontinued",
+  Available="Available"
+}
+enum OrderStete{
+  Completed="取引完了",
+  Uncontacted="未連絡",
+  contacted="連絡済み",
+  cancel="取引取り消し"
+}
+interface Ordertables{
+    [uid:string]:{
+        [uniqueKey:string]:OrdertablesElement
+    }
+}
+interface OrdertablesElement{
+  [num:number]:{
+    en:number;
+    farmer:string
+    roadStation:string[]
+    state:VegeState
+    unique:string
+    unit:string
+    photo:string
+    amount:number
+    VegeName:string
+}
+  orderTime:string
+  email:string
+  orderName:string
+  selectData:string
+  state:OrderStete
+  totalMoney:number
+}
+interface BuyerListTable {
+  orderName: string;
+  count: number;
+  totalMoney: number;
+};
 const roadStationUnitTempList = ref<string[]>(useRoadStationStore().roadStationTemp)
+roadStationUnitTempList.value.unshift("全て");
 const selectedRoadStation = ref<string>(roadStationUnitTempList.value[0])
-const orderAllData = ref<any>([])
-const orderNumList = ref<any>([])
+
+const fireOrderStore=useFireOrderStore()
+const orderAllData = ref<Ordertables>(fireOrderStore.OrderAllData)
+const fliterOrderData=ref<Ordertables>(orderAllData.value)
+const orderNumList = ref<BuyerListTable[]>([])
 const yearList = ref<number[]>([])
 const selectStartYear = ref<number>(2024)
 const selectStartMonth = ref<number>(1)
 const selectEndYear = ref<number>(2024)
 const selectEndMonth = ref<number>(12)
-const startDate = ref<Date>(new Date(2024, 8, 1));  // 4月 (0ベースなので3月が4月を指す)
-const endDate = ref<Date>(new Date(2024, 9, 31));    // 10月 (0ベースなので9月が10月を指す)
+const startDate = ref<Date>(new Date(2024, 3, 1));  // 4月 (0ベースなので3月が4月を指す)
+const endDate = ref<Date>(new Date(2024, 9, 31));   // 10月 (0ベースなので9月が10月を指す)
+watch(() => fireOrderStore.OrderAllData, (newUser) => {
+  orderAllData.value = newUser;
+  initData()
+}); 
 async function initData() {
-  orderAllData.value = await readOrderAllData(selectedRoadStation.value)
-  yearList.value = getYearsFromData(orderAllData.value)
-  orderNumList.value = getOrderSummaries(orderAllData.value, startDate.value, endDate.value)
+  //道の駅ごとにフィルターをやって
+  if(selectedRoadStation.value=="全て"){
+
+    fliterOrderData.value=orderAllData.value
+  }else{
+    fliterOrderData.value=filterRoadStationByRoomne(orderAllData.value,selectedRoadStation.value)
+  }
+  //全体のデータから年代の種類を取得する
+  yearList.value = extractUniqueYears(fliterOrderData.value)
+  //全体のデータからある範囲のデータに抽出する
+  fliterOrderData.value= filterOrdersByDateRange(fliterOrderData.value,startDate.value,endDate.value)
+  //抽出したデータからBuyerListの作成
+  orderNumList.value = generateBuyerListTable(fliterOrderData.value)
 }
+//取引完了のものの総額を計算する
+function getTotalMoney(data: Ordertables) {
+  let totalCompletedMoney = 0;
+  let countConplateOrder=0
+  for (const orderId in data) {
+    const orderDetails = data[orderId];
+    for (const orderDate in orderDetails) {
+      const order = orderDetails[orderDate];
+      if (order.state === OrderStete.Completed) {
+        totalCompletedMoney += order.totalMoney;
+        countConplateOrder += 1
+      }
+    }
+  }
+  return totalCompletedMoney
+}
+function filterRoadStationByRoomne(orderTables: Ordertables, roadStation: string): Ordertables {
+  // Create a deep copy of orderTables
+  const filteredOrderTables: Ordertables = JSON.parse(JSON.stringify(orderTables));
+  // Loop through each user's uid
+  Object.entries(filteredOrderTables).forEach(([uid, uniqueEntries]) => {
+    // Loop through each uniqueKey
+    Object.entries(uniqueEntries).forEach(([uniqueKey, orderElement]) => {
+      let fliterKey = Object.keys(orderElement);
+      let fliternum = fliterKey.length - 6;
 
-initData()
+      for (let i: number = 0; i < fliternum; i++) {
+        if (!orderElement[Number(fliterKey[i])].roadStation.includes(roadStation)) {
+          delete filteredOrderTables[uid][uniqueKey][Number(fliterKey[i])];
+        }
+      }
 
-function readOrderAllData(roadStation: string): Promise<any> {
-  return new Promise((resolve, reject) => {
-    const countRef = fireRef(getDatabase(), 'testOrders/' + roadStation + "/")
-    onValue(countRef, (snapshot) => {
-      resolve(snapshot.val())
-    }, (error) => {
-      reject(error)
+      let afterfliterKey = Object.keys(filteredOrderTables[uid][uniqueKey]);
+      let afterfilternum = afterfliterKey.length - 6;
+
+      if (afterfilternum == 0) {
+        delete filteredOrderTables[uid][uniqueKey];
+      }
     });
   });
+
+  return filteredOrderTables;
 }
+// 指定した範囲のデータを抽出する関数
+function filterOrdersByDateRange(
+  orders: Ordertables, // データのオブジェクト
+  startDate: Date,     // 開始日時 (Date型)
+  endDate: Date        // 終了日時 (Date型)
+): Ordertables {
+  const filteredOrders: Ordertables = {};
 
-function getYearsFromData(data: any): number[] {
-  const yearsSet = new Set<number>();
+  // ユーザーIDごとにループ
+  for (const uid in orders) {
+    const uniqueKeyOrders = orders[uid];
+    const filteredUniqueKeyOrders: { [uniqueKey: string]: OrdertablesElement } = {};
 
-  for (const uniqueKey in data) {
-    const orders = data[uniqueKey];
-    for (const timestamp in orders) {
-      const year = parseInt(timestamp.split('-')[0], 10);
-      yearsSet.add(year);
+    // uniqueKeyごとにループして orderTime をチェック
+    for (const uniqueKey in uniqueKeyOrders) {
+      const order = uniqueKeyOrders[uniqueKey];
+      const orderDate = parseOrderTime(order.orderTime);
+
+      // 日時範囲に含まれる場合のみ追加
+      if (orderDate >= startDate && orderDate <= endDate) {
+        filteredUniqueKeyOrders[uniqueKey] = order;
+      }
+    }
+
+    // フィルタされたデータがある場合のみユーザーIDに追加
+    if (Object.keys(filteredUniqueKeyOrders).length > 0) {
+      filteredOrders[uid] = filteredUniqueKeyOrders;
     }
   }
 
-  // Setから配列に変換して返す
-  return Array.from(yearsSet);
+  return filteredOrders;
 }
 
-function getOrderSummaries(data: any, startDate: Date, endDate: Date) {
-  const orderSummaries: { [key: string]: { count: number; totalMoney: number } } = {};
+initData()
+function extractUniqueYears(orders: Ordertables): number[] {
+  const yearsSet: Set<number> = new Set();
 
-  for (const uniqueKey in data) {
-    const orders = data[uniqueKey];
-    for (const timestamp in orders) {
-      // 日付の部分を取り出してDateオブジェクトに変換
-      const orderDateParts = timestamp.split('-');
-      const orderYear = parseInt(orderDateParts[0], 10);
-      const orderMonth = parseInt(orderDateParts[1], 10) - 1; // 月は0から始まるので-1
-      const orderDate = new Date(orderYear, orderMonth);
+  // ユーザーIDごとにループ
+  for (const uid in orders) {
+    const uniqueKeyOrders = orders[uid];
 
-      // フィルタリング: orderDateがstartDateとendDateの範囲内かを確認
-      if (orderDate >= startDate && orderDate <= endDate) {
-        const orderDetails = orders[timestamp];
-        const orderName = orderDetails.orderName;
-        const totalMoney = orderDetails.totalMoney;
-
-        if (orderName in orderSummaries) {
-          orderSummaries[orderName].count++;
-          orderSummaries[orderName].totalMoney += totalMoney;
-        } else {
-          orderSummaries[orderName] = {
-            count: 1,
-            totalMoney: totalMoney,
-          };
-        }
+    // uniqueKeyごとに orderTime の年を抽出
+    for (const uniqueKey in uniqueKeyOrders) {
+      const order = uniqueKeyOrders[uniqueKey];
+      
+      // order.orderTime が存在するかチェック
+      if (order.orderTime && typeof order.orderTime === "string") {
+        // orderTime から年の部分を抽出し、数値に変換
+        const year = parseInt(order.orderTime.split('-')[0], 10); // 年は orderTime の最初の部分にある
+        
+        // 数値の年を Set に追加 (重複は自動的に無視される)
+        yearsSet.add(year);
       }
     }
   }
 
-  return Object.keys(orderSummaries).map(orderName => ({
+  // Set を配列に変換して返す (number[])
+  return Array.from(yearsSet);
+}
+
+function generateBuyerListTable(orders: Ordertables): BuyerListTable[] {
+  const buyerList: { [orderName: string]: { count: number, totalMoney: number } } = {};
+
+  // ユーザーIDごとにループ
+  for (const uid in orders) {
+    const uniqueKeyOrders = orders[uid];
+
+    // uniqueKey ごとに注文情報を集計
+    for (const uniqueKey in uniqueKeyOrders) {
+      const order = uniqueKeyOrders[uniqueKey];
+
+      // state が OrderStete.Completed の場合のみ処理する
+      if (order.state === OrderStete.Completed) {
+        const { orderName, totalMoney } = order;
+
+        // 既に orderName が buyerList に存在するか確認
+        if (!buyerList[orderName]) {
+          // 初めての場合、初期値を設定
+          buyerList[orderName] = { count: 0, totalMoney: 0 };
+        }
+
+        // 注文件数をカウントし、総額を加算
+        buyerList[orderName].count += 1;
+        buyerList[orderName].totalMoney += totalMoney; // Use totalMoney from the order
+      }
+    }
+  }
+
+  // buyerList を BuyerListTable[] に変換して返す
+  return Object.keys(buyerList).map(orderName => ({
     orderName,
-    count: orderSummaries[orderName].count,
-    totalMoney: orderSummaries[orderName].totalMoney,
+    count: buyerList[orderName].count,
+    totalMoney: buyerList[orderName].totalMoney
   }));
 }
+
 
 type Order = {
   orderName: string;
@@ -131,16 +260,30 @@ function changeDate(data: { startYear?: number; endYear?: number; startMonth?: n
   if (data.endMonth !== undefined) {
     endDate.value.setMonth(data.endMonth - 1)
   }
+  initData()
+}
+// 日付の文字列を Date オブジェクトに変換するヘルパー関数
+function parseOrderTime(orderTime: string | undefined): Date  {
+  if (!orderTime || typeof orderTime !== "string") {
+    console.log(orderTime)
+    return new Date(2000, 12 - 1, 1); // orderTime が無効な場合は null を返す
+  }
 
+  const [year, month, day] = orderTime.split('-');
+  
+  // 日時が正しく分割されなければ null を返す
+  if (!year || !month || !day) {
+    console.log(orderTime)
+    return new Date(2000, 12 - 1, 1);
+  }
 
-  orderNumList.value = getOrderSummaries(orderAllData.value, startDate.value, endDate.value)
+  return new Date(Number(year), Number(month) - 1, Number(day));
 }
 </script>
 <template>
   <h1>購入者リスト</h1>
-  <!-- {{orderAllData}} -->
-  <!-- {{ yearList }}
-  <p>{{ orderNumList }}</p> -->
+  <h3>フィルター</h3>
+  <!-- {{ orderAllData }} -->
   <select class="form-select" aria-label="roadsideStationSelect" v-model="selectedRoadStation" @change="initData">
     <option selected v-bind:value="roadStation" v-for="roadStation in roadStationUnitTempList" :key=roadStation>
       {{ roadStation }}
@@ -173,7 +316,7 @@ function changeDate(data: { startYear?: number; endYear?: number; startMonth?: n
     <p>月</p>
   </div>
 
-
+  <h2>実際のデータ</h2>
   <div class="buyer-group">
     <h3>注文者名</h3>
     <h3>件数</h3>
@@ -189,6 +332,7 @@ function changeDate(data: { startYear?: number; endYear?: number; startMonth?: n
       <h3>{{ element.totalMoney }}円</h3>
     </div>
   </div>
+  <p>※取引完了の総額です。</p>
   <button v-on:click="pushExport" class="buyer-button">出力する</button>
 </template>
 <style>

@@ -1,212 +1,192 @@
 <script setup lang="ts">
-import {getDatabase, onValue, ref as fireRef} from 'firebase/database'
-//Vueとfirebaseで同じrefという関数があって競合しているのでfirebaseの方をfireRefにしている
-import {ref} from 'vue'
-
-import OrderStep1 from './components/orderpage/OrderStep1.vue'
-import OrderStep2 from './components/orderpage/OrderStep2.vue'
-import OrderStep3 from './components/orderpage/OrderStep3.vue'
-import OrderStep4 from './components/orderpage/OrderStep4.vue'
-import OrderPopup from './components/orderpage/OrderPopup.vue'
-import SelectRoadStation from './components/SelectRoadStation.vue'
-import OrderHistory from './components/orderpage/OrderHistory.vue'
-//変数の定義
-const vegeAllData = ref<any>(null)
-const stepNum = ref<number>(0)
-const selectVegeList = ref<number[]>([])
-const selectMenList = ref<string[]>([])
-const selectMenUniqueList = ref<string[]>([])
-const selectDate = ref<Date | null>(null)
-const vegeCountList = ref<number[]>([])
-const totalMoneyList = ref<number[]>([])
-const allTotalMoney = ref<number>(0)
-const finishSend = ref<boolean>(false)
-const roadStation = ref<string>("")
-const vegeKeys = ref<any>(null)
-
-//読みこむデータの指定
-function readvegeAllData(roadStation: string): Promise<any> {
-  return new Promise((resolve, reject) => {
-    const countRef = fireRef(getDatabase(), 'testVege/' + roadStation + "/")
-    onValue(countRef, (snapshot) => {
-      resolve(snapshot.val())
-    }, (error) => {
-      reject(error)
-    });
-  });
+import { useVegeStore } from '@/stores/vege'
+import { ref,watch,onMounted} from 'vue'
+import OrderHistory from './components/orderpage/OrderHistory.vue';
+import { useOrderDataStore } from '@/stores/orderData';
+import OrderEachToggle from './components/orderpage/OrderEachToggle.vue';
+import { useCartStore } from '@/stores/cart';
+import { useSortVegeStore } from '@/stores/sortByVege';
+import router from '@/router'
+enum SortMode{
+    All="all",
+    Kawasaki="川崎",
+    Murone="室根",
+    Other="その他"
 }
-
-function readvegeKeys(roadStation: string): Promise<any> {
-  return new Promise((resolve, reject) => {
-    const countRef = fireRef(getDatabase(), 'testVegeKeys/' + roadStation + "/")
-    onValue(countRef, (snapshot) => {
-      resolve(snapshot.val())
-    }, (error) => {
-      reject(error)
-    });
-  });
+enum VegeState{
+  Discontinued="Discontinued",
+  Available="Available"
 }
-
-// stateが"Discontinued"のアイテムを排除する関数
-// 全部、型をanyでやってるの悪そうな感じがする
-const filterDiscontinuedItems = (data: any) => {
-  const filteredData: any = {};
-
-  for (const [category, items] of Object.entries(data) as [any, any]) {
-    const filteredItems: any = {};
-
-    for (const [id, item] of Object.entries(items as any) as [string, any]) {
-      if (item.state !== "Discontinued") {
-        filteredItems[id] = item;
-      }
+interface CartTables{
+    [uid:string]:{
+         [uniqueKey: string]:CartElementTables;
+        
     }
-
-    if (Object.keys(filteredItems).length > 0) {
-      filteredData[category] = filteredItems;
+}
+interface CartElementTables{
+    en:number;
+    farmer:string
+    roadStation:string[]
+    unit:string
+    photo:string
+    unique:string
+    vegeName:string
+    amount:number
+}
+interface Vegetables{
+    [vegeName:string]:{
+        [uniqueKey:string]:{
+            en:number;
+            farmer:string
+            roadStation:string[]
+            state:VegeState
+            uid:string
+            unit:string
+            photo:string
+        }
     }
+}
+const orderStore=useOrderDataStore()
+const vegeStore=useVegeStore()
+const sortVegeStore=useSortVegeStore()
+const sortVegeOrder=ref<string[]>(sortVegeStore.sortbyVege)
+const orderData=ref<Vegetables>(orderStore.orderData)
+const vegeAllData = ref<Vegetables>(vegeStore.VegeAllData)
+const cartStore=useCartStore()
+const cartData=ref<CartTables>(cartStore.cartData)
+const selectedFilter=ref<SortMode>(SortMode.All)
+  onMounted(() => {
+    sortVegeOrder.value=sortVegeStore.sortbyVege
+    vegeAllData.value=vegeStore.VegeAllData
+    vegeAllData.value = filterAvailableVegetables(vegeAllData.value);
+    filterVegeData.value=vegeAllData.value
+    filterVegeData.value=makeSortData(filterVegeData.value,sortVegeOrder.value)
+})
+vegeAllData.value=filterAvailableVegetables(vegeAllData.value)
+const filterVegeData=ref<Vegetables>(vegeAllData.value)
+watch(() => sortVegeStore.sortbyVege, (newUser) => {
+  sortVegeOrder.value = newUser;
+});
+watch(() => cartStore.cartData, (newUser) => {
+  cartData.value = newUser;
+});
+watch(() => vegeStore.VegeAllData, (newUser) => {
+  vegeAllData.value = filterAvailableVegetables(newUser);
+  filterVegeData.value=vegeAllData.value
+  filterVegeData.value=makeSortData(filterVegeData.value,sortVegeOrder.value)
+});
+watch(() => orderStore.orderData, (newUser) => {
+  orderData.value = newUser;
+});
+function filterAvailableVegetables(data: Vegetables): Vegetables {
+    const result: Vegetables = {};
+    for (const vegeName in data) {
+        const filteredEntries: { [uniqueKey: string]: any } = {};
+        for (const uniqueKey in data[vegeName]) {
+            if (data[vegeName][uniqueKey].state === VegeState.Available) {
+                filteredEntries[uniqueKey] = data[vegeName][uniqueKey];
+            }
+        }
+        // もしfilteredEntriesに要素があれば、resultに追加
+        if (Object.keys(filteredEntries).length > 0) {
+            result[vegeName] = filteredEntries;
+        }
+    }
+    return result;
+}
+function onPushCart(){
+  router.push("/cart")
+}
+async function onPushfilter(mode:SortMode){
+  selectedFilter.value=mode
+  if(mode==SortMode.All){
+    filterVegeData.value=vegeAllData.value
+    await sortVegeStore.roadData(mode)
+    filterVegeData.value=makeSortData(filterVegeData.value,sortVegeOrder.value)
+  }else{
+    filterVegeData.value=filterByRoadStation(vegeAllData.value,mode)
+    await sortVegeStore.roadData(mode)
+    filterVegeData.value=makeSortData(filterVegeData.value,sortVegeOrder.value)
   }
-
-  return filteredData;
-};
-
-
-//Stepの管理
-function onStep(next: boolean) {
-
-  if (next) {
-    stepNum.value = stepNum.value + 1
-  } else {
-    stepNum.value = stepNum.value - 1
+  if(mode==SortMode.Other){
+    sortVegeOrder.value= Object.keys(filterVegeData.value)
   }
-}
-
-//子要素からのデータの受け取り
-function onSend(isSend: boolean) {
-  finishSend.value = isSend
-}
-
-function changeVege(element: number[]) {
-  selectVegeList.value = element
-}
-
-function changeMen(element: string[], unique: string[]) {
-  selectMenList.value = element
-  selectMenUniqueList.value = unique
-}
-
-function changeCount(count: number[], money: number) {
-  vegeCountList.value = count
-  allTotalMoney.value = money
-}
-
-function changeDate(date: Date | null) {
-  selectDate.value = date
-}
-
-function resetData() {
-  selectMenList.value = []
-  selectMenUniqueList.value = []
-  selectDate.value = null
-  vegeCountList.value = []
-  totalMoneyList.value = []
-  allTotalMoney.value = 0
-}
-
-async function updateRoadStation(element: string) {
-  roadStation.value = element
-  vegeAllData.value = await readvegeAllData(element)
-  vegeAllData.value = filterDiscontinuedItems(vegeAllData.value)
-  vegeKeys.value = await readvegeKeys(element)
-  // 変数の初期化
-  selectVegeList.value = []
-  resetData()
-}
-</script>
-
-<template>
-  <div class="title">
-    <h1>注文画面</h1>
-  </div>
+  else{
+    sortVegeOrder.value= await sortVegeStore.roadData(mode) as string[]
+  }
   
-  <!-- {{ vegeAllData }} -->
-  <!-- {{ vegeKeys }} -->
-  <OrderHistory>
-</OrderHistory>  
-  <SelectRoadStation
-      v-bind:-road-station="roadStation"
-      v-on:on-step="onStep"
-      v-on:update-road-station="updateRoadStation"
-      v-if="stepNum==0">
-  </SelectRoadStation>
-  <OrderStep1
-      v-bind:vege-keys="vegeKeys"
-      v-bind:select-vege-list="selectVegeList"
-      v-on:on-step="onStep"
-      v-on:change-vege="changeVege"
-      v-on:reset-data="resetData"
-      v-if="stepNum == 1"
-  ></OrderStep1>
 
-  <!-- 生産者の設定 -->
-  <h1 v-if="stepNum == 1">{{ selectMenUniqueList }}</h1>
-  <h1 v-if="stepNum == 1&&(vegeAllData==undefined||vegeAllData==null)">データがない</h1>
-  <OrderStep2
-      v-bind:vege-all-data="vegeAllData"
-      v-bind:select-vege="selectVegeList"
-      v-bind:select-men="selectMenList"
-      v-bind:vege-keys="vegeKeys"
-      v-bind:select-men-unique-list="selectMenUniqueList"
-      v-on:on-step="onStep"
-      v-on:change-men="changeMen"
-      v-if="stepNum == 2&&vegeAllData!=undefined"
-  ></OrderStep2>
-  <!-- 日付・個数の指定 -->
-  <OrderStep3
-      v-bind:select-date="selectDate"
-      v-bind:vege-count="vegeCountList"
-      v-bind:vege-all-data="vegeAllData"
-      v-bind:vege-keys="vegeKeys"
-      v-bind:select-men-unique-list="selectMenUniqueList"
-      v-bind:select-vege="selectVegeList"
-      v-bind:total-money="totalMoneyList"
-      v-on:change-count="changeCount"
-      v-on:on-step="onStep"
-      v-on:change-date="changeDate"
-      v-if="stepNum == 3"
-  ></OrderStep3>
+}
+function filterByRoadStation(vegetables: Vegetables, role: SortMode) {
+    const result: Vegetables = {};
+    
+    for (const vegeName in vegetables) {
+        const filteredEntries = Object.entries(vegetables[vegeName]).filter(
+            ([uniqueKey, data]) => data.roadStation.includes(role)
+        );
 
-  <!-- 確認・送信画面 -->
-  <OrderStep4
-      v-bind:select-date="selectDate"
-      v-bind:vege-count="vegeCountList"
-      v-bind:vege-all-data="vegeAllData"
-      v-bind:vegeKeys="vegeKeys"
-      v-bind:select-men-unique-list="selectMenUniqueList"
-      v-bind:select-men="selectMenList"
-      v-bind:select-vege="selectVegeList"
-      v-bind:total-money="totalMoneyList"
-      v-bind:all-total-money="allTotalMoney"
-      v-bind:road-station="roadStation"
-      v-on:on-step="onStep"
-      v-on:on-send="onSend"
-      v-if="stepNum == 4"
-  ></OrderStep4>
-  <OrderPopup v-if="finishSend"></OrderPopup>
+        if (filteredEntries.length > 0) {
+            result[vegeName] = Object.fromEntries(filteredEntries);
+        }
+    }
+
+    return result;
+}
+function makeSortData(data: Vegetables, order: string[]): Vegetables {
+  // 指定された順番で並べ替え、他の野菜を最後に追加
+  const sortedData = Object.keys(data)
+    .sort((a, b) => {
+      const indexA = order.indexOf(a);
+      const indexB = order.indexOf(b);
+      if (indexA === -1) return 1; // orderにない場合は後ろに
+      if (indexB === -1) return -1;
+      return indexA - indexB;
+    })
+    .reduce((acc, key) => {
+      acc[key] = data[key];
+      return acc;
+    }, {} as Vegetables);
+
+  return sortedData;
+}
+
+</script>
+<template>
+  <OrderHistory></OrderHistory>
+  <article v-if="Object.keys(orderData).length===0">
+    <!-- <h3>フィルター</h3>
+<button v-on:click="onPushfilter(SortMode.All)" class="filter_button" v-bind:class="{fliter_active:selectedFilter==SortMode.All}">全て</button>
+<button v-on:click="onPushfilter(SortMode.Kawasaki)" class="filter_button" v-bind:class="{fliter_active:selectedFilter==SortMode.Kawasaki}">川崎</button>
+<button v-on:click="onPushfilter(SortMode.Murone)" class="filter_button" v-bind:class="{fliter_active:selectedFilter==SortMode.Murone}">室根</button>
+<button v-on:click="onPushfilter(SortMode.Other)" class="filter_button" v-bind:class="{fliter_active:selectedFilter==SortMode.Other}">その他</button> -->
+    <div v-for="(data,vegeName,index) in filterVegeData" :key=index>
+    <OrderEachToggle
+    v-bind:data="data"
+    v-bind:vege-name="vegeName"></OrderEachToggle>
+  </div>
+  </article>
+  <article v-if="Object.keys(orderData).length!==0">
+    <OrderFormPage
+    v-bind:order-data="orderData"></OrderFormPage>
+  </article>
+  <article class="order_backgroud"></article>
 </template>
-<style>
-.title {
-  text-align: center;
-}
+<style scoped>
 
-.database {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.filter_button{
+  background-color: white;
+  padding: 10px;
 }
-
-.write-button {
-  width: 200px;
-  height: 100px;
-  margin: auto;
+.fliter_active{
+  background-color: rgb(209, 209, 209);
+}
+.order_backgroud{
+  background-color: var(--background-color);
+  z-index: -1;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+  position: fixed;
 }
 </style>

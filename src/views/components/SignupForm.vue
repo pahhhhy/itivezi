@@ -19,7 +19,7 @@ function emitName(event: Event) {
 </script>
 <template>
   <div class="mb-3">
-    <label for="exampleFormControlInput1" class="form-label">name</label>
+    <label for="exampleFormControlInput1" class="form-label">アカウント名</label>
     <input
       type="text"
       class="form-control"
@@ -29,7 +29,7 @@ function emitName(event: Event) {
     />
   </div>
   <div class="mb-3">
-    <label for="exampleFormControlInput1" class="form-label">Email address</label>
+    <label for="exampleFormControlInput1" class="form-label">メールアドレス</label>
     <input
       type="email"
       class="form-control"
@@ -38,7 +38,7 @@ function emitName(event: Event) {
       v-on:input="emitEmail"
     />
   </div>
-  <label for="inputPassword5" class="form-label">Password</label>
+  <label for="inputPassword5" class="form-label">パスワード</label>
   <input
     type="password"
     id="inputPassword5"

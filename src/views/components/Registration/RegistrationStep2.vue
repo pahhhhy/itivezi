@@ -1,11 +1,29 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import RegStep2Element from './RegStep2Element.vue';
+enum VegeState{
+  Discontinued="Discontinued",
+  Available="Available"
+}
+interface Vegetables{
+    [vegeName:string]:{
+        [uniqueKey:string]:vegeElementTables
+    }
+}
+interface vegeElementTables{
+  en:number
+  farmer:string
+  roadStation:string[]
+  state:VegeState
+  uid:string
+  unit:string
+  photo:string
+}
 interface Props {
   vegeKeys: string[]
-  vegeList: number[]
-  vegeMoneyList: number[]
-  vegeAmountList: number[]
-  vegeUnitList: string[]
+  vegeList: string[]
+  uproadData:Vegetables
+  uniqueKey:string|null
 }
 interface Emits {
   (event: 'onStep', Next: boolean): void
@@ -14,61 +32,21 @@ interface Emits {
     data:{money?:number[];amount?:number[];unit?:string[]}
   ): void
 }
-enum vegeUnitTemp{
-  g="g",
-  kg="kg",
-  book="本",
-  piece="個",
-  wheel="輪",
-  sheet="枚"
-}
 const emit = defineEmits<Emits>()
 const props = defineProps<Props>()
-const vegeMoneyList = ref<number[]>(props.vegeMoneyList)
-const vegeAmountList = ref<number[]>(props.vegeAmountList)
-const vegeUnitList = ref<string[]>(props.vegeUnitList)
-const vegeUnitTempList = ref<string[]>(Object.values(vegeUnitTemp))
-if (vegeMoneyList.value.length == 0) {
-  //これをしないとエラー検知ができなかったはず。初回だけvegeListに合わせて０埋め
-  vegeMoneyList.value = new Array(props.vegeList.length).fill(0)
-  vegeUnitList.value = new Array(props.vegeList.length).fill(0)
-  vegeAmountList.value = new Array(props.vegeList.length).fill(0)
-}
-function updateVegeMoney(value: number, index: number,mode:string) {
-  
-  if(mode=="Money"){
-  // マイナスの値になることを防ぐ
-    if (value < 0) {
-      vegeMoneyList.value[index] = 0
-    } else {
-      vegeMoneyList.value[index] = value
-    }
-    updateStep2List("Money")
-  }
-  if(mode=="Amount"){
-  // マイナスの値になることを防ぐ
-    if (value < 0) {
-      vegeAmountList.value[index] = 0
-    } else {
-      vegeAmountList.value[index] = value
-    }
-    updateStep2List("Amount")
-  }
-}
+
+const uproadData=ref<Vegetables>(props.uproadData)
 function errorFind() {
-  const isMoneyList: boolean =
-    vegeMoneyList.value.length != props.vegeList.length ||
-    // vegeMoneyList.value.some((item) => item === '') || //inputで値を打った後に消すと空文字ができてしまうからそれを判定するため
-    vegeMoneyList.value.some((item) => item === 0)
-  const isVegeAmountList: boolean =
-    vegeAmountList.value.length != props.vegeList.length ||
-    // vegeAmountList.value.some((item) => item === '') ||
-    vegeAmountList.value.some((item) => item === 0)
-  const isVegeUnitList: boolean = vegeAmountList.value.some((item) => item === -1)
-
-  const isError = isMoneyList || isVegeAmountList || isVegeUnitList
-
-  return isError
+  let error=false
+  Object.keys(uproadData.value).forEach((vegeName) => {
+    Object.keys(uproadData.value[vegeName]).forEach((unique) => {
+      const Data=uproadData.value[vegeName][unique]
+      if(Data.en==-1)error=true
+      if(Data.roadStation.length==0)error=true
+      if(Data.unit=="")error=true
+    })
+  })
+  return error
 }
 const step2Error = ref<boolean>(false)
 function onStep(next: boolean) {
@@ -83,65 +61,18 @@ function onStep(next: boolean) {
     }
   }
 }
-function updateStep2List(action:string) {
- if(action=="Amount"){
-  emit("updateStep2List",{amount:vegeAmountList.value})
- }
- if(action=="Unit"){
-  emit("updateStep2List",{unit:vegeUnitList.value})
- }
- if(action=="Money"){
-  emit("updateStep2List",{money:vegeMoneyList.value})
- }
-}
 </script>
 <template>
   <section>
-    <h1 v-for="(vegeName, index) in props.vegeList" :key="vegeName + index">
-      {{ vegeKeys[vegeName] }}
-      <h4>どのぐらいの量ですか？</h4>
-      <div class="unit">
-        <input
-          class="form-control"
-          type="number"
-          placeholder="単価"
-          aria-label="default input example"
-          v-model="vegeAmountList[index]"
-          @change="updateVegeMoney(vegeAmountList[index], index,'Amount')"
-        />
-        <select
-          class="form-select"
-          aria-label="Default select example"
-          v-model="vegeUnitList[index]"
-          @change="updateStep2List('Unit')"
-        >
-          <!-- 選択式ではなく野菜を決めた時点でその野菜に対応した単位を決めてしまった方が良かった -->
-          <option selected value="-1" disabled hidden>単位</option>
-          <option
-            v-for="(vegeName) in vegeUnitTempList"
-            :key="vegeName"
-            v-bind:value="vegeName"
-          >
-            {{ vegeName }}
-          </option>
-        </select>
-      </div>
-      <h4>何円にしますか？</h4>
-      <input
-        class="form-control"
-        type="number"
-        placeholder="何円にしますか？"
-        aria-label="default input example"
-        v-model="vegeMoneyList[index]"
-        @input="updateVegeMoney(vegeMoneyList[index], index,'Money')"
-      />
-    </h1>
-    
-    <h3>vegelist{{ props.vegeList.length }}</h3>
-    <h4>money{{ vegeMoneyList.length }}</h4>
-    <h1>{{ vegeMoneyList }}</h1>
-    <h1>単価：{{ vegeAmountList }}</h1>
-    <h1>単位：{{ vegeUnitList }}</h1>
+    <div v-for="(vegeName, index) in props.vegeList" :key="vegeName + index">
+      <RegStep2Element
+      v-bind:index="index"
+      v-bind:unique-key="props.uniqueKey"
+      v-bind:uproad-data="props.uproadData"
+      v-bind:vege-keys="props.vegeKeys"
+      v-bind:vege-list="props.vegeList"
+      v-bind:vege-name="vegeName"></RegStep2Element>
+    </div>
     <h1 style="color: red" v-show="errorFind() && step2Error">全ての価格を設定してください</h1>
     <button v-on:click="onStep(false)" class="btn btn-primary">戻る</button>
     <button v-on:click="onStep(true)" class="btn btn-primary">次へ</button>
