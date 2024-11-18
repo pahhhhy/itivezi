@@ -7,7 +7,7 @@ export async function readUserData(userId: string, field?: string): Promise<any>
     const userDataRef = fireRef(getDatabase(), 'testUser/' + userId + (field ? "/"+field : ''));
     return new Promise((resolve) => {
         let userData = null;
-        get(userDataRef, {source: 'cache'}).then((snapshot) => {
+        get(userDataRef).then((snapshot) => {
             userData = snapshot.val();
             resolve(userData);
         });
