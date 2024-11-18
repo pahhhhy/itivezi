@@ -1,123 +1,137 @@
 <script setup lang="ts">
 import {useRoadStationStore} from "../../../stores/roadStation"
-import {ref} from 'vue'
-import {getDatabase, onValue, ref as fireRef} from 'firebase/database'
-
-type Data = {
-  [key: string]: {
-    [key: string]: {
-      en: number;
-      farmer: string;
-      state: string;
-      uid: string;
-      unit: string;
-    };
+import {ref,watch} from 'vue'
+import { useVegeStore } from '@/stores/vege'
+import OwnerFarmerListElement from "./OwnerFarmerListElement.vue";
+enum VegeState{
+  Discontinued="Discontinued",
+  Available="Available"
+}
+interface Vegetables{
+    [vegeName:string]:{
+        [uniqueKey:string]:vegeElementTables
+    }
+}
+interface vegeElementTables{
+  en:number
+  farmer:string
+  roadStation:string[]
+  state:VegeState
+  uid:string
+  unit:string
+  photo:string
+}
+interface FarmerList{
+  [farmerName:string]:{
+    [VegeName:string]:{
+    unit:string
+    en:number
+  }
   };
-};
-
-type Result = {
-  [farmer: string]: number;
-};
+}
+const vegeStore=useVegeStore()
+const vegeAllData = ref<Vegetables>(vegeStore.VegeAllData)
 const roadStationUnitTempList = ref<string[]>(useRoadStationStore().roadStationTemp)
+  roadStationUnitTempList.value.unshift("全て");
 const selectedRoadStation = ref<string>(roadStationUnitTempList.value[0])
-const vegeAllData = ref<any>(null)
-const vegeKeys = ref<string[]>([])
-const countFarmerList = ref<any>([])
-const selectedTableList = ref<boolean[]>([])
-const groupByFarmerList = ref<any>([])
-
+const groupByFarmerList = ref<FarmerList>({})
+  watch(() => vegeStore.VegeAllData, (newUser) => {
+  vegeAllData.value = newUser;
+  initData()
+});
 async function initData() {
-  vegeAllData.value = await readvegeAllData(selectedRoadStation.value)
-  vegeAllData.value = filterDiscontinuedItems(vegeAllData.value)
-  vegeKeys.value = Object.keys(vegeAllData.value)
-  countFarmerList.value = countFarmers(vegeAllData.value)
-  groupByFarmerList.value = groupByFarmer(vegeAllData.value)
+  //disableを消して
+  vegeAllData.value =removeDiscontinuedVegetables(vegeAllData.value)
+  let fliterOrderData =vegeAllData.value
+  //道の駅ごとにフィルターをやって
+  if(selectedRoadStation.value=="全て"){
+    fliterOrderData=vegeAllData.value
+  }else{
+    fliterOrderData= filterByRoadStation(vegeAllData.value,selectedRoadStation.value)
+  }
+  //農家ごとのデータを作成する
+  groupByFarmerList.value  = classifyVegetablesByFarmer(fliterOrderData)
 }
 
 initData()
-const filterDiscontinuedItems = (data: any) => {
-  const filteredData: any = {};
-  const excludedItems: any = {};  // 排除されたアイテムを保存するオブジェクト
-  const allDiscontinuedCategories: string[] = [];  // すべてが "Discontinued" のカテゴリ名を保存する配列
+function filterByRoadStation  (vegeTables: Vegetables,mode:string): Vegetables {
+  const filtered: Vegetables = {};
 
-  for (const [category, items] of Object.entries(data) as [string, any]) {
-    const filteredItems: any = {};
-    const excludedCategoryItems: any = {};  // このカテゴリーで排除されたアイテム
-    let allDiscontinued = true;  // すべてが "Discontinued" かどうかをチェックするフラグ
+  Object.entries(vegeTables).forEach(([vegeName, uniqueEntries]) => {
+    const filteredEntries: { [uniqueKey: string]: vegeElementTables } = {};
 
-    for (const [id, item] of Object.entries(items as any) as [string, any]) {
-      if (item.state !== "Discontinued") {
-        filteredItems[id] = item;
-        allDiscontinued = false;  // "Discontinued" でないアイテムがあればフラグをfalseに
-      } else {
-        excludedCategoryItems[id] = item;  // 排除されたアイテムを保存
+    Object.entries(uniqueEntries).forEach(([uniqueKey, entry]) => {
+      // roadStationの配列に"室根"が含まれているかチェック
+      if (entry.roadStation.includes(mode)) {
+        filteredEntries[uniqueKey] = entry;
       }
-    }
-
-    if (Object.keys(filteredItems).length > 0) {
-      filteredData[category] = filteredItems;
-    }
-    if (Object.keys(excludedCategoryItems).length > 0) {
-      excludedItems[category] = excludedCategoryItems;
-    }
-
-    if (allDiscontinued) {
-      allDiscontinuedCategories.push(category);  // すべてが "Discontinued" ならカテゴリ名を保存
-    }
-  }
-  return filteredData;
-};
-
-function readvegeAllData(roadStation: string): Promise<any> {
-  return new Promise((resolve, reject) => {
-    const countRef = fireRef(getDatabase(), 'testVege/' + roadStation + "/")
-    onValue(countRef, (snapshot) => {
-      resolve(snapshot.val())
-    }, (error) => {
-      reject(error)
     });
+
+    // フィルタリング後にデータが残っている場合のみ追加
+    if (Object.keys(filteredEntries).length > 0) {
+      filtered[vegeName] = filteredEntries;
+    }
   });
+
+  return filtered;
+};
+function removeDiscontinuedVegetables(vegetables: Vegetables): Vegetables {
+    const filteredVegetables: Vegetables = {};
+
+    // 各野菜名ごとにループ
+    for (const vegeName in vegetables) {
+        const vegeEntries = vegetables[vegeName];
+        const filteredEntries: { [uniqueKey: string]: vegeElementTables } = {};
+
+        // uniqueKey ごとにループ
+        for (const uniqueKey in vegeEntries) {
+            const vegeEntry = vegeEntries[uniqueKey];
+
+            // state が Discontinued でない場合にのみフィルタリング
+            if (vegeEntry.state !== VegeState.Discontinued) {
+                filteredEntries[uniqueKey] = vegeEntry;
+            }
+        }
+
+        // フィルタリング後にエントリがある場合にのみ追加
+        if (Object.keys(filteredEntries).length > 0) {
+            filteredVegetables[vegeName] = filteredEntries;
+        }
+    }
+
+    return filteredVegetables;
 }
 
-function countFarmers(data: Data): Result {
-  const result: Result = {};
+function classifyVegetablesByFarmer(vegeTables: Vegetables): FarmerList {
+    const farmerList: FarmerList = {};
 
-  Object.values(data).forEach(vegeData => {
-    Object.values(vegeData).forEach(record => {
-      const {farmer} = record;
-      if (result[farmer]) {
-        result[farmer]++;
-      } else {
-        result[farmer] = 1;
-      }
-    });
-  });
-  selectedTableList.value = new Array(result.length).fill(false)
-  return result;
-};
+    for (const vegeName in vegeTables) {
+        const uniqueKeys = vegeTables[vegeName];
 
-function pushFarmer(index: number) {
-  selectedTableList.value[index] = !selectedTableList.value[index]
+        for (const uniqueKey in uniqueKeys) {
+            const element = uniqueKeys[uniqueKey];
+            const farmerName = element.farmer;
+
+            // 農家がリストにない場合、初期化
+            if (!farmerList[farmerName]) {
+                farmerList[farmerName] = {};
+            }
+
+            // 野菜名が農家にまだ登録されていない場合、追加
+            if (!farmerList[farmerName][vegeName]) {
+                farmerList[farmerName][vegeName] = {
+                    unit: element.unit,
+                    en: element.en
+                };
+            } else {
+                // もしすでに同じ野菜が存在する場合、enを合計する（必要に応じて）
+                farmerList[farmerName][vegeName].en += element.en;
+            }
+        }
+    }
+
+    return farmerList;
 }
-
-function groupByFarmer(data: Data): Result {
-  const result: any = {};
-
-  Object.entries(data).forEach(([vegetable, records]) => {
-    Object.entries(records).forEach(([id, record]) => {
-      const {farmer, ...rest} = record;
-      if (!result[farmer]) {
-        result[farmer] = {};
-      }
-      if (!result[farmer][vegetable]) {
-        result[farmer][vegetable] = [];
-      }
-      result[farmer][vegetable].push(rest);
-    });
-  });
-
-  return result;
-};
 
 function pushExport() {
   let CSVfile = convertToCSV(groupByFarmerList.value)
@@ -127,19 +141,15 @@ function pushExport() {
   downloadCSV(CSVfile, fileName)
 }
 
-// CSVに変換する関数
-const convertToCSV = (data: any): string => {
+const convertToCSV = (data: FarmerList): string => {
   // CSVのヘッダー
-  const headers = ["名前", "野菜", "値段", "個数"];
+  const headers = ["名前", "野菜", "値段", "単位"];
   const rows: string[] = [];
 
   // データをフラット化してCSV用に整形
   Object.entries(data).forEach(([farmer, vegetables]) => {
-    Object.entries(vegetables as any).forEach(([vegetable, entries]) => {
-      // entriesは配列なので、ここでforEachを使用します
-      (entries as any[]).forEach((entry: any) => {
-        rows.push([farmer, vegetable, entry.en.toString(), entry.unit].join(","));
-      });
+    Object.entries(vegetables).forEach(([vegetable, details]) => {
+      rows.push([farmer, vegetable, details.en.toString(), details.unit].join(","));
     });
   });
 
@@ -165,38 +175,17 @@ const downloadCSV = (csv: string, filename: string) => {
 </script>
 <template>
   <h1>出品者リスト</h1>
+  <!-- {{ groupByFarmerList }} -->
+  <!-- {{ vegeAllData }} -->
   <select class="form-select" aria-label="roadsideStationSelect" v-model="selectedRoadStation" @change="initData">
     <option selected v-bind:value="roadStation" v-for="roadStation in roadStationUnitTempList" :key=roadStation>
       {{ roadStation }}
     </option>
   </select>
-  <!-- {{vegeAllData}}
-  {{ countFarmerList }} -->
-  <!-- {{ groupByFarmerList }} -->
-
-  <div v-for="(number,farmer,index) in countFarmerList" :key="farmer">
-    <!-- {{ number }}
-    {{ farmer }} -->
-    <div class="farmerList-group">
-      <button v-on:click="pushFarmer(index)">
-        <h3>{{ farmer }}さん</h3>
-        <h3>{{ number }}件</h3>
-        <i class="bi bi-chevron-down" v-if="!selectedTableList[index]"></i>
-        <i class="bi bi-chevron-up" v-if="selectedTableList[index]"></i>
-      </button>
-      <div class="farmerList-group-element">
-        <div v-for="(element,vege) in groupByFarmerList[farmer]" :key="vege" v-show="selectedTableList[index]">
-          <!-- {{ element }}
-          {{vege}} -->
-          <article>
-            <h3>{{ vege }}</h3>
-            <p>{{ element[0].unit }} {{ element[0].en }}円</p>
-          </article>
-
-        </div>
-      </div>
-
-    </div>
+  <div v-for="(element,farmer) in groupByFarmerList" :key="farmer">
+    <OwnerFarmerListElement
+    v-bind:-farmer-name="farmer"
+    v-bind:-vege-data="element"></OwnerFarmerListElement>
   </div>
   <button class="export-button" v-on:click="pushExport()">出力する</button>
 </template>
@@ -206,27 +195,6 @@ const downloadCSV = (csv: string, filename: string) => {
   margin-top: 20px;
 }
 
-.farmerList-group button {
-  display: flex;
-  width: 600px;
-  margin: 0 20px;
-  background-color: white;
-  border: none;
-  border-top: 1px solid gray;
-  border-bottom: 1px solid gray;
-  justify-content: space-between;
-}
-
-.farmerList-group button i {
-  display: flex;
-  align-items: center;
-  margin: auto 0;
-}
-
-.farmerList-group-element {
-  display: flex;
-
-}
 
 .farmerList-group-element article {
   border: 1px solid gray;

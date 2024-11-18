@@ -1,4 +1,4 @@
-import {createRouter, createWebHistory} from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 import OrderPage from '../views/OrderPage.vue'
 import AppTop from '../views/AppTop.vue'
 import RegistrationPage from '../views/RegistrationPage.vue'
@@ -7,92 +7,78 @@ import Signup from '../views/SignupPage.vue'
 import Login from '../views/LoginPage.vue'
 import Addinfo from '../views/AddInfo.vue'
 import Owner from '../views/OwnerPage.vue'
-import {getAuth} from 'firebase/auth'
+import Cart from '../views/CartPage.vue'
+import {
+  getAuth
+} from 'firebase/auth'
 import {getCurrentRole} from "../utils/auth"
-import Chat from '../views/ChatPage.vue'
-import AnnouncementsPage from "@/views/AnnouncementsPage.vue";
-import AnnouncementDetailPage from "@/views/AnnouncementDetailPage.vue";
-
+enum Role{
+  Onwer="管理者",
+  Buyer="飲食店",
+  Farmer="農家",
+  Murone="室根",
+  Kawasaki="川崎",
+  None=""
+}
 const router = createRouter({
-    history: createWebHistory(import.meta.env.BASE_URL),
-    routes: [
-        {
-            path: '/',
-            name: 'top',
-            component: AppTop
-        },
-        {
-            path: '/order',
-            name: 'order',
-            component: OrderPage
-        },
-        {
-            path: '/registration',
-            name: 'registration',
-            component: RegistrationPage
-        },
-        {
-            path: '/my-page',
-            name: 'my-page',
-            component: MyPage
-        },
-        {
-            path: '/signup',
-            name: 'signup',
-            component: Signup
-        },
-        {
-            path: '/login',
-            name: 'login',
-            component: Login
-        },
-        {
-            path: '/add-info',
-            name: 'add-info',
-            component: Addinfo
-        },
-        {
-            path: '/Owner',
-            name: 'Owner',
-            component: Owner
-        },
-        {
-            path: '/chat',
-            name: 'chat',
-            component: Chat,
-        },
-        {
-            path: '/chat/:roomId',
-            name: 'chat-room',
-            component: Chat,
-        },
-        {
-            path: '/announcements',
-            name: 'announcements',
-            component: AnnouncementsPage,
-        },
-        {
-            path: '/announcement',
-            redirect: '/announcements',
-        },
-        {
-            path: '/announcements/:announceId',
-            name: 'announcement',
-            component: AnnouncementDetailPage,
-        },
-    ]
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes: [
+    {
+      path: '/',
+      name: 'top',
+      component: AppTop
+    },
+    {
+      path: '/order',
+      name: 'order',
+      component: OrderPage
+    },
+    {
+      path: '/registration',
+      name: 'registration',
+      component: RegistrationPage
+    },
+    {
+      path: '/my-page',
+      name: 'my-page',
+      component: MyPage
+    },
+    {
+      path: '/signup',
+      name: 'signup',
+      component: Signup
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: Login
+    },
+    {
+      path: '/add-info',
+      name: 'add-info',
+      component: Addinfo
+    },
+    {
+      path: '/Owner',
+      name: 'Owner',
+      component: Owner
+    },
+    {
+      path: '/cart',
+      name: 'cart',
+      component: Cart
+    }
+  ]
 })
 // ここからガードの追加部分
 router.beforeEach(async (to, from, next) => {
-    if (to.name === 'Owner') {
-        // if (to.categoryName === 'chat') {
-        if (await getCurrentRole(getAuth()) === "管理者") next();
-        // if( await getCurrentRole(getAuth()) === "管理者" ) next();
-        else next({name: 'login'})
-    } else {
-        next()
-    }
+  if (to.name === Role.Onwer||to.name === Role.Kawasaki||to.name === Role.Murone) {
+  // if (to.name === 'chat') {
+      if( await getCurrentRole(getAuth()) ===  Role.Onwer||await getCurrentRole(getAuth()) ===  Role.Murone||await getCurrentRole(getAuth()) ===  Role.Kawasaki) next();
+      // if( await getCurrentRole(getAuth()) === "管理者" ) next();
+      else next({name: 'login'})
+  }else{
+      next()
+  }
 })
-
-
 export default router

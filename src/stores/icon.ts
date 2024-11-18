@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { getAuth, onAuthStateChanged, type User, updateProfile } from 'firebase/auth';
+import {  type User, updateProfile } from 'firebase/auth';
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL ,deleteObject} from 'firebase/storage';
 
 export const useIconStore = defineStore('iconURL', {
@@ -16,18 +16,6 @@ export const useIconStore = defineStore('iconURL', {
       } else {
         console.error("IconStoreError: No photoURL available");
       }
-    },
-    fetchIconURL() {
-      const auth = getAuth();
-
-      // Firebaseの認証ステートが変わった際にアイコンURLを取得
-      onAuthStateChanged(auth, (user) => {
-        if (user && user.photoURL) {
-          this.iconURL = user.photoURL;  // ここでユーザーのアイコンURLを設定
-        } else {
-          this.iconURL = '';  // ユーザーがいない場合やアイコンがない場合
-        }
-      });
     },
     // Firebase Storageに画像をアップロードし、プロフィール画像を更新
     async uploadImage(selectedImage: File | null, user: User) {

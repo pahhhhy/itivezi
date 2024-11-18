@@ -1,104 +1,108 @@
 <script setup lang="ts">
-import {onMounted, ref} from 'vue'
-import {getDatabase, onValue, ref as fireRef, set, update} from 'firebase/database'
-import {useRoadStationStore} from "../../../stores/roadStation"
-import draggable from 'vuedraggable'
-import {getAuth, onAuthStateChanged, type User} from 'firebase/auth'
+import { ref,watch} from 'vue'
+import { type User} from 'firebase/auth'
+import { useVegeStore } from '@/stores/vege'
+import { useUserStore } from '@/stores/userData';
+import { usefireUserStore } from '@/stores/fireUserdata';
+import OwnerVegeOwnerPage from './OwnerVegeOwnerPage.vue'
+interface Usertables{
+    affiliation:String[]
+    gender:string
+    name:string
+    phoneNumber:number
+    place:string
+    role:Role
+    email:string
+}
 
-const roadStationUnitTempList = ref<string[]>(useRoadStationStore().roadStationTemp)
-const isActive = ref<boolean>(false)
-const vegeAllData = ref<any>(null)
-const vegeKeys = ref<string[]>([])
-const selectedRoadStation = ref<string>(roadStationUnitTempList.value[0])
-const excludedVegeList = ref<any>([])
+enum VegeState{
+  Discontinued="Discontinued",
+  Available="Available"
+}
+interface Vegetables{
+    [VegeName:string]:{
+        [uniqueKey:string]:{
+            en:number;
+            farmer:string
+            roadStation:string[]
+            state:VegeState
+            uid:string
+            unit:string
+            photo:string
+        }
+    }
+}
+enum Role{
+    Onwer="管理者",
+    Buyer="飲食店",
+    Farmer="農家",
+    Murone="室根",
+    Kawasaki="川崎",
+    None=""
+  }
+const vegeStore=useVegeStore()
+const vegeAllData = ref<Vegetables>(vegeStore.VegeAllData)
+  const userStore=useUserStore()
+const unavailableVegeList = ref<string[]>([])
+const AvailableVegeLIst=ref<Vegetables>(filterVegetablesByState(vegeAllData.value))
 const farmerVegeList = ref<any>([])
 const uniqueVegeList = ref<any>([])
 const deleteVegeName = ref<string>("")
 const isPopup = ref<boolean>(false)
-const CSVfile = ref<any>("")
-const currentTime = ref<string>('')
+const fireUseStore=usefireUserStore()
+const currentUser = ref<User|null>(userStore.currentUser);
+const myUserData=ref<Usertables>(fireUseStore.myUserData)
+watch(() => fireUseStore.myUserData, (newUser) => {
+  myUserData.value = newUser;
+});
+  watch(() => userStore.currentUser, (newUser) => {
+  currentUser.value = newUser;
+});
+watch(() => vegeStore.VegeAllData, (newUser) => {
+  vegeAllData.value = newUser;
+});
+function filterByRoadStation(vegetables: Vegetables, role: Role) {
+    const result: Vegetables = {};
+    
+    for (const vegeName in vegetables) {
+        const filteredEntries = Object.entries(vegetables[vegeName]).filter(
+            ([uniqueKey, data]) => data.roadStation.includes(role)
+        );
 
-function pushActive() {
-  if (isActive.value) {
-    //更新するを押したら並び順リストを更新する
-    writeVegeKeys(vegeKeys.value, selectedRoadStation.value)
-  }
-  isActive.value = !isActive.value
-
-}
-
-const currentUser = ref<User | null>(null)
-onMounted(() => {
-  const auth = getAuth()
-  // ログインしているユーザーを取得する
-  onAuthStateChanged(auth, (user) => {
-    if (user != null && user.emailVerified) {
-      currentUser.value = user
-
-    } else {
-      currentUser.value = null
+        if (filteredEntries.length > 0) {
+            result[vegeName] = Object.fromEntries(filteredEntries);
+        }
     }
-  })
-})
-// stateが"Discontinued"のアイテムを排除する関数
-// 全部、型をanyでやってるの悪そうな感じがする
-const filterDiscontinuedItems = (data: any) => {
-  const filteredData: any = {};
-  const excludedItems: any = {};  // 排除されたアイテムを保存するオブジェクト
-  const allDiscontinuedCategories: string[] = [];  // すべてが "Discontinued" のカテゴリ名を保存する配列
 
-  for (const [category, items] of Object.entries(data) as [string, any]) {
-    const filteredItems: any = {};
-    const excludedCategoryItems: any = {};  // このカテゴリーで排除されたアイテム
-    let allDiscontinued = true;  // すべてが "Discontinued" かどうかをチェックするフラグ
+    return result;
+}
+function filterVegetablesByState(vegetables: Vegetables) {
+  let available: Vegetables = {};
+  let unavailableVegeNames: string[] = [];
 
-    for (const [id, item] of Object.entries(items as any) as [string, any]) {
-      if (item.state !== "Discontinued") {
-        filteredItems[id] = item;
-        allDiscontinued = false;  // "Discontinued" でないアイテムがあればフラグをfalseに
-      } else {
-        excludedCategoryItems[id] = item;  // 排除されたアイテムを保存
+  Object.keys(vegetables).forEach(outerKey => {
+    let hasAvailable = false;
+    Object.keys(vegetables[outerKey]).forEach(innerKey => {
+      const item = vegetables[outerKey][innerKey];
+      if (item.state === VegeState.Available) {
+        hasAvailable = true; // Available なデータがある場合にフラグを立てる
+        if (!available[outerKey]) {
+          available[outerKey] = {};
+        }
+        available[outerKey][innerKey] = item;
       }
-    }
-
-    if (Object.keys(filteredItems).length > 0) {
-      filteredData[category] = filteredItems;
-    }
-    if (Object.keys(excludedCategoryItems).length > 0) {
-      excludedItems[category] = excludedCategoryItems;
-    }
-
-    if (allDiscontinued) {
-      allDiscontinuedCategories.push(category);  // すべてが "Discontinued" ならカテゴリ名を保存
-    }
-  }
-
-  excludedVegeList.value = allDiscontinuedCategories;
-  return filteredData;
-};
-
-function writeVegeKeys(
-    vegeKeys: string[],
-    roadStation: string
-) {
-  const db = getDatabase()
-  set(fireRef(db, 'testVegeKeys/' + roadStation + "/"), vegeKeys)
-      .then(() => {
-      })
-      .catch((error) => {
-        console.error("Error saving list: ", error);
-      })
-}
-
-function readvegeAllData(roadStation: string): Promise<any> {
-  return new Promise((resolve, reject) => {
-    const countRef = fireRef(getDatabase(), 'testVege/' + roadStation + "/")
-    onValue(countRef, (snapshot) => {
-      resolve(snapshot.val())
-    }, (error) => {
-      reject(error)
     });
+
+    // Available なデータが1つもない場合にのみ unavailableVegeNames に追加
+    if (!hasAvailable) {
+      unavailableVegeNames.push(outerKey);
+    }
   });
+
+  // unavailableVegeList.value に string[] を代入
+  unavailableVegeList.value = unavailableVegeNames;
+  console.log(unavailableVegeList.value)
+  return available;
 }
 
 function extractVegetableInfo(data: any): { [key: string]: string[] } {
@@ -133,9 +137,12 @@ function extractVegetableInfo(data: any): { [key: string]: string[] } {
 }
 
 async function initData() {
-  vegeAllData.value = await readvegeAllData(selectedRoadStation.value)
-  vegeAllData.value = filterDiscontinuedItems(vegeAllData.value)
-  vegeKeys.value = Object.keys(vegeAllData.value)
+  if(myUserData.value.role==Role.Kawasaki){
+      vegeAllData.value=filterByRoadStation(vegeAllData.value,Role.Kawasaki)
+    }else if(myUserData.value.role==Role.Murone){
+      vegeAllData.value=filterByRoadStation(vegeAllData.value,Role.Murone)
+  }
+  AvailableVegeLIst.value=filterVegetablesByState(vegeAllData.value)
   farmerVegeList.value = extractVegetableInfo(vegeAllData.value)
 }
 
@@ -146,89 +153,13 @@ function pushDeleteIcon(vegeName: string) {
   isPopup.value = true
 }
 
-function pushDelete() {
+async function pushDelete() {
   isPopup.value = false
-  for (let i: number = 0; i < farmerVegeList.value[deleteVegeName.value].length; i++) {
-    deleteVegeData(deleteVegeName.value, uniqueVegeList.value[deleteVegeName.value][i], selectedRoadStation.value)
-  }
-
-}
-
-async function deleteVegeData(vege: string, uid: string, roadStation: string): Promise<void> {
-  const db = getDatabase();
-  const path = 'testVege/' + roadStation + "/" + vege + '/' + uid;
-  // 更新するデータを指定
-  const updates = {
-    state: "Discontinued"
-  };
-  try {
-    await update(fireRef(db, path), updates).then(() => {
-      initData()
-    })
-
-  } catch (error) {
-    console.error("Error removing data:", error);
-  }
+  await vegeStore.deleteAllVegeData(deleteVegeName.value)
 }
 
 function pushBack() {
   isPopup.value = false
-}
-
-function pushExport() {
-  const now = new Date()
-  currentTime.value = now.toLocaleString()
-  CSVfile.value = makeCsvData();
-  exportToCSV(CSVfile.value, "vegeList_" + currentTime.value)
-}
-
-function makeCsvData() {
-  // 結果を格納する配列
-  const result: [string, string, number][] = [];
-
-// データをループして抽出
-  for (const vegetable in vegeAllData.value) {
-    const entries = vegeAllData.value[vegetable];
-    for (const key in entries) {
-      const entry = entries[key];
-      if (entry.farmer === currentUser.value?.displayName) {
-        result.push([vegetable, entry.unit, entry.en]);
-      }
-    }
-  }
-  return result
-}
-
-function exportToCSV(data: any[], fileName: string) {
-  const csvRows: string[] = [];
-
-  // ヘッダーを追加
-  const headers = ["野菜の名前", "unit", "money"];
-  csvRows.push(headers.join(','));
-
-  // データ行を追加
-  for (const row of data) {
-    const values = row.map((value: any) => {
-      const escapeValue = String(value).replace(/"/g, '""');
-      return `"${escapeValue}"`;
-    });
-    csvRows.push(values.join(','));
-  }
-
-  // CSV文字列を作成
-  const csvString = csvRows.join('\n');
-
-  // BOMを追加してCSVファイルを生成
-  const bom = '\uFEFF'; // BOMを追加
-  const blob = new Blob([bom + csvString], {type: 'text/csv;charset=utf-8;'});
-  const url = window.URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.setAttribute('hidden', '');
-  a.setAttribute('href', url);
-  a.setAttribute('download', `${fileName}.csv`);
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
 }
 
 </script>
@@ -237,44 +168,18 @@ function exportToCSV(data: any[], fileName: string) {
   <!-- {{ farmerVegeList }}
   {{uniqueVegeList}} -->
   <!-- {{ CSVfile }} -->
-  <select class="form-select" aria-label="roadsideStationSelect" v-model="selectedRoadStation" @change="initData">
-    <option selected v-bind:value="roadStation" v-for="roadStation in roadStationUnitTempList" :key=roadStation>
-      {{ roadStation }}
-    </option>
-  </select>
-  <h1 class="vege-title">現在注文可能な野菜のリスト</h1>
-  <article v-if="!isActive">
-    <div class="vegeList-group">
-      <div v-for="element in vegeKeys" :key="element">
-        {{ element }}
-      </div>
-    </div>
-    <button v-on:click="pushActive" class="vegeList-button">編集する</button>
-  </article>
-  <article v-if="isActive">
-    <p>ドラック＆ドロップで並べ替えができます</p>
-    <div class="vegeList-group-active">
-      <draggable v-model="vegeKeys" draggable=".vegeList-unit-active" item-key="id">
-        <template #item="{ element }">
-          <div class="vegeList-unit-active">
-            <p>・{{ element }}</p>
-            <div class="vegeList-unit-icon-active">
-              <button v-on:click="pushDeleteIcon(element)"><i class="bi bi-trash3"></i></button>
-            </div>
-          </div>
-        </template>
-      </draggable>
-
-    </div>
-    <button v-on:click="pushActive" class="vegeList-button">更新する</button>
-    <button v-on:click="pushExport" class="vegeList-button">出力する</button>
-  </article>
-  <div v-if="excludedVegeList.length!=0">
-    <h1>現在、在庫切れの野菜</h1>
-    <div v-for="vegeName in excludedVegeList" :key="vegeName">
-      {{ vegeName }}
-    </div>
-  </div>
+    <!-- 管理者は全てのリストを選択したときの注文の並び順を変更できる。
+    道の駅はそのところを選択したときの注文の並び順を変更できる。 -->
+    <!-- {{ AvailableVegeLIst }}
+      {{ unavailableVegeList }} -->
+    <article >
+      <OwnerVegeOwnerPage 
+      v-bind:current-user="currentUser"
+      v-bind:data="AvailableVegeLIst"
+      v-bind:unavailable-vege-list="unavailableVegeList"
+      v-bind:role="myUserData.role"
+      v-on:delete-icon="pushDeleteIcon"></OwnerVegeOwnerPage>
+    </article>
   <div class="owner-popup" v-if="isPopup">
     <h3>{{ deleteVegeName }}は以下の{{
         farmerVegeList[deleteVegeName].length

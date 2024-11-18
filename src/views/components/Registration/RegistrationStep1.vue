@@ -1,19 +1,51 @@
 <script setup lang="ts">
 import { ref,watch } from 'vue'
+import { useUserStore } from '@/stores/userData';
+enum VegeState{
+  Discontinued="Discontinued",
+  Available="Available"
+}
+interface Vegetables{
+    [vegeName:string]:{
+        [uniqueKey:string]:vegeElementTables
+    }
+}
+interface vegeElementTables{
+  en:number
+  farmer:string
+  roadStation:string[]
+  state:VegeState
+  uid:string
+  unit:string
+  photo:string
+}
 interface Props {
-  vegeList: number[]
+  vegeList: string[]
   vegeKeys: string[]
+  uproadData:Vegetables
+  uniquwKey:string|null
 }
 interface Emits {
   (event: 'OnStep', Next: boolean): void
-  (event: 'changeSelect', element: number[]): void
-  (event: 'resetData', ): void
+  (event: 'updateUproadData', element: Vegetables): void
+  (event: 'changeSelectList', element: string[]): void
 }
+
+const userStore=useUserStore()
+const currentUser = ref(userStore.currentUser);
+const myName=ref<string|null|undefined>(currentUser.value?.displayName) 
+const myUid=ref<string|undefined>(currentUser.value?.uid)
+watch(() => userStore.currentUser, (newUser) => {
+  currentUser.value = newUser;
+  myName.value=currentUser.value?.displayName
+  myUid.value=currentUser.value?.uid
+});
 const emit = defineEmits<Emits>()
 const props = defineProps<Props>()
-const selectVegeList = ref<number[]>(props.vegeList)
+const selectVege = ref<string>("")
+  const selectVegeList = ref<string[]>(props.vegeList)
 const step1Error = ref<boolean>(false)
-
+const uproadData=ref<Vegetables>(props.uproadData)
 function onStep(next:boolean) {
   if(!next)emit('OnStep', false)
   else{
@@ -27,22 +59,45 @@ function onStep(next:boolean) {
   
 }
 function changeVege() {
-  emit('changeSelect', selectVegeList.value)
+  if(props.uniquwKey&&myName.value&&myUid.value){
+    for(let i:number=0;i<selectVegeList.value.length;i++){
+    uproadData.value[selectVegeList.value[i]]={
+    [props.uniquwKey]:{
+      en: -1,
+      farmer: myName.value,
+      roadStation: [],
+      state: VegeState.Available,
+      uid: myUid.value,
+      unit: "",
+      photo: "none"
+    }
+  }
+  }
+  }else{
+    console.error("myUidnaizo")
+  }
+  emit('updateUproadData', uproadData.value)
+  emit("changeSelectList",selectVegeList.value)
 }
 // チェックボックスの状態が変わったときの関数
-function handleCheckboxChange() {
-  emit("resetData")
+function handleCheckboxChange(item:string) {
+  selectVege.value=item
+  delete uproadData.value[selectVege.value]
+  emit('updateUproadData', uproadData.value)
+  emit("changeSelectList",selectVegeList.value)
 }
 
 // selectedVegeを監視して、変化を検知
 watch(selectVegeList, (newVal, oldVal) => {
   const removedItems = oldVal.filter(item => !newVal.includes(item))
   if (removedItems.length > 0) {
-    removedItems.forEach(item => handleCheckboxChange())
+    removedItems.forEach(item => handleCheckboxChange(item))
   }
 })
 </script>
 <template>
+  <!-- {{ uproadData }}
+  {{ selectVege }} -->
   <section>
     <h1>野菜を選択してください</h1>
     <div class="form">
@@ -50,7 +105,7 @@ watch(selectVegeList, (newVal, oldVal) => {
         <input
           class="form-check-input"
           type="checkbox"
-          :value="index"
+          :value="element"
           v-model="selectVegeList"
           v-on:change="changeVege"
           :id="'flexCheckIndeterminate' + index"
@@ -61,11 +116,10 @@ watch(selectVegeList, (newVal, oldVal) => {
       </div>
     </div>
 
-    <p>Selected Vegetables: {{ selectVegeList }}</p>
+    <!-- <p>Selected Vegetables: {{ selectVegeList }}</p> -->
     <h1 style="color: red" v-show="step1Error && selectVegeList.length == 0">
       野菜を選択してください
     </h1>
-    <button v-on:click="onStep(false)" class="btn btn-primary">戻る</button>
     <button v-on:click="onStep(true)" class="btn btn-primary">次へ</button>
   </section>
 </template>

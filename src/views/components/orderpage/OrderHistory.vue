@@ -1,192 +1,171 @@
 <script setup lang="ts">
-import { ref,  onMounted } from 'vue'
-import {getDatabase, onValue, ref as fireRef,set} from 'firebase/database'
-import { getAuth, onAuthStateChanged, type User } from 'firebase/auth'
-import {useRoadStationStore}from "../../../stores/roadStation"
-const roadStationUnitTempList = ref<string[]>(useRoadStationStore().roadStationTemp)
-onMounted(() => {
-  const auth = getAuth()
-  // ログインしているユーザーを取得する
-  onAuthStateChanged(auth, (user) => {
-    if (user != null && user.emailVerified) {
-      currentUser.value = user
-     
-    } else {
-      currentUser.value = null
+import { ref ,watch} from 'vue'
+import { useFireOrderStore } from '@/stores/fireOrder'
+import { useUserStore } from '@/stores/userData';
+import { useVegeStore } from '@/stores/vege'
+import OrderHistoryElement from './OrderHistoryElement.vue';
+import OrderHistoryPopupElement from './OrderHistoryPopupElement.vue';
+enum VegeState{
+  Discontinued="Discontinued",
+  Available="Available"
+}
+enum OrderStete{
+  Completed="取引完了",
+  Uncontacted="未連絡",
+  contacted="連絡済み",
+  cancel="取引取り消し"
+}
+interface Vegetables{
+    [vegeName:string]:{
+        [uniqueKey:string]:vegeElementTables
     }
-  })
-})
-const currentUser = ref<User | null>(null)
+}
+interface vegeElementTables{
+  en:number
+  farmer:string
+  roadStation:string[]
+  state:VegeState
+  uid:string
+  unit:string
+  photo:string
+}
+
+interface Ordertables{
+    [uid:string]:{
+        [uniqueKey:string]:OrdertablesElement
+    }
+}
+interface OrdertablesElement{
+  [num:number]:{
+    en:number;
+    farmer:string
+    roadStation:string[]
+    state:VegeState
+    unique:string
+    unit:string
+    photo:string
+    amount:number
+    VegeName:string
+}
+  orderTime:string
+  email:string
+  orderName:string
+  selectData:string
+  state:OrderStete
+  totalMoney:number
+}
+
+interface orderVegeElementTables{
+    [num:number]:{
+    en:number;
+    farmer:string
+    roadStation:string[]
+    state:VegeState
+    unique:string
+    unit:string
+    photo:string
+    amount:number
+    VegeName:string
+}
+}
+interface timestamp{
+    year: number;
+    month: number;
+    day: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+    milliseconds: number;
+}
+const FireOrderStore=useFireOrderStore()
+const userStore=useUserStore()
+const currentUser = ref(userStore.currentUser);
 const isActive=ref<boolean>(false)
-const OrderAllData=ref<any>([])
-const vegeAllData=ref<any>([])
-const dayisTureList=ref<any>([])
+const OrderAllData=ref<Ordertables>(FireOrderStore.OrderAllData)
+OrderAllData.value=reverseOrdertables(OrderAllData.value)
+const vegeStore=useVegeStore()
+const vegeAllData = ref<Vegetables>(vegeStore.VegeAllData)
 const IsPopup=ref<boolean>(false)
-const today = new Date().toISOString().split('T')[0]
-const selectDate = ref<Date>()
+const selectData=ref<orderVegeElementTables>([])
+const nowSelectData = ref< Vegetables>({});
+const AllTotalMoney=ref<number>(0);
+const selectDate=ref<string>("")
+const selectCountList=ref<number[]>([])
+  const today = new Date().toISOString().split('T')[0]
+watch(() => userStore.currentUser, (newUser) => {
+  currentUser.value = newUser;
+});
+watch(() => FireOrderStore.OrderAllData, (newUser) => {
+  OrderAllData.value = reverseOrdertables(newUser);
+});
+watch(() => vegeStore.VegeAllData, (newUser) => {
+  vegeAllData.value = newUser;
+});
 function onPushHistory(){
     isActive.value=!isActive.value
 }
-function readOrderAllData(): Promise<any> {
-  return new Promise((resolve, reject) => {
-    const countRef = fireRef(getDatabase(), 'testOrders/')
-    onValue(countRef, (snapshot) => {
-      resolve(snapshot.val())
-    }, (error) => {
-      reject(error)
-    });
-  });
-}
-function readVegeAllData(): Promise<any> {
-  return new Promise((resolve, reject) => {
-    const countRef = fireRef(getDatabase(), 'testVege/')
-    onValue(countRef, (snapshot) => {
-      resolve(snapshot.val())
-    }, (error) => {
-      reject(error)
-    });
-  });
-}
-async function initData(){
-  //全体を取って
-  OrderAllData.value=await readOrderAllData()
-  vegeAllData.value=await readVegeAllData()
-  if(currentUser.value!=null){
-      //自分のデータのみにして
-    OrderAllData.value=extractOrdersByName(OrderAllData.value, currentUser.value.displayName)
-  }
-  //販売停止かどうかを判定する
-  dayisTureList.value=compareData(OrderAllData.value,vegeAllData.value)
-  //逆順にする
-  OrderAllData.value=reversedOrderAllData(OrderAllData.value)
-}
-initData()
-// 自分のオーダーデータから［道の駅,UID,Data］になるように抽出する関数
-function extractOrdersByName(data: any, targetName: string|null): any {
-  const result: any = {};
-
-  for (const location in data) {
-    result[location] = {};
-
-    for (const id in data[location]) {
-      const orders = data[location][id];
-
-      for (const orderDate in orders) {
-        const order = orders[orderDate];
-
-        if (order.orderName === targetName) {
-          result[location][id] = result[location][id] || {};
-          result[location][id][orderDate] = order;
-        }
-      }
+function getSelectData(data:orderVegeElementTables){
+  selectData.value=data
+  IsPopup.value=true
+  for (let i: number = 0; i < Object.keys(selectData.value).length; i++) {
+    const vegeName = selectData.value[i].VegeName;
+    const uniqueKey = selectData.value[i].unique;
+     // vegeNameが存在しない場合は初期化
+     if (!nowSelectData.value[vegeName]) {
+      nowSelectData.value[vegeName] = {};
     }
+
+    // uniqueKeyを使用してデータを挿入
+    nowSelectData.value[vegeName][uniqueKey] = getNowSelectData(vegeAllData.value, vegeName, uniqueKey);
+  }
+}
+function reverseOrdertables(data: Ordertables): Ordertables {
+    const result: Ordertables = {};
+
+    for (const uid in data) {
+        const reversedEntries: { [uniqueKey: string]: OrdertablesElement } = {};
+
+        // uniqueKey を配列化して逆順に
+        const keys = Object.keys(data[uid]).reverse();
+
+        keys.forEach((uniqueKey) => {
+            reversedEntries[uniqueKey] = data[uid][uniqueKey];
+        });
+
+        result[uid] = reversedEntries;
+    }
+
+    return result;
+}
+function getNowSelectData(data: Vegetables, vegeName: string, uniqueKey: string): vegeElementTables {
+  let result: vegeElementTables = {
+    en: 0,                    
+    farmer: "",                
+    roadStation: [],           
+    state: VegeState.Discontinued,      
+    uid: "",                  
+    unit: "",                  
+    photo: ""                  
+  };
+
+  // 野菜名とユニークキーが存在する場合のみデータを上書き
+  if (data[vegeName] && data[vegeName][uniqueKey]) {
+    let Data = data[vegeName][uniqueKey];
+    result = {
+      en: Data.en,                    
+      farmer: Data.farmer,                
+      roadStation: Data.roadStation,     // 修正: farmer ではなく roadStation
+      state: Data.state,      
+      uid: Data.uid,                  
+      unit: Data.unit,                  
+      photo: Data.photo                // 修正: data ではなく Data から取得
+    };
   }
 
   return result;
 }
-function filterVegeData(Data: any) {
-  return Object.values(Data).filter(
-    (v): v is { vegeName: string; unit: string; amount: number; price: number; farmerName: string } =>
-    typeof v === "object" && "vegeName" in (v as any)
-  );
-}
-function compareData(orders: any, veges: any) {
-  const results: any = {};
-
-  // 道の駅（駅名）ごとにループ
-  Object.keys(orders).forEach(station => {
-    if (currentUser.value) {
-      const stationOrders = orders[station][currentUser.value.uid];
-      const stationVeges = veges[station] || {};
-      // 日付ごとにループ
-      const dateResults: any = {};
-      if(stationOrders==undefined) return results
-      Object.keys(stationOrders).forEach(date => {
-        const orderItems = stationOrders[date];
-        let isAllAvailable = true; // 初期値をTrueに設定
-        // 数字の部分だけを抽出してループする
-        const numericKeys = Object.keys(orderItems).filter(key => /^\d+$/.test(key));
-        numericKeys.forEach(itemKey => {
-          const item = orderItems[itemKey];
-          // 野菜データの中で該当する野菜を検索
-          const vegeCategory = stationVeges[item.vegeName];
-          if (vegeCategory) {
-            const vege = vegeCategory[item.unique];
-            if (!vege || vege.state !== "Available") {
-              isAllAvailable = false;
-            }
-          } else {
-            isAllAvailable = false;
-          }
-        });
-        
-        // 日付ごとの結果を追加
-        dateResults[date] = isAllAvailable ;
-      });
-      
-      // 道の駅ごとの結果を追加
-      results[station] = dateResults;
-    }
-  });
-  
-  return results;
-}
-function reversedOrderAllData(data: any) {
-  const reversedData: any = {};
-
-  Object.keys(data).forEach(station => {
-    const stationData = data[station];
-    const reversedStationData: any = {};
-
-    Object.keys(stationData).forEach(uid => {
-      const uidData = stationData[uid];
-      const reversedUidData: any = {};
-
-      Object.keys(uidData).reverse().forEach(date => {
-        reversedUidData[date] = uidData[date];
-      });
-
-      reversedStationData[uid] = reversedUidData;
-    });
-
-    reversedData[station] = reversedStationData;
-  });
-
-  return reversedData;
-}
-const selectedVegeData=ref<any>([])
-const selectedRoadStation=ref<string>("")
-const dayError=ref<boolean>(false)
-function onPushOrder(vege:any,roadstation:string){
-  IsPopup.value=true
-  selectedVegeData.value=vege
-  selectedRoadStation.value=roadstation
-}
-function onPushSend(){
-  if(selectDate.value!=undefined)
-  selectedVegeData.value.selectDate=selectDate.value
-  else{
-    dayError.value=true
-  }
-  if(currentUser.value){writeVegeOrder(selectedVegeData.value,currentUser.value,selectedRoadStation.value)}
-  
-}
-function writeVegeOrder(
-  OrderData: any,
-  currentUser: User,
-  roadStation:string,
-) {
-  const now = parseTimestamp(getJSTTimestamp())
-  const currentTime =
-    now.year + '-' + now.month + '-' + now.day + '-' + now.hours + '-' + now.day + '-' + now.seconds
-  const db = getDatabase()
-  set(fireRef(db, 'testOrders/' + roadStation+"/"+currentUser.uid + '/' + currentTime), OrderData)
-    .then(() => {
-      IsPopup.value=false
-      initData()
-      selectDate.value=undefined
-    })
-
+function getTotalMoney(money:number){
+  AllTotalMoney.value=AllTotalMoney.value+money
 }
 //タイムスタンプ文字列を変換
 function parseTimestamp(timestamp: string) {
@@ -218,111 +197,134 @@ function getJSTTimestamp() {
   // ISO 8601フォーマットに変換し、無効な文字を置き換える
   return jstDate.toISOString().replace(/[:.]/g, '-')
 }
+async function onPushBuy(){
+    
+    if(currentUser.value&&currentUser.value.email&&currentUser.value.displayName){
+        let now:timestamp=parseTimestamp(getJSTTimestamp())
+        let currentTime:string=now.year + '-' + now.month + '-' + now.day + '-' + now.hours + '-' + now.day + '-' + now.seconds
+        let uproadData: OrdertablesElement = {
+            orderTime: currentTime,
+            email: currentUser.value.email,
+            orderName: currentUser.value.displayName,
+            selectData: selectDate.value,
+            state: OrderStete.Uncontacted,
+            totalMoney: AllTotalMoney.value
+        };
+        addCartToOrder(nowSelectData.value,uproadData)
+        IsPopup.value= !await FireOrderStore.updateCartData(uproadData,currentUser.value.uid)
+    }
+    
+}
+function addCartToOrder(selectData: Vegetables,  order: OrdertablesElement) {
+  const VegeName=Object.keys(selectData)
+  for(let i:number=0;i<VegeName.length;i++){
+    const uniqueKey =Object.keys(selectData[VegeName[i]])
+    const DataElement=selectData[VegeName[i]][uniqueKey[0]]
+    order[i] = {
+        en: DataElement.en,
+        farmer: DataElement.farmer,
+        roadStation: DataElement.roadStation,
+        state: VegeState.Available, // state を追加
+        unique: uniqueKey[0],
+        unit: DataElement.unit,
+        photo: DataElement.photo,
+        amount: selectCountList.value[i],
+        VegeName: VegeName[i], // vegeName を VegeName にマッピング
+      };
+  }
+  }
+  function getVegeCount(Count:number,index:number){
+    selectCountList.value[index]=Count
+  }
+  function onPushBuck(){
+    IsPopup.value=false
+  }
 </script>
 <template>
   <!-- {{OrderAllData}} -->
    <!-- {{dayisTureList }} -->
+    <!-- {{ vegeAllData }} -->
+      <!-- {{ selectData}} -->
+        <!-- {{ nowSelectData }} -->
 <button v-on:click="onPushHistory" v-bind:class="{active:isActive}" class="history-button">過去の注文</button>
-<article v-if="isActive">
-  <table v-for="(roadStation,index) in roadStationUnitTempList" :key="index">
-    <h3 v-if="currentUser!=null &&OrderAllData[roadStation][currentUser.uid]==undefined">{{roadStation}}で注文していません</h3>
-    <div v-if="currentUser!=null &&OrderAllData[roadStation][currentUser.uid]!=undefined">
-      <caption>{{roadStation}}の過去の注文データ</caption>
+<article v-if="isActive&& currentUser">
+  <!-- {{ OrderAllData[currentUser.uid] }} -->
+  <table>
+    <caption>過去の注文データ</caption>
     <thead>
       <tr>
         <th scope="col">日時</th>
-        <th scope="col" colspan="4">野菜データ</th>
+        <th scope="col">野菜データ</th>
         <th scope="col">合計金額</th>
         <th scope="col">希望日</th>
         <th scope="col">再度注文</th>
       </tr>
     </thead>
-    <tbody >
-    
-      <tr v-for="(Data, day,Index) in OrderAllData[roadStation][currentUser.uid]" :key="Index">
-        <!-- {{ Data }} -->
-        <td>{{ day}}</td>
-        <!-- 野菜データ部分のみをループ -->
-        <td colspan="4">
-          <table>
-            <tr>
-              <td>野菜</td>
-              <td>単位</td>
-              <td>個数</td>
-              <td>値段</td>
-              <td>農家名</td>
-            </tr>
-            <tr v-for="(vege, index) in filterVegeData(Data)" :key="index">
-              <td>{{ vege.vegeName }}</td>
-              <td>{{ vege.unit }}</td>
-              <td>{{ vege.amount }}個</td>
-              <td>{{ vege.price }}円</td>
-              <td>{{ vege.farmerName }}</td>
-            </tr>
-          </table>
-        </td>
-        <td >{{ Data.totalMoney }}円</td>
-        <td >{{ Data.selectDate}}</td>
-        <td>
-          <button v-if="dayisTureList[roadStation][day]" v-on:click="onPushOrder(Data,roadStation)">再度注文</button>
-          <h3 v-if="!dayisTureList[roadStation][day]">販売停止</h3>
-        </td>
+    <tbody>
+      <tr v-for="(element,uniqueKey) in OrderAllData[currentUser.uid]" :key="uniqueKey">
+        <OrderHistoryElement 
+        v-bind:data="element"
+        v-bind:vege-alldata="vegeAllData"
+        v-on:get-select-data="getSelectData"></OrderHistoryElement>
       </tr>
     </tbody>
-    </div>
-    
   </table>
 </article>
-<article v-if="IsPopup" class="popup">
-  <!-- {{ selectedVegeData }} -->
-  <table >
+<article v-show="IsPopup" class="Histoty_popup">
+  <h1>購入画面</h1>
+  <table>
     <thead>
       <tr>
-          <td>野菜</td>
-          <td>単位</td>
-          <td>個数</td>
-          <td>値段</td>
-          <td>農家名</td>
+        <th scope="col">野菜名</th>
+        <th scope="col">農家名</th>
+        <th scope="col">販売単位</th>
+        <th scope="col">単価</th>
+        <th scope="col">購入個数</th>
+        <th scope="col">合計金額</th>
       </tr>
     </thead>
-    <tbody v-if="currentUser!=null">
-      <tr v-for="(Data, index) in filterVegeData(selectedVegeData)" :key="index">
-        <!-- {{ Data }} -->
-        <td>{{ Data.vegeName}}</td>
-        <td>{{ Data.unit}}</td>
-        <td>{{ Data.amount}}</td>
-        <td>{{ Data.price}}</td>
-        <td>{{ Data.farmerName}}</td>
-        <!-- 野菜データ部分のみをループ -->
+    <tbody>
+      <tr v-for="(element, vegeName,index) in nowSelectData" :key="index">
+        <template v-for="(vegeData, uniqueKey) in element" :key="uniqueKey">
+          <OrderHistoryPopupElement
+          v-bind:vege-data="vegeData"
+          v-bind:vege-name="vegeName"
+          v-bind:select-data="selectData[index]"
+          v-bind:index="index"
+          v-on:get-vege-count="getVegeCount"
+          v-on:get-total-money="getTotalMoney"></OrderHistoryPopupElement>
+        </template>
       </tr>
     </tbody>
   </table>
-  <h3>希望日を選択してください</h3>
-  <h1 style="padding-top: 30px">日付を指定してください</h1>
-    <VueDatePicker
-      v-model="selectDate"
-      format="yyyy/MM/dd"
-      locale="ja"
-      model-type="yyyy-MM-dd"
-      week-start="0"
-      :enable-time-picker="false"
-      :min-date="today"
-      auto-apply
-      no-today
-    />
-    <h3 style="color: red;" v-if="dayError">希望日を入力してください</h3>
-    <button v-on:click="onPushSend()">注文する</button>
+  <p>※購入時の値段や販売単価が違う場合があります。確認をお願いします。</p>
+  <h4>総合金額:{{AllTotalMoney}}円</h4>
+  <h4>希望日指定：{{ selectDate }}</h4>
+  <VueDatePicker
+    v-model="selectDate"
+    format="yyyy/MM/dd"
+    locale="ja"
+    model-type="yyyy-MM-dd"
+    week-start="0"
+    :enable-time-picker="false"
+    :min-date="today"
+    auto-apply
+    no-today
+  />
+  <button v-on:click="onPushBuy()">購入する</button>
+  <button v-on:click="onPushBuck()">戻る</button>
 </article>
 </template>
 <style>
-.popup{
-  position: absolute;
+.Histoty_popup{
+  position: fixed;
   z-index: 1;
   border: 1px solid gray;
   border-radius: 20px;
   top: 20%;
   left: 20%;
   padding: 20px;
+  background-color: white;
 }
 .history-button{
     background: white;
