@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { RouterLink,useRoute } from 'vue-router'
 import router from '@/router'
 import {
   getAuth,
   signOut,
 } from 'firebase/auth'
 import {useIconStore}from "@/stores/icon"
+import { usefireUserStore } from '@/stores/fireUserdata';
+import { ref,watch } from 'vue'
 enum PageMode{
   home="Home",
   order="Order",
@@ -14,10 +15,32 @@ enum PageMode{
   owner="Onwer",
   None="null",
   login="login",
-  logout="Logout"
+  logout="Logout",
+    chat="Chat",
+  announcements="Announcements"
 }
+interface Usertables{
+    affiliation:String[]
+    gender:string
+    name:string
+    phoneNumber:number
+    place:string
+    role:Role
+    email:string
+}
+enum Role{
+    Onwer="管理者",
+    Buyer="飲食店",
+    Farmer="農家",
+    Murone="室根",
+    Kawasaki="川崎",
+    None=""
+  }
 const iconStore = (useIconStore())
 const auth = getAuth()
+const myRole = ref<string>("")
+const fireUseStore=usefireUserStore()
+const myUserData=ref<Usertables>(fireUseStore.myUserData)
 function logout() {
   signOut(auth)
     .then(() => {
@@ -53,44 +76,44 @@ async function onClickCard(mode: PageMode) {
       break;
   }
 }
-
+watch(() => fireUseStore.myUserData, (newUser) => {
+  myUserData.value = newUser;
+  myRole.value=myUserData.value.role
+});
 </script>
 <template>
 <div class="card_group">
-      <div class="card" >
-        <div class="card-body">
-          <h5 class="card-title"><i class="bi bi-cart"></i>注文</h5>
-          <p class="card-text">野菜の注文ができます</p>
-          <button class="card_button" v-on:click="onClickCard(PageMode.order)">注文画面へ</button>
-        </div>
-      </div>
-        <div class="card">
-          <div class="card-body">
-            <h5 class="card-title"><i class="bi bi-cart"></i>登録</h5>
-            <p class="card-text">自分が作った野菜を登録することで販売することができます。</p>
-            <button class="card_button" v-on:click="onClickCard(PageMode.registration)">登録画面へ</button>
-          </div>
-        </div>
-      <div class="card" >
-        <div class="card-body">
-          <h5 class="card-title"><i class="bi bi-person"></i>マイページ</h5>
-          <p class="card-text">自分の情報の更新や過去の注文を確認することができます。</p>
-          <button class="card_button" v-on:click="onClickCard(PageMode.mypage)">マイページへ</button>
-        </div>
-      </div>
-        <div class="card" >
-          <div class="card-body">
-            <h5 class="card-title"><i class="bi bi-columns-gap"></i>管理者画面</h5>
-            <p class="card-text">注文画面の野菜の並べ替えや各種データの出力や初期設定などをすることができます。</p>
-            <button class="card_button" v-on:click="onClickCard(PageMode.owner)">管理画面へ</button>
-          </div>
-        </div>
-        <div class="card logout" v-on:click="onClickCard(PageMode.logout)">
-          <div class="card-body">
-            <h5 class="card-title"><i class="bi bi-box-arrow-in-left"></i>ログアウト</h5>
-          </div>
-        </div>
+  <div class="card">
+    <h2>注文</h2>
+    <p>野菜の注文ができます</p>
+    <button v-on:click="onClickCard(PageMode.order)">注文へ</button>
   </div>
+  <div class="card" v-if="myRole!=Role.Buyer">
+    <h2>登録</h2>
+    <p>自分が作った野菜を登録することができます。</p>
+    <button v-on:click="onClickCard(PageMode.registration)">登録へ</button>
+  </div>
+  <div class="card">
+    <h2>チャット</h2>
+    <p>管理者や同業者、道の駅などの人たちと会話することができます</p>
+    <button v-on:click="onClickCard(PageMode.order)">チャットへ</button>
+  </div>
+  <div class="card">
+    <h2>掲示板</h2>
+    <p>管理者からの連絡事項を見ることができます。</p>
+    <button v-on:click="onClickCard(PageMode.announcements)">掲示板へ</button>
+  </div>
+  <div class="card">
+    <h2>マイページ</h2>
+    <p>自分の情報の更新や過去の注文を確認することができます。</p>
+    <button v-on:click="onClickCard(PageMode.mypage)">マイページへ</button>
+  </div>
+  <div class="card" v-if="myRole!=Role.Buyer && myRole!=Role.Farmer">
+    <h2>管理者画面</h2>
+    <p>注文画面の野菜の並べ替えや各種データの出力や初期設定などをすることができます。</p>
+    <button v-on:click="onClickCard(PageMode.announcements)">管理者画面へ</button>
+  </div>
+</div>
 </template>
 <style scoped>
 .link{
@@ -101,15 +124,30 @@ p{
     margin: 0;
 }
 .card{
-  width: 400px;
-  height: 250px;
-  padding: 20px;
-  margin: 15px 30px;
+  width: 340px;
+  height: 175px;
+  padding: 10px 20px;
+  margin: 10px 0;
+  border: none;
   text-align: left;
+  color: var(--text-color);
 }
-.card h5{
-  color: var(--main-color);
-  font-size: 24px;
+.card h2{
+  font-size: 20px;
+  border-bottom:1px  solid var(--text-color);
+}
+.card p{
+  font-size: 16px;
+  height: 60px;
+  margin-top: 10px;
+}
+.card button{
+  width: 140px;
+  height: 35px;
+  background-color: var(--main-color);
+  border-radius: 50px;
+  color: white;
+  border: none;
 }
 .card i{
   color: black;
