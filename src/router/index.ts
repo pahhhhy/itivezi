@@ -8,6 +8,9 @@ import Login from '../views/LoginPage.vue'
 import Addinfo from '../views/AddInfo.vue'
 import Owner from '../views/OwnerPage.vue'
 import Cart from '../views/CartPage.vue'
+import Chat from '../views/ChatPage.vue'
+import AnnouncementsPage from "@/views/AnnouncementsPage.vue";
+import AnnouncementDetailPage from "@/views/AnnouncementDetailPage.vue";
 import {
   getAuth
 } from 'firebase/auth'
@@ -67,7 +70,31 @@ const router = createRouter({
       path: '/cart',
       name: 'cart',
       component: Cart
-    }
+    },
+    {
+      path: '/chat',
+      name: 'chat',
+      component: Chat,
+    },
+    {
+      path: '/chat/:roomId',
+      name: 'chat-room',
+      component: Chat,
+    },
+    {
+      path: '/announcements',
+      name: 'announcements',
+      component: AnnouncementsPage,
+    },
+    {
+      path: '/announcement',
+      redirect: '/announcements',
+    },
+    {
+      path: '/announcements/:announceId',
+      name: 'announcement',
+      component: AnnouncementDetailPage,
+    },
   ]
 })
 // ここからガードの追加部分
