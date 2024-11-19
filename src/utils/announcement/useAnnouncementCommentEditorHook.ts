@@ -9,7 +9,7 @@ import {defineComponent, h, ref, type Ref} from "vue";
 import smallTextInputField from "@/views/components/common/smallTextInputField.vue";
 import type {AnnouncementCommentType} from "@/types/announcement/announcementComments";
 
-export const useAnnouncementCommentEditor = (announcementRef: DatabaseReference, user: Ref<User | null>) => {
+export const useAnnouncementCommentEditor = (announcementRef: DatabaseReference, user: User) => {
     // 返信しようとしているコメント(返信先)のID (nullは返信しようとしていないことを表す)
     const replyingCommentId = ref<string | null>(null);
 
@@ -22,13 +22,13 @@ export const useAnnouncementCommentEditor = (announcementRef: DatabaseReference,
 
     // ----- コメント関連 -----
     const sendComment = () => {
-        if (!user.value || !commentContent.value) return;
+        if (!user || !commentContent.value) return;
 
         if (replyingCommentId.value) { // 返信中だったなら
             const data = {
                 content: commentContent.value,
                 createdAt: serverTimestamp(),
-                userId: user.value.uid,
+                userId: user.uid,
                 replyTo: replyingCommentId.value,
             }
             addAnnouncementCommentReply(announcementRef, replyingCommentId.value, data);
@@ -40,7 +40,7 @@ export const useAnnouncementCommentEditor = (announcementRef: DatabaseReference,
             const data = {
                 content: commentContent.value,
                 createdAt: serverTimestamp(),
-                userId: user.value.uid,
+                userId: user.uid,
                 replies: {},
             }
             addAnnouncementComment(announcementRef, data);
@@ -53,7 +53,7 @@ export const useAnnouncementCommentEditor = (announcementRef: DatabaseReference,
     }
 
     const deleteComment = (comment: AnnouncementCommentType) => {
-        if (!user.value) return;
+        if (!user) return;
         deleteAnnouncementComment(announcementRef, comment);
     }
 

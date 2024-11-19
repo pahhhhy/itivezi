@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getCurrentInstance, onMounted, type Ref, ref } from 'vue'
+import { getCurrentInstance, onMounted, ref } from 'vue'
 import { getDatabase, onValue, ref as fireRef } from 'firebase/database'
 import { useRoute } from 'vue-router'
 import type { Announcement, MavonEditorToolbars } from '@/types/announcement/announcement'
@@ -9,16 +9,14 @@ import { deleteAnnouncement, updateAnnouncement } from '@/utils/announcement/ann
 import router from '@/router'
 import { useAnnouncementFiles } from '@/utils/announcement/useAnnouncementFilesHook'
 import { storageURLPattern } from '@/types/files'
-import { useAnnouncementCommentEditor } from '@/utils/announcement/useAnnouncementCommentEditorHook'
 import { getUserIconURL, getUserName } from '@/utils/common/userData'
 import KebabMenu from '@/views/components/common/kebabMenu.vue'
 import type {
   AnnouncementCommentType,
   AnnouncementCommentWithViewData
 } from '@/types/announcement/announcementComments'
-import AnnouncementComment from '@/views/components/announcementPage/announcementComment.vue'
 import type { Category } from '@/types/announcement/categories'
-import type { User } from 'firebase/auth'
+import AnnouncementCommentWrapper from '@/views/components/announcementPage/announcementCommentWrapper.vue'
 
 const route = useRoute()
 // 実際に表示するお知らせ内容。編集する場合はこちらが変更される
@@ -278,15 +276,6 @@ const onChange = (mdEditorsContent: string | null = null) => {
 
 // -----編集関連機能ここまで-----
 
-// -----コメント, コメント返信関連機能ここから-----
-const commentHooks =
-  typeof user.value !== 'undefined'
-    ? useAnnouncementCommentEditor(announcementRef, user as Ref<User | null>)
-    : null
-const commentInputField = commentHooks?.commentInputField
-
-// -----コメント, コメント返信関連機能ここまで-----
-
 // const authorUserIconRef = ref<null | string>(getUserIconURL(originalAnnouncement.value?.userId));
 // console.log(authorUserIconRef)
 </script>
@@ -352,42 +341,8 @@ const commentInputField = commentHooks?.commentInputField
             @imgAdd="imgAdd"
           />
 
-          <!--                内容-->
-          <!--          <div class="announcement-content" v-html="content"></div>-->
+          <AnnouncementCommentWrapper v-if="user" :user="user" :commentsWithViewData="commentsWithViewData ?? []" :announcementRef="announcementRef" />
         </div>
-
-        <!--    ここからコメント-->
-        <div class="comment-wrapper" v-if="commentsWithViewData && user">
-          <announcementComment
-            v-for="comment in commentsWithViewData"
-            :key="comment.createdAt as number"
-            :user="user"
-            :comment="comment"
-            :commentHooks="commentHooks"
-          />
-        </div>
-      </div>
-
-      <div class="comment-input-field" v-if="commentHooks">
-        <div
-          class="comment-input-field-alert"
-          v-if="commentHooks.replyingCommentId.value && commentsWithViewData"
-        >
-          <p>
-            返信先:
-            {{
-              commentsWithViewData.find(
-                (comment) => comment.commentId === commentHooks!.replyingCommentId.value
-              )?.userName
-            }}
-          </p>
-          <button @click="commentHooks.setReplyingMessage(null)">キャンセル</button>
-        </div>
-        <div class="comment-input-field-alert" v-if="commentHooks.editingCommentId.value">
-          <p>編集中</p>
-          <button @click="commentHooks.setEditingMessage(null)">キャンセル</button>
-        </div>
-        <commentInputField />
       </div>
     </div>
   </div>
@@ -432,6 +387,9 @@ const commentInputField = commentHooks?.commentInputField
 
 .announcement-wrapper {
   height: fit-content;
+}
+.announcement-content {
+  z-index: -100;
 }
 
 .announcement-head {

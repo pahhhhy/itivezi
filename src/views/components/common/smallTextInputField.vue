@@ -1,81 +1,55 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-
-const model = ref('');
+const model = defineModel()
 
 // props
 interface Props {
-  onSendClicked: () => void;
+  onSendClicked: () => void
 }
 
-const { onSendClicked } = defineProps<Props>();
-
-const textareaRef = ref<HTMLTextAreaElement | null>(null);
+const {onSendClicked} = defineProps<Props>()
 
 const setTextInputMatchHeight = () => {
-  if (!textareaRef.value) return;
+  // https://qiita.com/mtoutside/items/8dce5699a2d0283664a2
 
-  const textContents = textareaRef.value;
-
+  const textContents = document.getElementById('messageInput');
   // テキスト要素の高さを取得
   const textHeight = textContents.clientHeight;
-
   // テキスト要素のline-heightを取得
   let lineHeight = getComputedStyle(textContents).getPropertyValue('line-height');
-
   // [32.4px]のようなピクセル値が返ってくるので、数字だけにする
   lineHeight = lineHeight.replace(/[^-\d.]/g, '');
-
   // テキスト要素の行数を取得
   const lines = textContents.value.split('\n').length;
-
+  console.log(lines);
   // テキスト要素の高さを行数に応じて変更
-  textContents.style.height = `${textHeight + (lines - 1) * parseFloat(lineHeight)}px`;
-
+  // textContents.style.height = `${textHeight + (lines - 1) * lineHeight}px`;
   // textareaのrows属性を行数に応じて変更
   textContents.rows = lines;
-};
-
-onMounted(() => {
-  if (textareaRef.value) {
-    setTextInputMatchHeight();
-  }
-});
+}
 
 </script>
-
 <template>
   <div class="messageBox">
-    <textarea
-      rows="1"
-      required
-      placeholder="コメントを入力..."
-      id="messageInput"
-      ref="textareaRef"
-      v-model="model"
-      @focus="setTextInputMatchHeight"
-      @keyup="setTextInputMatchHeight"
-      @keydown="setTextInputMatchHeight"
-      @change="setTextInputMatchHeight"
-    />
+    <textarea rows="1" required="" placeholder="コメントを入力..." id="messageInput"
+              @focus="setTextInputMatchHeight()" @keyup="setTextInputMatchHeight()" @keydown="setTextInputMatchHeight()" @change="setTextInputMatchHeight"  v-model="model"/>
     <button id="sendButton" @click="onSendClicked">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 664 663">
         <path
-          fill="none"
-          d="M646.293 331.888L17.7538 17.6187L155.245 331.888M646.293 331.888L17.753 646.157L155.245 331.888M646.293 331.888L318.735 330.228L155.245 331.888"
+            fill="none"
+            d="M646.293 331.888L17.7538 17.6187L155.245 331.888M646.293 331.888L17.753 646.157L155.245 331.888M646.293 331.888L318.735 330.228L155.245 331.888"
         ></path>
         <path
-          stroke-linejoin="round"
-          stroke-linecap="round"
-          stroke-width="33.67"
-          stroke="#6c6c6c"
-          d="M646.293 331.888L17.7538 17.6187L155.245 331.888M646.293 331.888L17.753 646.157L155.245 331.888M646.293 331.888L318.735 330.228L155.245 331.888"
+            stroke-linejoin="round"
+            stroke-linecap="round"
+            stroke-width="33.67"
+            stroke="#6c6c6c"
+            d="M646.293 331.888L17.7538 17.6187L155.245 331.888M646.293 331.888L17.753 646.157L155.245 331.888M646.293 331.888L318.735 330.228L155.245 331.888"
         ></path>
       </svg>
     </button>
   </div>
-</template>
 
+</template>
 <style scoped>
 .messageBox {
   width: 100%;
@@ -100,9 +74,11 @@ onMounted(() => {
   scrollbar-width: none;
   background-color: transparent;
   outline: none;
+  //line-height: 1.4;
   border: none;
   color: black;
   resize: none;
+
 }
 
 #messageInput:focus ~ #sendButton svg path,
@@ -138,4 +114,5 @@ onMounted(() => {
   fill: #f2f2f2;
   stroke: black;
 }
+
 </style>
