@@ -3,7 +3,7 @@ import {ref} from 'vue'
 import {getDatabase, onValue, ref as fireRef} from 'firebase/database'
 import AnnouncementsListElement
   from "@/views/components/announcementPage/announcementsList/AnnouncementsListElement.vue";
-import type { Category, CategorizedAnnouncements } from '@/types/announcement/categories'
+import type {CategorizedAnnouncements, Category} from '@/types/announcement/categories'
 import {categorizeAnnouncements} from "@/utils/announcement/announcementCategories";
 
 interface Props {
@@ -11,7 +11,6 @@ interface Props {
 }
 
 const {categories} = defineProps<Props>()
-
 
 
 const db = getDatabase()
@@ -37,15 +36,26 @@ onValue(announcementsRef, (snapshot) => {
 
 </script>
 <template>
-  <div>
-    <h5>お知らせ一覧(仮)</h5>
-    <div v-if="announcements" style="border: 1px solid black; margin: 1rem; height: fit-content; width: fit-content;">
-<!--      属している記事が一つもないカテゴリは表示しない-->
-      <div v-for="categoryNames in Object.keys(nestedAnnouncements).filter(categoryName => Object.keys(nestedAnnouncements[categoryName]).length > 0)" :key="categoryNames">
-        <h6>{{ categoryNames }}</h6>
-        <AnnouncementsListElement v-for="announce in nestedAnnouncements[categoryNames]" :key="announce.announceId" :announce/>
-      </div>
+  <div v-if="announcements" class="categories-wrapper">
+    <!--      属している記事が一つもないカテゴリは表示しない-->
+    <div
+        v-for="categoryNames in Object.keys(nestedAnnouncements).filter(categoryName => Object.keys(nestedAnnouncements[categoryName]).length > 0)"
+        :key="categoryNames">
+      <h6>{{ categoryNames }}</h6>
+      <AnnouncementsListElement v-for="announce in nestedAnnouncements[categoryNames]" :key="announce.announceId"
+                                :announce/>
     </div>
-    <p v-else>お知らせがありません。</p>
   </div>
+  <p v-else>お知らせがありません。</p>
 </template>
+
+<style scoped>
+  .categories-wrapper {
+    margin:  30px;
+  }
+  h6 {
+    margin: 10px 0;
+    color: #434343;
+    border-bottom: 1px solid currentColor;
+  }
+</style>

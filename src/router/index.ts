@@ -9,7 +9,7 @@ import Addinfo from '../views/AddInfo.vue'
 import Owner from '../views/OwnerPage.vue'
 import Cart from '../views/CartPage.vue'
 import Chat from '../views/ChatPage.vue'
-import AnnouncementsPage from "@/views/AnnouncementsPage.vue";
+import AnnouncementsPage from "@/views/AnnouncementsListPage.vue";
 import AnnouncementDetailPage from "@/views/AnnouncementDetailPage.vue";
 import {
   getAuth
