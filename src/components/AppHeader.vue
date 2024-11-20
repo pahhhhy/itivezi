@@ -76,11 +76,6 @@ cartCount.value=cartStore.getCountCart(currentUser.value.uid)
 //バーガーの押したときにはアニメーションを走らせ、
 //ついでにサイドバーのボタンを押したときに対応したページに飛ぶコードも一緒に書いた。
 function onClickBurger(mode:PageMode){
-  if(!isBurger.value){
-    gsap.to(sidebar.value,{x:205,duration:0.5})
-  }else{
-    gsap.to(sidebar.value,{x:-205,duration:0.5})
-  }
   switch (mode){
     case PageMode.home:
       router.push("/")
@@ -175,6 +170,12 @@ watch(
 function onPushComment(){
   router.push("/chat")
 }
+function onPushIcon(){
+  router.push("/")
+}
+function onPushMypage(){
+  router.push("/my-page")
+}
 </script>
 
 <template>
@@ -183,7 +184,7 @@ function onPushComment(){
   <div v-bind:class="{black_back:isBurger,active:isBurger}" class="blackback" ref="blackback" v-on:click="onClickBurger(PageMode.None)">
   </div>
   <header>
-    <div class="header-icon">
+    <div class="header-icon" v-on:click="onPushIcon">
       <img src="..\\assets\\itivezilogo.png" alt="" />
     </div>
     
@@ -197,7 +198,7 @@ function onPushComment(){
           
           <p class="d-none d-sm-block">買い物かご</p>
         </div>
-        <div class="myacount" v-if="currentUser != null" >
+        <div class="myacount" v-if="currentUser != null" v-on:click="onPushMypage">
           <div v-if="iconURL != null&&iconURL != '' "><img v-bind:src="iconURL" alt="" class="aicon-image"></div>
           <p v-if="currentUser != null" class="d-none d-sm-block">{{ currentUser.displayName }}様</p>
         </div>
@@ -205,7 +206,7 @@ function onPushComment(){
       <i v-if="isBurger" v-on:click="onClickBurger(PageMode.None)" class="bi bi-x-lg burger"></i>
     </nav>
   </header>
-  <aside  ref="sidebar">
+  <aside  ref="sidebar" v-bind:class="{active:isBurger}">
     <ul>
       <li :class="{ 'active': isActive(PageMode.home) }">
         <div v-on:click="onClickBurger(PageMode.home)" class="sidebar_element" >
@@ -368,10 +369,16 @@ aside {
   left: -205px;
   height: calc(100% - 80px);
   width: 200px;
-  position: absolute;
+  top: 80px;
+  position: fixed;
   background-color: white;
   z-index: 20;
   box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.25);
+  transition: 0.5s all ease ;
+}
+aside.active{
+  left: 0;
+  transition: 0.5s all ease ;
 }
 aside i {
   font-size: 30px;

@@ -152,7 +152,14 @@ function makeSortData(data: Vegetables, order: string[]): Vegetables {
 
 </script>
 <template>
-  <OrderHistory></OrderHistory>
+  <article class="module">
+    <button>
+      フィルター
+      <i class="bi bi-chevron-down"></i>
+    </button>
+    <button>過去の注文</button>
+  </article>
+
   <article v-if="Object.keys(orderData).length===0">
     <!-- <h3>フィルター</h3>
 <button v-on:click="onPushfilter(SortMode.All)" class="filter_button" v-bind:class="{fliter_active:selectedFilter==SortMode.All}">全て</button>
@@ -169,10 +176,26 @@ function makeSortData(data: Vegetables, order: string[]): Vegetables {
     <OrderFormPage
     v-bind:order-data="orderData"></OrderFormPage>
   </article>
-  <article class="order_backgroud"></article>
+
 </template>
 <style scoped>
-
+.module{
+  margin: auto;
+  width: 340px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+}
+.module button{
+  height: 40px;
+  width: 150px;
+  border-radius: 5px;
+  color: white;
+  text-align: center;
+  background-color: var(--other-color);
+  border: none;
+  margin: 0 10px;
+}
 .filter_button{
   background-color: white;
   padding: 10px;
@@ -180,13 +203,5 @@ function makeSortData(data: Vegetables, order: string[]): Vegetables {
 .fliter_active{
   background-color: rgb(209, 209, 209);
 }
-.order_backgroud{
-  background-color: var(--background-color);
-  z-index: -1;
-  height: 100%;
-  width: 100%;
-  top: 0;
-  left: 0;
-  position: fixed;
-}
+
 </style>

@@ -69,7 +69,7 @@ watch(() => userStore.currentUser, (newUser) => {
         OrderDataStore.resetData()
         vegeCount.value=0
         totalMoney.value=0
-        emit("onPushPopup")
+        isPopup.value=false
     }
 }
 function changeMoney(money: number) {
@@ -94,7 +94,7 @@ function onPushBuck(){
     <img :src="props.data.photo" class="card-img-top" alt="..." v-if="props.data.photo!='none'">
     <img src="../../../assets/Noimage.jpeg" class="card-img-top" alt="..." v-if="props.data.photo=='none'">
     <div class="card-body">
-        <p class="card-title">{{props.data.farmer}}</p>
+        <p class="card-title">【 {{props.data.farmer}}産 】</p>
         <div class="card_money">
           <h5 class="card-text">{{props.data.unit}}  </h5>
           <h5 class="card-text">  {{props.data.en}}円</h5>
@@ -102,9 +102,14 @@ function onPushBuck(){
     </div>
   </button>
 <article class="popup_order" v-if="isPopup">
+  
   <h1>{{props.vegeName}}</h1>
-  <p>卸先： {{props.data.roadStation}}</p>
+  <p v-for="(Wholesaler,index) in props.data.roadStation" v-bind:key="index" class="Wholesaler">
+    
+    【{{ Wholesaler }}】
+  </p>
   <h4>{{props.data.unit}}     {{props.data.en}}円</h4>
+  <label>個数選択</label>
    <input
         class="form-control"
         type="number"
@@ -115,10 +120,12 @@ function onPushBuck(){
           changeMoney(props.data.en)
         "
         />
-    <p>合計金額：{{totalMoney}}円</p>
+    <p>小計      ￥{{totalMoney}}</p>
     <button class="btn btn-success" v-on:click="onPushBuck()">戻る</button>
-    <button class="btn btn-success" v-on:click="onPushCart()" v-bind:class="{disable:totalMoney==0}">購入</button>
-</article>
+    <button class="btn btn-success" v-on:click="onPushCart()" v-bind:class="{disable:totalMoney==0}">カートに入れる</button>
+
+</article >
+<div class="blackback" v-if="isPopup"></div>
 </template>
 <style scoped>
 .disable{
@@ -128,15 +135,16 @@ function onPushBuck(){
 .card-body{
   margin-top: 5px;
   padding: 0 10px;
+  text-align: left;
   width: 100%;
 }
 .card_money{
   display: flex;
   justify-content: space-between;
-  
 }
 .card-body h5{
-  font-size: 18px;
+  font-size: 20px;
+  font-weight: bolder;
   text-align: right;
   color: var(--other-color);
 }
@@ -146,33 +154,75 @@ function onPushBuck(){
   object-fit: contain;
 }
 .card-body p{
-  font-size: 16px;
-  border-radius: 8px;
-  margin: 0;
-  width: 60px;
+  font-size: 14px;
+  text-align: left;
+  border-radius: 10px;
+  display: inline-block;
+  padding: 3px;
   text-align: center;
   border: 2px solid var(--main-color);
 }
 .card{
-  margin: 10px;
+  margin:  10px 0;
   width: 150px!important;
   height: 150px;
   border: none;
   background-color: white;
+}
+.blackback{
+  position: fixed ;
+  height: calc(100vh - 80px);
+  width: 100vw;
+  top: 80px;
+  left: 0;
+  z-index: 5;
+  background-color: rgba(3,3,3,0.5);;
 }
 .card img{
   height: 50%;
 }
 .popup_order{
   position: fixed;
-  width: 400px;
+  width: 340px;
   height: 300px;
-  z-index: 1;
+  z-index: 10;
   border: 1px solid gray;
   border-radius: 20px;
-  top: 20%;
-  left: 20%;
+  top: calc(50% - 150px);
+  left: calc(50% - 170px);
   padding: 20px;
   background-color: white;
+}
+.popup_order label{
+  font-weight: bolder;
+}
+.popup_order h1{
+  border-bottom: 1px solid var(--text-color);
+  font-size: 24px;
+  font-weight: bolder;
+}
+.popup_order h4{
+  color: var(--other-color);
+}
+
+.Wholesaler {
+  font-size: 14px!important;
+  text-align: left;
+  border-radius: 10px;
+  display: inline-block;
+  padding: 3px;
+  text-align: center;
+  border: 2px solid var(--main-color);
+}
+.popup_order p{
+  margin: 5px 0;
+
+  font-size: 18px;
+  font-weight: bolder;
+}
+.popup_order button{
+  font-size: 16px;
+  margin: 0 5px;
+  font-weight: bolder;
 }
 </style>
