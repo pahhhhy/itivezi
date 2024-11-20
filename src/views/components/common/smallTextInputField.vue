@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const model = defineModel()
+const model = defineModel<string>() // refではなくdefineModelにすることでこのコンポーネントのv-modelを定義できる
 
 // props
 interface Props {
@@ -11,7 +11,8 @@ const {onSendClicked} = defineProps<Props>()
 const setTextInputMatchHeight = () => {
   // https://qiita.com/mtoutside/items/8dce5699a2d0283664a2
 
-  const textContents = document.getElementById('messageInput');
+  const textContents = document.getElementById('messageInput') as HTMLTextAreaElement;
+  if (!textContents) return;
   // テキスト要素の高さを取得
   const textHeight = textContents.clientHeight;
   // テキスト要素のline-heightを取得
@@ -20,7 +21,6 @@ const setTextInputMatchHeight = () => {
   lineHeight = lineHeight.replace(/[^-\d.]/g, '');
   // テキスト要素の行数を取得
   const lines = textContents.value.split('\n').length;
-  console.log(lines);
   // テキスト要素の高さを行数に応じて変更
   // textContents.style.height = `${textHeight + (lines - 1) * lineHeight}px`;
   // textareaのrows属性を行数に応じて変更
@@ -30,7 +30,7 @@ const setTextInputMatchHeight = () => {
 </script>
 <template>
   <div class="messageBox">
-    <textarea rows="1" required="" placeholder="コメントを入力..." id="messageInput"
+    <textarea rows="1" required placeholder="コメントを入力..." id="messageInput"
               @focus="setTextInputMatchHeight()" @keyup="setTextInputMatchHeight()" @keydown="setTextInputMatchHeight()" @change="setTextInputMatchHeight"  v-model="model"/>
     <button id="sendButton" @click="onSendClicked">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 664 663">
@@ -74,7 +74,6 @@ const setTextInputMatchHeight = () => {
   scrollbar-width: none;
   background-color: transparent;
   outline: none;
-  //line-height: 1.4;
   border: none;
   color: black;
   resize: none;

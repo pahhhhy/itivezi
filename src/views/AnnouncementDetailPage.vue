@@ -152,7 +152,6 @@ onMounted(() => {
 const addUserInfoToComment = async (
   comment: AnnouncementCommentType
 ): Promise<AnnouncementCommentWithViewData> => {
-  console.log('addUserInfoToComment', comment)
   // コメント送信者のアイコンを取得
   const url = await getUserIconURL(comment.userId)
   // コメント送信者の名前を取得
