@@ -37,6 +37,19 @@ onValue(announcementsRef, (snapshot) => {
 <template>
   <div v-if="announcements" class="categories-wrapper">
     <!--      属している記事が一つもないカテゴリは表示しない-->
+<!--    最近の記事-->
+<!--    TODO: DBでカテゴリごとに記事を格納する、addCategoryで更新処理を行い, 取得できるようにする-->
+    <h6>最近のお知らせ</h6>
+    <AnnouncementsListElement
+      v-for="announce in announcements"
+      :key="announce.announceId"
+      :announce="announce"
+      :category-name="
+        Object.keys(nestedAnnouncements).find((categoryName) =>
+          Object.keys(nestedAnnouncements[categoryName]).includes(announce.announceId)
+        ) ?? ''
+      "
+    />
     <div
       v-for="categoryNames in Object.keys(nestedAnnouncements).filter(
         (categoryName) => Object.keys(nestedAnnouncements[categoryName]).length > 0
@@ -48,8 +61,8 @@ onValue(announcementsRef, (snapshot) => {
       <AnnouncementsListElement
         v-for="announce in nestedAnnouncements[categoryNames]"
         :key="announce.announceId"
-        :announce
-        :category-name=""
+        :announce="announce"
+        :category-name="categoryNames"
       />
     </div>
   </div>
