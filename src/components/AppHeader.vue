@@ -191,11 +191,12 @@ function onPushMypage(){
     <nav>
       <button v-on:click="onPushComment"><i class="bi bi-chat-right-text comment"  ></i></button>
         <div class="cart "  v-on:click="onPushCart" v-if="currentUser != null">
-          <div class="cart_icon">
-            <i class="bi bi-cart"></i>
-            <p>{{cartCount}}</p>
+          <div class="cart_icon" v-if="cartCount==0">
+            <img src="../assets/cart.png" alt="">
           </div>
-          
+          <div v-if="cartCount!=0" class="cart_icon">
+            <img src="../assets/cart!.png" alt="">
+          </div>
           <p class="d-none d-sm-block">買い物かご</p>
         </div>
         <div class="myacount" v-if="currentUser != null" v-on:click="onPushMypage">
@@ -284,10 +285,10 @@ button{
 }
 .blank{
   width: 100%;
-  height: 80px;
+  height: 60px;
 }
 header {
-  height: 80px;
+  height: 60px;
   width: 100vw;
   display: flex;
   top:0;
@@ -301,14 +302,18 @@ header {
   z-index: 20;
   background-color: white;
 }
+header i{
+  color: var(--text-color);
+}
 .header-icon{
-  width: 38%;
-  height: 100%;
+  width: 35%;
+  height: 60px;
   display: flex;
   align-items: center;
 }
-.header-icon image{
+.header-icon img{
   width: 100%;
+  object-fit: contain;
 }
 .myacount{
   display: flex;
@@ -326,6 +331,10 @@ header {
   text-align: center;
   font-size: 40px;
   margin: 20%;
+}
+.cart_icon img{
+  width: 40px;
+  height: 40px;
 }
 .cart_icon p{
   position: absolute;
@@ -353,7 +362,6 @@ nav {
   width: 50px;
   height: 50px;
   border-radius: 25px;
-  margin: 0 10px;
 }
 nav >p{
   margin: 0 10px;
@@ -367,9 +375,9 @@ nav >p{
 }
 aside {
   left: -205px;
-  height: calc(100% - 80px);
+  height: calc(100% - 60px);
   width: 200px;
-  top: 80px;
+  top: 60px;
   position: fixed;
   background-color: white;
   z-index: 20;
@@ -421,7 +429,7 @@ li.active .sidebar_element{
 .blackback{
   position: fixed;
   display: block;
-  top: 80px;
+  top: 60px;
   left: 0;
   background-color:rgba(3,3,3); ;
   opacity: 0;
@@ -433,7 +441,7 @@ li.active .sidebar_element{
 }
 
 .blackback.active{
-  top: 80px;
+  top: 60px;
   left: 0;
   background-color:rgba(3,3,3); ;
   width: 100vw;
@@ -446,7 +454,7 @@ li.active .sidebar_element{
 .background{
   position: fixed;
   display: block;
-  top: 80px;
+  top: 60px;
   left: 0;
   background-color:var(--background-color) ;
   width: 100vw;

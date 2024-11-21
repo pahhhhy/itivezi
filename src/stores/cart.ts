@@ -50,6 +50,16 @@ export const useCartStore = defineStore({
               return false; // エラーが発生したら false を返す
             }
           },
+          async SetCartData(data: CartElementTables, uid: string,unikey:string): Promise<boolean> {
+            const db = getDatabase();
+            try {
+              await set(fireRef(db, 'orderCart/' + uid+ "/"+unikey ), data);
+              return true; // 成功したら true を返す
+            } catch (error) {
+              console.error('Error updating data:', error);
+              return false; // エラーが発生したら false を返す
+            }
+          },
           getCountCart(uid:string){
             if(this.cartData[uid]!=undefined){
               return Object.keys(this.cartData[uid]).length

@@ -94,10 +94,10 @@ function onPushBuck(){
     <img :src="props.data.photo" class="card-img-top" alt="..." v-if="props.data.photo!='none'">
     <img src="../../../assets/Noimage.jpeg" class="card-img-top" alt="..." v-if="props.data.photo=='none'">
     <div class="card-body">
-        <p class="card-title">【 {{props.data.farmer}}産 】</p>
+        <p class="card-title">【{{props.data.farmer}}産】</p>
         <div class="card_money">
           <h5 class="card-text">{{props.data.unit}}  </h5>
-          <h5 class="card-text">  {{props.data.en}}円</h5>
+          <h4 class="card-text">  {{props.data.en}}円</h4>
         </div>
     </div>
   </button>
@@ -128,26 +128,35 @@ function onPushBuck(){
 <div class="blackback" v-if="isPopup"></div>
 </template>
 <style scoped>
+p{
+  margin: 0;
+}
 .disable{
     pointer-events: none;
     opacity: 0.5;
 }
 .card-body{
-  margin-top: 5px;
-  padding: 0 10px;
   text-align: left;
   width: 100%;
+  padding: 0;
 }
 .card_money{
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
 }
 .card-body h5{
   font-size: 20px;
   font-weight: bolder;
-  text-align: right;
+  padding: 0;
+  text-align: left;
   color: var(--other-color);
 }
+.card_money h5{
+  font-size: 14px;
+  font-weight: normal;
+  margin: 0;
+}
+
 .card img{
   width: 100%;
   height: 100%;
@@ -158,7 +167,6 @@ function onPushBuck(){
   text-align: left;
   border-radius: 10px;
   display: inline-block;
-  padding: 3px;
   text-align: center;
   border: 2px solid var(--main-color);
 }
@@ -173,7 +181,7 @@ function onPushBuck(){
   position: fixed ;
   height: calc(100vh - 80px);
   width: 100vw;
-  top: 80px;
+  top: 60px;
   left: 0;
   z-index: 5;
   background-color: rgba(3,3,3,0.5);;

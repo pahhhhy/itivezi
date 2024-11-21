@@ -99,5 +99,6 @@ function onPushCart(){
     .vege_group{
         display: flex;
         overflow-x: scroll;
+        overflow-y: hidden;
     }
 </style>
