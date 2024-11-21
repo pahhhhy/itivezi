@@ -9,9 +9,10 @@ export const useAnnouncementCategories = () => {
     const addCategory = (categoryName: string) => {
         const newCategoryRef = push(categoriesRef)
         const newCategoryId = newCategoryRef.key;
-        if (!newCategoryId) {
+        if (!newCategoryId) { // もし既存のカテゴリなかったら
             throw new Error('Failed to push new category')
         }
+
         const categoryData: Category = {
             categoryName: categoryName,
             categoryId: newCategoryId,

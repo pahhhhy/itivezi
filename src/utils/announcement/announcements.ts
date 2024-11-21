@@ -1,4 +1,4 @@
-import {type DatabaseReference, push, remove, serverTimestamp, set, update} from "firebase/database";
+import { child, type DatabaseReference, get, push, remove, serverTimestamp, set, update } from 'firebase/database'
 import type {Announcement} from "@/types/announcement/announcement";
 
 /**
@@ -10,6 +10,17 @@ import type {Announcement} from "@/types/announcement/announcement";
 export function postAnnouncement(announcementsRef: DatabaseReference, pushData: Omit<Announcement, "announceId">) {
     const newAnnounceRef = push(announcementsRef)
     const pushDataWithId = {...pushData, announceId: newAnnounceRef.key}
+    // カテゴリの処理
+    if (pushData.categoryId) {
+        const categoryData = get(child(announcementsRef, 'categories/' + pushData.categoryId))
+        if (!categoryData.exists()) {
+            console.error(`Category with ID ${pushData.categoryId} does not exist.`)
+            return
+        }
+        const newAnnouncementCount = categoryData.val().announcementCount + 1
+        update(categoryRef, { [pushData.categoryId]: { announcementCount: newAnnouncementCount } })
+    }
+
     set(newAnnounceRef, pushDataWithId)
         .catch((error) => {
             console.error('エラーが発生しました:', error)
