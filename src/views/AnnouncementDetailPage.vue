@@ -190,13 +190,13 @@ const allowEditMode = () => {
 }
 
 // 削除ボタンを押したときの関数
-const deleteAnnounce = () => {
+const deleteAnnounce = async () => {
   if (!window.confirm('このお知らせを削除します。よろしいですか?')) return
 
   updateFilesFromContent()
   deleteImgFromStorage(files.value)
-  deleteAnnouncement(announcementRef)
-  router.push('/announcements')
+  await deleteAnnouncement(announcementRef)
+  await router.push('/announcements')
 }
 
 // mdエディターのツールバーの表示を制御する関数

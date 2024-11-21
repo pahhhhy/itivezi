@@ -1,11 +1,11 @@
-import type {Announcement} from "@/types/announcement/announcement";
+import type {Announcement, ServerTimestamp} from "@/types/announcement/announcement";
 
 export interface Category {
     categoryId: string;
     categoryName: string;
     announcementCount: number;
     announces: {
-        [announceId: string]: boolean;
+        [announceId: string]: ServerTimestamp;
     };
 }
 

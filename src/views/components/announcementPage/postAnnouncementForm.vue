@@ -24,27 +24,25 @@ const title = ref<string>('');
 const category = ref<string>('')
 
 // お知らせのリファレンス
-const announcementsRef = fireRef(getDatabase(), 'testAnnouncements/announcements')
-// カテゴリーのリファレンス
-const categoriesRef = fireRef(getDatabase(), 'testAnnouncements/categories')
+const announcementRootRef = fireRef(getDatabase(), 'testAnnouncements')
 
 
 // お知らせを投稿する処理
-function post() {
-  const pushData = {
-    title: title.value,
-    content: content.value,
-    createdAt: serverTimestamp(),
-    userId: user.value?.uid ?? '',
-    categoryId: category.value,
-    comments: [],
-  }
+async function post() {
+    const pushData = {
+        title: title.value,
+        content: content.value,
+        createdAt: serverTimestamp(),
+        userId: user.value?.uid ?? '',
+        categoryId: category.value,
+        comments: [],
+    }
 
-  const {deleteFiles} = splitFiles(files.value, content.value)
-  deleteImgFromStorage(deleteFiles)
+    const {deleteFiles} = splitFiles(files.value, content.value)
+    deleteImgFromStorage(deleteFiles)
 
-  postAnnouncement(announcementsRef, pushData)
-  content.value = ''
+    await postAnnouncement(announcementRootRef, pushData)
+    content.value = ''
 }
 
 </script>
