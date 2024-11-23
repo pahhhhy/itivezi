@@ -24,7 +24,7 @@ const userid = ref<string>(user.uid)
 // piniaのuseUserStoreから登場ユーザーをすべて取得
 const {getUserPublicData} = useUserDataStore();
 
-const usersPublicData = ref<Record<string, UserPublicData> | undefined>(undefined)
+const usersPublicData = ref<Record<string, UserPublicData> | undefined>(undefined) // undefinedにしているのは、getUserPublicDataが非同期で呼ばれるため
 let unmounted = false
 onMounted(() => {
   unmounted = false
