@@ -100,11 +100,18 @@ export const categorizeAnnouncements = (
     return { categoryId: category.categoryId, categoryName: category.categoryName }
   })
 
+
   // 記事一つ一つについて
+  if (!announcements) {
+    return categorizedAnnouncements;
+  }
+  if (announcements.length === 0) {
+    return categorizedAnnouncements;
+  }
   announcements.forEach((announcement) => {
     // 処理中のannouncementが属するカテゴリを取得
     const category = categoryIdAndName.find((category) => {
-      return category.categoryId === announcement.categoryId
+      return category.categoryId === announcement.categoryId;
     })
     if (!category) {
       // 所属しているカテゴリが見つからなかった場合
