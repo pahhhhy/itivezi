@@ -12,41 +12,43 @@ import {
   ref as fireRef
 } from 'firebase/database'
 import AnnouncementsListElement from '@/views/components/announcementPage/announcementsList/AnnouncementsListElement.vue'
-import type { CategorizedAnnouncements } from '@/types/announcement/categories'
+import type {CategorizedAnnouncements, Category} from '@/types/announcement/categories'
 import { categorizeAnnouncements } from '@/utils/announcement/announcementCategories'
 import type { Announcement } from '@/types/announcement/announcement'
 
 interface CategoryProp {
   announces: {
-    [key: string]: any
+    [key: string]: number // 投稿のid: timestamp
   }
 
   [key: string]: any
 }
 
 interface Props {
-  categories: CategoryProp
+  categories: Category
 }
 
 const { categories } = defineProps<Props>()
 
 const db = getDatabase()
-// お知らせのリファレンス
+// 投稿のリファレンス
 const announcementRootRef = fireRef(db, 'testAnnouncements')
 const announcementsRef = child(announcementRootRef, 'announcements')
-// 取得したお知らせ一覧
+// 取得した投稿一覧
 const announcements = ref()
 const nestedAnnouncements = ref<CategorizedAnnouncements>({})
 
-// お知らせの最新一件は監視をしておき、それ以外については最初に1度だけ40件取得しておく。加えて、categoriesの中身をカテゴリごとに5件ずつ、timestampの降順で取得する。
+// すべての最近の記事として取得する記事の数を指定する定数
+const recentAnnounceCount = 20
+// 各カテゴリごとに取得する記事の数を指定する定数
+const categoryAnnounceCount = 5
+
+// 投稿の最新一件は監視をしておき、それ以外については最初に1度だけrecentAnnounceCount件取得しておく。加えて、categoriesの中身をカテゴリごとにcategoryAnnounceCount件ずつ、timestampの降順で取得する。
 const q1 = query(announcementsRef, orderByChild('createdAt'), limitToLast(1))
 onValue(q1, (snapshot) => {
-  console.log('onvalue')
   if (!snapshot.exists()) {
     return
   }
-  console.log(snapshot.val())
-
 
   // 既存の内容が更新されたら更新, 新規の内容だったら追加
   const newAnnouncements = Object.values(snapshot.val())
@@ -64,68 +66,64 @@ onValue(q1, (snapshot) => {
   nestedAnnouncements.value = categorizeAnnouncements(Object.values(categories), announcements.value)
 })
 
-const q2 = query(announcementsRef, orderByChild('createdAt'), limitToLast(40))
+const q2 = query(announcementsRef, orderByChild('createdAt'), limitToLast(recentAnnounceCount))
 get(q2)
   .then((snapshot) => {
     if (!snapshot.exists()) {
       return
     }
-
-    announcements.value = Object.values(snapshot.val())
+    // ここでのsnapshotは[id: string]: Announcementの形
+    announcements.value = Object.values(snapshot.val()) as unknown as Announcement // 投稿の一覧を取得
+    // この段階でnestedAnnouncementsにも入れておく
+    nestedAnnouncements.value = categorizeAnnouncements(Object.values(categories), announcements.value)
   })
   .then(() => {
-    // 各categoriesのannouncements上位5件に含まれるidを持つお知らせで、上の処理で取ってこれなかったものを別途取得する
-    const categoryAnnouncements = Object.values(categories).map((category) => {
-      // categoryのannounceをtimestampで並び替えた後, 上位5件のidを取得(ローカル)
-      return Object.values(category.announces ?? {})
-        .sort((a: any, b: any) => b.createdAt - a.createdAt)
-        .slice(0, 5)
-        .map((announce: any) => announce.announceId)
+    // 各categoriesのannouncements上位categoryAnnounceCount件に含まれるidを持つ投稿で、上の処理で取ってこれなかったものを別途取得する
+
+    // まずはカテゴリごとに上位categoryAnnounceCount件の投稿を取得、一つの配列にまとめる
+    const topAnnouncementsForEachCategory = Object.values(categories).map((category): string[] => {
+      const announcesEachCategory: {[id: string]: number} = category.announces // 投稿のid: timestampの形
+      // timestampの降順でソートし、上位categoryAnnounceCount件のidを配列で返す
+      return Object.keys(announcesEachCategory)
+        .sort((a, b) => announcesEachCategory[b] - announcesEachCategory[a])
+        .slice(0, categoryAnnounceCount) // 配列の先頭からcategoryAnnounceCount件取得
+    }).flat()
+
+    // このcategoryAnnouncementsとnestedAnnouncementsの中身を比較して、先ほど取得したannouncementsに含まれていない投稿を調べる
+    const missingAnnouncements = topAnnouncementsForEachCategory.filter((announceId) => {
+      return !announcements.value.some((announce: Announcement) => announce.announceId === announceId) // 投稿のidが一致するものがannouncementsに一つもないならfilterで残す
     })
 
-    // 不足しているお知らせ
-    const missingAnnouncements = Object.values(categoryAnnouncements)
-      .flat()
-      .filter((announceId) => !Object.keys(nestedAnnouncements.value).includes(announceId))
-    if (missingAnnouncements.length !== 0) {
-      // あるなら取得して追加
-      missingAnnouncements.forEach((announceId) => {
-        const q = query(announcementsRef, orderByChild('announceId'), equalTo(announceId))
-        onValue(
-          q,
-          (snapshot) => {
+    if (missingAnnouncements.length !== 0) { // そしてあるならば
+      missingAnnouncements.forEach((announceId) => { // それぞれの投稿を取得してnestedAnnouncementsに追加
+        get(child(announcementsRef, announceId)).then((snapshot) => { // 非同期で取得をかけておく
             if (!snapshot.exists()) {
               return
             }
 
-            const announce = snapshot.val()
-            const categoryName =
-              Object.keys(categories).find((categoryName) =>
-                Object.keys(
-                  (
-                    categories as {
-                      [key: string]: CategoryProp
-                    }
-                  )[categoryName].announces
-                ).includes(announceId)
-              ) ?? ''
-            nestedAnnouncements.value[categoryName] = {
-              ...nestedAnnouncements.value[categoryName],
-              [announceId]: announce
-            }
-          },
-          { onlyOnce: true }
+
+            const newAnnounce = snapshot.val() as Announcement
+            announcements.value.push(newAnnounce)
+            nestedAnnouncements.value = categorizeAnnouncements(
+              Object.values(categories),
+              announcements.value
+            )
+
+
+          }
         )
+
       })
     }
   })
+
 </script>
 <template>
   <div v-if="announcements" class="categories-wrapper">
     <!--      属している記事が一つもないカテゴリは表示しない-->
     <!--    最近の記事-->
     <!--    TODO: DBでカテゴリごとに記事を格納する、addCategoryで更新処理を行い, 取得できるようにする-->
-    <h6>最近のお知らせ</h6>
+    <h6>最近の投稿</h6>
 
     <!--    カテゴリの機能が正しく動作しているかを示すテスト-->
     <!--    categoriesをjsonのように見やすく出力-->
@@ -141,14 +139,17 @@ get(q2)
         ) ?? ''
       "
     />
+
+    <br />
+    <br />
+
     <div
       v-for="categoryNames in Object.keys(nestedAnnouncements).filter(
         (categoryName) => Object.keys(nestedAnnouncements[categoryName]).length > 0
       )"
       :key="categoryNames"
     >
-<!--      <p>{{ categories }}</p>-->
-      <h6>{{ categoryNames }}</h6>
+      <h6>{{ categoryNames == "" ? "新しいカテゴリー" : categoryNames }}</h6>
       <AnnouncementsListElement
         v-for="announce in nestedAnnouncements[categoryNames]"
         :key="announce.announceId"
@@ -157,7 +158,7 @@ get(q2)
       />
     </div>
   </div>
-  <p v-else>お知らせがありません。</p>
+  <p v-else>投稿がありません。</p>
 </template>
 
 <style scoped>

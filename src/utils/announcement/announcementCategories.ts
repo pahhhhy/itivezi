@@ -87,10 +87,12 @@ export const removeAnnouncementFromCategory = async (
   });
 }
 
+// カテゴリをキーとして、そのカテゴリに属する記事を格納するオブジェクトを返す
 export const categorizeAnnouncements = (
   categories: Category[],
   announcements: Announcement[]
 ): CategorizedAnnouncements => {
+
   // カテゴリ分けされた後のannouncementsを格納するオブジェクト
   const categorizedAnnouncements: CategorizedAnnouncements = {
     '': {} // 初期で未分類用の枠を追加しておく

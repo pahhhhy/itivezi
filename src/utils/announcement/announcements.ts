@@ -34,14 +34,13 @@ export async function deleteAnnouncement(announcementRef: DatabaseReference) {
 
 /**
  * お知らせを更新します。権限の確認はここでは行いません。
- * @param announcementRootRef 更新したいお知らせそのもののリファレンス。
+ * @param announcementRef 更新したいお知らせそのもののリファレンス。
  * @param updateData 更新するデータ。
  * @returns 更新したデータ(サーバータイムスタンプ付き)
  */
-export async function updateAnnouncement(announcementRootRef: DatabaseReference, updateData: Partial<Announcement>) {
-    const announcementsRef = child(announcementRootRef, 'announcements');
+export async function updateAnnouncement(announcementRef: DatabaseReference, updateData: Partial<Announcement>) {
     updateData.updatedAt = serverTimestamp() as unknown as number;
-    update(announcementsRef, updateData)
+    update(announcementRef, updateData)
         .catch((error) => {
             console.error('エラーが発生しました:', error)
         })

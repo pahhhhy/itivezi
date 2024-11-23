@@ -220,8 +220,10 @@ const toolbarsPropertiesForVisibility = (visible: boolean) => {
 
 // 保存ボタンを押したときの関数
 const saveAnnounce = () => {
-  // 編集したかの検知は外部で行っている
+  console.log(title.value)
+  console.log(content.value)
 
+  // 編集したかの検知は外部で行っている
   updateAnnouncement(announcementRef, { title: title.value, content: content.value })
   if (originalAnnouncement.value) {
     originalAnnouncement.value.title = title.value
@@ -307,8 +309,8 @@ const onChange = (mdEditorsContent: string | null = null) => {
                   <button v-if="editMode" :disabled="!isEdited" @click="saveAnnounce">
                     保存して公開
                   </button>
-                  <button v-if="editMode" @click="finishEdit">終了</button>
-                  <button @click="deleteAnnounce">削除</button>
+                  <button v-if="editMode" @click="finishEdit">編集を終了</button>
+                  <button @click="deleteAnnounce">お知らせを削除</button>
                 </kebabMenu>
               </div>
             </div>
@@ -325,7 +327,7 @@ const onChange = (mdEditorsContent: string | null = null) => {
           <mavon-editor
             :key="editMode"
             v-model="content"
-            class="announcement-content"
+            :class="`announcement-content ${editMode ? 'editing' : ''}`"
             language="ja"
             :subfield="editMode"
             defaultOpen="preview"
@@ -387,8 +389,9 @@ const onChange = (mdEditorsContent: string | null = null) => {
 .announcement-wrapper {
   height: fit-content;
 }
-.announcement-content {
-  z-index: -100;
+
+.announcement-content { /* mavon-editorで使う */
+  z-index: 0;
 }
 
 .announcement-head {
