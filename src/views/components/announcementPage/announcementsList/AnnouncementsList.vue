@@ -38,9 +38,9 @@ const announcementsRef = child(announcementRootRef, 'announcements')
 const announcements = ref()
 const nestedAnnouncements = ref<CategorizedAnnouncements>({})
 
-// すべての最近の記事として取得する記事の数を指定する定数
+// すべての最近の投稿として取得する投稿の数を指定する定数
 const recentAnnounceCount = 20
-// 各カテゴリごとに取得する記事の数を指定する定数
+// 各カテゴリごとに取得する投稿の数を指定する定数
 const categoryAnnounceCount = 5
 
 // 投稿の最新一件は監視をしておき、それ以外については最初に1度だけrecentAnnounceCount件取得しておく。加えて、categoriesの中身をカテゴリごとにcategoryAnnounceCount件ずつ、timestampの降順で取得する。
@@ -120,9 +120,9 @@ get(q2)
 </script>
 <template>
   <div v-if="announcements" class="categories-wrapper">
-    <!--      属している記事が一つもないカテゴリは表示しない-->
-    <!--    最近の記事-->
-    <!--    TODO: DBでカテゴリごとに記事を格納する、addCategoryで更新処理を行い, 取得できるようにする-->
+    <!--      属している投稿が一つもないカテゴリは表示しない-->
+    <!--    最近の投稿-->
+    <!--    TODO: DBでカテゴリごとに投稿を格納する、addCategoryで更新処理を行い, 取得できるようにする-->
     <h6>最近の投稿</h6>
 
     <!--    カテゴリの機能が正しく動作しているかを示すテスト-->

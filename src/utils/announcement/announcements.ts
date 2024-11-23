@@ -2,7 +2,7 @@ import {child, type DatabaseReference, get, push, remove, serverTimestamp, set, 
 import type {Announcement, ServerTimestamp} from "@/types/announcement/announcement";
 
 /**
- * お知らせを投稿します。権限の確認はここでは行いません。
+ * 投稿を投稿します。権限の確認はここでは行いません。
  * @param announcementRootRef データを置く場所のリファレンス。
  * @param pushData 保存するデータ。
  * @returns 保存したデータのID
@@ -25,16 +25,16 @@ export async function postAnnouncement(announcementRootRef: DatabaseReference, p
 }
 
 /**
- * お知らせを削除します。権限の確認はここでは行いません。
- * @param announcementRef 削除したいお知らせそのもののリファレンス。
+ * 投稿を削除します。権限の確認はここでは行いません。
+ * @param announcementRef 削除したい投稿そのもののリファレンス。
  */
 export async function deleteAnnouncement(announcementRef: DatabaseReference) {
     await remove(announcementRef);
 }
 
 /**
- * お知らせを更新します。権限の確認はここでは行いません。
- * @param announcementRef 更新したいお知らせそのもののリファレンス。
+ * 投稿を更新します。権限の確認はここでは行いません。
+ * @param announcementRef 更新したい投稿そのもののリファレンス。
  * @param updateData 更新するデータ。
  * @returns 更新したデータ(サーバータイムスタンプ付き)
  */
@@ -48,13 +48,13 @@ export async function updateAnnouncement(announcementRef: DatabaseReference, upd
 }
 
 /**
- * カテゴリに記事を追加または削除します。
+ * カテゴリに投稿を追加または削除します。
  * @param announcementsRef データを置く場所のリファレンス。
  * @param categoryId カテゴリのID。
- * @param announceId 記事のID。
+ * @param announceId 投稿のID。
  * @param action アクションタイプ ('add' または 'remove')。
- * @param createdAt (任意) 追加時の記事の作成日時。ただし、削除時には無視されます。
- * @returns 更新した記事のID。
+ * @param createdAt (任意) 追加時の投稿の作成日時。ただし、削除時には無視されます。
+ * @returns 更新した投稿のID。
  */
 async function updateAnnouncementInCategory(
     announcementsRef: DatabaseReference,
@@ -99,11 +99,11 @@ async function updateAnnouncementInCategory(
 }
 
 /**
- * カテゴリに記事を追加します。
+ * カテゴリに投稿を追加します。
  * @param announcementsRef データを置く場所のリファレンス。
  * @param categoryId 追加するカテゴリのID。
- * @param announceId 追加する記事のID。
- * @param createdAt 追加する記事の作成日時。
+ * @param announceId 追加する投稿のID。
+ * @param createdAt 追加する投稿の作成日時。
  * @returns 追加したデータのID。
  */
 export async function addAnnouncementToCategory(
@@ -116,10 +116,10 @@ export async function addAnnouncementToCategory(
 }
 
 /**
- * カテゴリから記事を削除します。
+ * カテゴリから投稿を削除します。
  * @param announcementsRef データを置く場所のリファレンス。
  * @param categoryId 削除するカテゴリのID。
- * @param announceId 削除する記事のID。
+ * @param announceId 削除する投稿のID。
  * @returns 削除したデータのID。
  */
 export async function removeAnnouncementFromCategory(

@@ -19,9 +19,9 @@ import type { Category } from '@/types/announcement/categories'
 import AnnouncementCommentWrapper from '@/views/components/announcementPage/announcementCommentWrapper.vue'
 
 const route = useRoute()
-// 実際に表示するお知らせ内容。編集する場合はこちらが変更される
+// 実際に表示する投稿内容。編集する場合はこちらが変更される
 const title = ref('')
-// 編集差分の検知などで使うバックアップお知らせ
+// 編集差分の検知などで使うバックアップ投稿
 const originalAnnouncement = ref<Announcement>()
 // ユーザーアイコンつきコメントを保管する変数
 const commentsWithViewData = ref<AnnouncementCommentWithViewData[] | null>(null)
@@ -48,11 +48,11 @@ const { categories } = defineProps<{
 // URLの末尾からこのページのannounceIdを取得して保管
 const announceId = route.params.announceId
 
-// このページで表示する記事
+// このページで表示する投稿のリファレンス
 const announcementRef = fireRef(getDatabase(), 'testAnnouncements/announcements/' + announceId)
 
 onMounted(() => {
-  // お知らせを非同期で取得
+  // 投稿を非同期で取得
   onValue(announcementRef, async (snapshot) => {
     console.log('onvalue')
     console.log(snapshot.val())
@@ -191,7 +191,7 @@ const allowEditMode = () => {
 
 // 削除ボタンを押したときの関数
 const deleteAnnounce = async () => {
-  if (!window.confirm('このお知らせを削除します。よろしいですか?')) return
+  if (!window.confirm('この投稿を削除します。よろしいですか?')) return
 
   updateFilesFromContent()
   deleteImgFromStorage(files.value)
@@ -255,7 +255,7 @@ const finishEdit = () => {
   }
 }
 
-// お知らせを編集したかどうか検知する関数
+// 投稿を編集したかどうか検知する関数
 const checkIsEdited = (mdEditorsContent: string | null = null) => {
   let result: boolean
   result = title.value !== originalAnnouncement.value?.title // まずtitleが変更されているかどうか
@@ -302,7 +302,7 @@ const onChange = (mdEditorsContent: string | null = null) => {
                 <kebabMenu>
                   <!--                  TODO: 次やるのはこれ作るでもいいし, 喫緊なのはコメントの体裁を整えてコメントの編集, ユーザーアイコンと投稿者表示,-->
                   <!--                  すること (画像は不要) ← これやる-->
-                  <!--                  TODO: コメントのmd対応は本質ではないのでwysiwygは記事投稿のところにのみ使おう-->
+                  <!--                  TODO: コメントのmd対応は本質ではないのでwysiwygは投稿のところにのみ使おう-->
                   <!--                  TODO: その後に投稿カテゴリー追加もやる ← categoryIdはもうあるのでこれを追加する処理,-->
                   <!--                  作成編集削除一覧管理する処理(AnnouncementsList内で良し)を作る-->
                   <button v-if="!editMode" @click="allowEditMode">編集</button>
@@ -310,7 +310,7 @@ const onChange = (mdEditorsContent: string | null = null) => {
                     保存して公開
                   </button>
                   <button v-if="editMode" @click="finishEdit">編集を終了</button>
-                  <button @click="deleteAnnounce">お知らせを削除</button>
+                  <button @click="deleteAnnounce">投稿を削除</button>
                 </kebabMenu>
               </div>
             </div>

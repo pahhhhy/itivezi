@@ -23,11 +23,11 @@ const {user, role} = useAuthData();
 const title = ref<string>('');
 const category = ref<string>('')
 
-// お知らせのリファレンス
+// 投稿のリファレンス
 const announcementRootRef = fireRef(getDatabase(), 'testAnnouncements')
 
 
-// お知らせを投稿する処理
+// 投稿を投稿する処理
 async function post() {
     const pushData = {
         title: title.value,
@@ -48,7 +48,7 @@ async function post() {
 </script>
 <template>
   <div style="border: 1px solid black; margin: 1rem; height: fit-content; width: fit-content;">
-    <h5>お知らせを送信する(仮)</h5>
+    <h5>投稿を送信する(仮)</h5>
     <div>
       <label for="category">カテゴリ</label>
       <select v-model="category">

@@ -87,7 +87,7 @@ export const removeAnnouncementFromCategory = async (
   });
 }
 
-// カテゴリをキーとして、そのカテゴリに属する記事を格納するオブジェクトを返す
+// カテゴリをキーとして、そのカテゴリに属する投稿を格納するオブジェクトを返す
 export const categorizeAnnouncements = (
   categories: Category[],
   announcements: Announcement[]
@@ -103,7 +103,7 @@ export const categorizeAnnouncements = (
   })
 
 
-  // 記事一つ一つについて
+  // 投稿一つ一つについて
   if (!announcements) {
     return categorizedAnnouncements;
   }

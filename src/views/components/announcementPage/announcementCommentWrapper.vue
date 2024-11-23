@@ -8,7 +8,7 @@ import AnnouncementComment from '@/views/components/announcementPage/announcemen
 interface Props {
   user: User
   commentsWithViewData: AnnouncementCommentWithViewData[]
-  announcementRef: DatabaseReference // 親コンポーネントで表示する記事
+  announcementRef: DatabaseReference // 親コンポーネントで表示する投稿
 }
 
 const { user, commentsWithViewData, announcementRef } = defineProps<Props>()
