@@ -384,7 +384,7 @@ const onChange = (mdEditorsContent: string | null = null) => {
   justify-content: start;
   align-items: start;
   gap: 1rem;
-  border-bottom: 1px solid black;
+  border-bottom: 1px solid var(--text-color);
   padding-bottom: 1em;
   height: fit-content;
 }

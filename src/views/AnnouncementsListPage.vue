@@ -25,7 +25,7 @@ onMounted(() => {
       }
       categories.value = [defaultData]
     } else {
-      categories.value = snapshot.val()
+      categories.value = Object.values(snapshot.val())
     }
   })
 })
@@ -33,7 +33,6 @@ onMounted(() => {
 
 <template>
   <div class="announcements" v-if="categories !== undefined">
-    <CategoriesManager :categories="categories" v-if="role === '管理者'" />
     <PostAnnouncementForm :categories="categories" v-if="role === '管理者'" />
     <AnnouncementsList :categories="categories" />
   </div>

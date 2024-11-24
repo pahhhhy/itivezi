@@ -5,6 +5,7 @@ import {useAuthData} from "@/utils/auth";
 import {postAnnouncement} from "@/utils/announcement/announcements";
 import {useAnnouncementFiles} from "@/utils/announcement/useAnnouncementFilesHook";
 import type {Category} from "@/types/announcement/categories";
+import CategorySelector from "@/views/components/announcementPage/categorySelector.vue";
 
 
 interface Props {
@@ -12,12 +13,13 @@ interface Props {
 }
 
 const {categories} = defineProps<Props>()
-
-
 const {files, content, imgAdd, deleteImgFromStorage, splitFiles} = useAnnouncementFiles()
-
 // 投稿者uid添付や投稿権限確認に使う変数
 const {user, role} = useAuthData();
+
+// categorySelectorを開いているか
+const isOpenCategorySelector = ref<boolean>(false)
+
 
 // 後にフォームから入力する部分
 const title = ref<string>('');
@@ -51,11 +53,9 @@ async function post() {
     <h5>投稿を送信する(仮)</h5>
     <div>
       <label for="category">カテゴリ</label>
-      <select v-model="category">
-        <option v-for="category in categories" :key="category.categoryId" :value="category.categoryId">
-          {{ category.categoryName }}
-        </option>
-      </select>
+      <p> {{ category }}</p>
+      <button @click="isOpenCategorySelector = true">カテゴリを選択</button>
+      <CategorySelector v-if="isOpenCategorySelector" :role="role" :categories="categories" @select="category = $event.categoryId" @close="isOpenCategorySelector = false"/>
     </div>
     <div>
       <label for="title">タイトル</label>

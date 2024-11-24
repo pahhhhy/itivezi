@@ -31,7 +31,7 @@ const announcementsRef = child(announcementRootRef, 'announcements')
 const announcements = ref()
 const nestedAnnouncements = ref<CategorizedAnnouncements>({})
 
-// すべての最近の投稿として取得する投稿の数を指定する定数
+// すべての最近の投稿として取得する投稿の数を指定する定数 (なるべくget数を減らすため最初に一定数取得しておく)
 const recentAnnounceCount = 20
 // 各カテゴリごとに取得する投稿の数を指定する定数
 const categoryAnnounceCount = 5
@@ -100,6 +100,9 @@ get(q2)
       const topAnnouncementsForEachCategory = Object.values(categories).map((category): string[] => {
         const announcesEachCategory: { [id: string]: number } = category.announces // 投稿のid: timestampの形
         // timestampの降順でソートし、上位categoryAnnounceCount件のidを配列で返す
+        if (!announcesEachCategory) {
+          return []
+        }
         return Object.keys(announcesEachCategory)
             .sort((a, b) => announcesEachCategory[b] - announcesEachCategory[a])
             .slice(0, categoryAnnounceCount) // 配列の先頭からcategoryAnnounceCount件取得
@@ -160,7 +163,6 @@ get(q2)
         ) ?? ''
       "
           :author-display-name="usersPublicData[announce.userId]?.userName ?? '不明なユーザー'"
-          class="announcements-container"
       />
     </div>
 
@@ -180,7 +182,6 @@ get(q2)
           :announce="announce"
           :category-name="categoryNames"
           :author-display-name="usersPublicData[announce.userId]?.userName ?? '不明なユーザー'"
-          class="announcements-container"
       />
     </div>
   </div>
@@ -193,7 +194,6 @@ get(q2)
 }
 
 h6 {
-  margin: 10px 0;
   padding: 5px 48px 10px 5px;
   color: #434343;
   border-bottom: 1px solid currentColor;
@@ -215,11 +215,7 @@ h6::after {
 }
 
 .category-wrapper {
-  margin: 20px 0;
-}
-
-.announcements-container {
-  margin: 10px 0;
+  margin: 50px 0;
 }
 
 

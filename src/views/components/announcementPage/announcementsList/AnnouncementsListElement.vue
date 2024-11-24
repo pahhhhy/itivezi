@@ -24,51 +24,51 @@ const {announce, categoryName, authorDisplayName} = defineProps<Props>()
         {{ formatServerTimestamp(announce.createdAt, "yyyy/MM/dd") }}
       </span>
       <span class="date-updated" v-if="announce.updatedAt">
-          ({{ formatServerTimestamp(announce.updatedAt, "yyyy/MM/dd") }}更新)
+        <span style="font-size: .8em;">更新:</span> {{ formatServerTimestamp(announce.updatedAt, "yyyy/MM/dd") }}
         </span>
     </p>
-
   </router-link>
 </template>
 <style scoped>
 
+* {
+  color: var(--text-color);
+}
 p {
   margin: 0;
 }
 
 .card {
+  margin: 0 0 8px 4px;
+  padding: 8px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: start;
-  padding: 8px;
-
   text-decoration: none;
+  border: none;
 }
 
 .category-name {
+  margin-bottom: -4px
+}
+.category-name, .other-data {
   font-size: .9em;
-  color: gray;
 }
 
 .title {
-  font-size: 1.4em;
+  font-size: 1.2em;
   font-weight: bold;
 }
 
 
-.other-data {
-  font-size: .9em;
-  color: gray;
-}
-
-
 .date {
-  margin-left: 2em;
+  margin-left: 12px;
 }
 
 .date-updated {
-  margin-left: .5em;
+  font-size: .9em;
+  margin-left: 8px;
 }
 
 </style>
