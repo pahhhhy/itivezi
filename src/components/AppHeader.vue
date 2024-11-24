@@ -75,31 +75,31 @@ if(currentUser.value)
 cartCount.value=cartStore.getCountCart(currentUser.value.uid)
 //バーガーの押したときにはアニメーションを走らせ、
 //ついでにサイドバーのボタンを押したときに対応したページに飛ぶコードも一緒に書いた。
-function onClickBurger(mode:PageMode){
+async function onClickBurger(mode:PageMode){
   switch (mode){
     case PageMode.home:
-      router.push("/")
+      await router.push("/")
       break;
       case PageMode.order:
-      router.push("/order")
+      await router.push("/order")
       break;
       case PageMode.registration:
-      router.push("/registration")
+      await router.push("/registration")
       break;
       case PageMode.mypage:
-      router.push("/my-page")
+      await router.push("/my-page")
       break;
       case PageMode.owner:
-      router.push("/Owner")
+      await router.push("/Owner")
       break;
       case PageMode.login:
-      router.push("/login")
+      await router.push("/login")
       break;
       case PageMode.chat:
-      router.push("/chat")
+      await router.push("/chat")
       break;
       case PageMode.announcements:
-      router.push("/announcements")
+      await router.push("/announcements")
       break;
       case PageMode.logout:
       logout()
@@ -110,7 +110,7 @@ function onClickBurger(mode:PageMode){
   isBurger.value = !isBurger.value
 }
 const auth = getAuth()
-function logout() {
+async function logout() {
   signOut(auth)
     .then(() => {
       // Sign-out successful.
@@ -141,9 +141,7 @@ function isActive(page: PageMode): boolean {
       return false;
   }
 }
-function onPushCart(){
-  router.push("/cart")
-}
+
 watch(() => userStore.currentUser, (newUser) => {
   currentUser.value = newUser;
   if(currentUser.value)
@@ -167,14 +165,17 @@ watch(
     }
   }
 );
-function onPushComment(){
-  router.push("/chat")
+async function onPushComment(){
+  await router.push('/chat')
 }
-function onPushIcon(){
-  router.push("/")
+async function onPushIcon(){
+  await router.push('/')
 }
-function onPushMypage(){
-  router.push("/my-page")
+async function onPushMypage(){
+  await router.push('/my-page')
+}
+async function onPushCart(){
+  await router.push('/cart')
 }
 </script>
 

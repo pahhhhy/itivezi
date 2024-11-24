@@ -70,6 +70,14 @@ const cartData=ref<CartTables>(cartStore.cartData)
 const AllTotalMoney=ref<number>(0)
 const isPopup=ref<boolean>(false)
 const isNone=ref<boolean>(false)
+  if(currentUser.value){
+    console.log(cartData.value[currentUser.value.uid])
+    if(cartData.value[currentUser.value.uid]==undefined){
+    isNone.value=true
+  }else{
+    isNone.value=false
+  }
+  }
 watch(() => userStore.currentUser, (newUser) => {
   currentUser.value = newUser;
 });
@@ -177,10 +185,12 @@ function onPushOrder(){
 }
 </script>
 <template>
+  <!-- <p>{{cartData}}</p>
+  <p>{{isNone}}</p> -->
   <article v-if="currentUser&&!isNone">
     <article class="cart_card">
       <h1>カート</h1>
-      <p>{{Object.keys(cartData[currentUser.uid]).length}}個の商品</p>
+      <p v-if="cartData[currentUser.uid]!=undefined||cartData[currentUser.uid]!=null">{{Object.keys(cartData[currentUser.uid]).length}}個の商品</p>
       <h2>小計  ￥{{AllTotalMoney}}</h2>
       <div class="selectdate">
         <p>配達希望日</p>

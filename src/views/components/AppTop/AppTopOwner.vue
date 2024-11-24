@@ -69,6 +69,12 @@ async function onClickCard(mode: PageMode) {
     case PageMode.login:
       await router.push("/login");
       break;
+      case PageMode.chat:
+      await router.push("/chat");
+      break;
+      case PageMode.announcements:
+      await router.push("/announcements");
+      break;
     case PageMode.logout:
       await logout();
       break;
@@ -96,7 +102,7 @@ watch(() => fireUseStore.myUserData, (newUser) => {
   <div class="card">
     <h2>チャット</h2>
     <p>管理者や同業者、道の駅などの人たちと会話することができます</p>
-    <button v-on:click="onClickCard(PageMode.order)">チャットへ</button>
+    <button v-on:click="onClickCard(PageMode.chat)">チャットへ</button>
   </div>
   <div class="card">
     <h2>掲示板</h2>
