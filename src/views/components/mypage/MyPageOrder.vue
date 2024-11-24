@@ -60,41 +60,32 @@ function pushToggle() {
   <!-- {{myOrderVegeData}} -->
   <!-- <h3>{{ nyOrderKeysNum }}</h3> -->
   <!-- <h3>{{ OrderTimeList }}</h3> -->
-  <button v-on:click="pushToggle()" class="toggle-button">
-    <i class="bi bi-caret-down-fill" v-show="!isToggle"></i>
-    <i class="bi bi-caret-up-fill" v-show="isToggle"></i>
-    <h2>自分の注文</h2>
-  </button>
-  <article  v-if="props.currentUser!=null&&isToggle">
-    <table>
-      <caption>過去の注文データ</caption>
-      <thead>
-        <tr>
-          <th scope="col">日時</th>
-          <th scope="col">野菜データ</th>
-          <th scope="col">合計金額</th>
-          <th scope="col">希望日</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(element,uniqueKey) in  AllOrderData[props.currentUser.uid]" :key="uniqueKey">
-          <MyOrderElements
+   <article class="myorder_card" v-if="props.currentUser!=null">
+    <h2>過去の注文</h2>
+    <article class="myorder_elementgroup">
+      <div v-for="(element,uniqueKey) in  AllOrderData[props.currentUser.uid]" :key="uniqueKey">
+        <MyOrderElements
           v-bind:data="element"
           ></MyOrderElements>
-        </tr>
-      </tbody>
-    </table>
-  </article>
+      </div>
+    </article>
+   </article>
 </template>
 <style>
-.toggle-button {
+.myorder_card{
+  width: 340px;
+  height: 250px;
   border: none;
   background-color: white;
-  display: flex;
-  align-items: center;
+  border-radius: 5px;
+  margin :20px auto;
+  padding: 5px 20px;
 }
-
-.order-item {
-  border: 1px solid gray;
+.myorder_card h2{
+  border-bottom: 1px solid var(--text-color);
+}
+.myorder_elementgroup{
+  overflow-y: scroll;
+  height: 200px;
 }
 </style>

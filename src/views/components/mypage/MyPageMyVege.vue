@@ -199,20 +199,9 @@ function onPushBack(){
 .myvege_elementgroup{
   overflow-y: scroll;
   height: 200px;
-
 }
 .myvege_card h2{
   border-bottom: 1px solid var(--text-color);
-}
-.uid {
-  border: 1px solid black;
-  padding-top: 20px;
-}
-.toggle-button {
-  border: none;
-  background-color: white;
-  display: flex;
-  align-items: center;
 }
 
 </style>

@@ -52,32 +52,15 @@ function getNumData(orderTable: OrdertablesElement) {
 }
 </script>
 <template>
-  <td>{{props.data.orderTime}}</td>
-  <td> 
-      <table>
-          <thead>
-              <tr>
-                  <th scope="col">野菜名</th>
-                  <th scope="col">農家名</th>
-                  <th scope="col">販売単位</th>
-                  <th scope="col">単価</th>
-                  <th scope="col">購入個数</th>
-              </tr>
-          </thead>
-          <tbody>
-              <tr v-for="(vegeData,index) in vegeElementList" :key="index">
-                  <td>{{vegeData.VegeName}}</td>
-                  <td>{{vegeData.farmer}}</td>
-                  <td>{{vegeData.unit}}</td>
-                  <td>{{vegeData.en}}</td>
-                  <td>{{vegeData.amount}}</td>
-              </tr>
-          </tbody>
-      </table>
-  </td>
-  <td> {{props.data.totalMoney}}円</td>
-  <td>{{props.data.selectData}}</td>
+  <article class="myorder_element">
+    <img :src="props.data.photo" class="card-img-top" alt="..." v-if="props.VegeData.photo!='none'">
+    <img src="../../../assets/Noimage.jpeg" class="card-img-top" alt="..." v-if="props.VegeData.photo=='none'">
+  </article>
 </template>
 <style scoped>
-
+.myorder_element{
+  display: flex;
+  height: 70px;
+  width: 270px;
+}
 </style>
