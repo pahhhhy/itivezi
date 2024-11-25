@@ -5,6 +5,25 @@ import { useUserStore } from '@/stores/userData';
 import { useFireOrderStore } from '@/stores/fireOrder';
 import cartElement from './components/cartPage/cartElement.vue';
 import router from '@/router'
+import { usefireUserStore } from '@/stores/fireUserdata';
+interface Usertables{
+    affiliation:String[]
+    gender:string
+    name:string
+    phoneNumber:number
+    place:string
+    role:Role
+    email:string
+}
+enum Role{
+    Onwer="管理者",
+    Buyer="飲食店",
+    Farmer="農家",
+    Murone="室根",
+    Kawasaki="川崎",
+    None=""
+  }
+
 enum VegeState{
   Discontinued="Discontinued",
   Available="Available"
@@ -59,6 +78,7 @@ interface OrdertablesElement{
   selectData:string
   state:OrderStete
   totalMoney:number
+place:string
 }
 const today = new Date().toISOString().split('T')[0]
 const selectDate=ref<string>("")
@@ -70,6 +90,11 @@ const cartData=ref<CartTables>(cartStore.cartData)
 const AllTotalMoney=ref<number>(0)
 const isPopup=ref<boolean>(false)
 const isNone=ref<boolean>(false)
+const place=ref<string>("")
+const isDay=ref<boolean>(false)
+  const fireUseStore=usefireUserStore()
+const myUserData=ref<Usertables>(fireUseStore.myUserData)
+
   if(currentUser.value){
     console.log(cartData.value[currentUser.value.uid])
     if(cartData.value[currentUser.value.uid]==undefined){
@@ -78,6 +103,10 @@ const isNone=ref<boolean>(false)
     isNone.value=false
   }
   }
+  watch(() => fireUseStore.myUserData, (newUser) => {
+  myUserData.value = newUser;
+  place.value=myUserData.value.place
+});
 watch(() => userStore.currentUser, (newUser) => {
   currentUser.value = newUser;
 });
@@ -92,10 +121,16 @@ watch(() => cartStore.cartData, (newUser) => {
   }
   }
 });
+watch(selectDate, (newDate) => {
+  if (newDate) {
+    isday();
+  }
+});
 function getTotalMoney(money:number){
     AllTotalMoney.value = AllTotalMoney.value + money
 
 }
+
 function addCartToOrder(cartData: CartTables, uid: string, order: OrdertablesElement) {
   const userCart = cartData[uid]; // 指定したユーザーのカートデータを取得
   let index = Object.keys(order).length - 5; // 既存の order の数を計算 (-5 は orderTime などの他のプロパティを除外)
@@ -128,7 +163,8 @@ async function onPushBuy(){
             orderName: currentUser.value.displayName,
             selectData: selectDate.value,
             state: OrderStete.Uncontacted,
-            totalMoney: AllTotalMoney.value
+            totalMoney: AllTotalMoney.value,
+            place:place.value
         };
         addCartToOrder(cartData.value,currentUser.value.uid,uproadData)
         if(currentUser.value)
@@ -183,6 +219,13 @@ async function deleteData(unique:string|number){
 function onPushOrder(){
   router.push("/order")
 }
+function isday(){
+  if(selectDate.value==""){
+    isDay.value=false
+  }else{
+    isDay.value=true
+  }
+}
 </script>
 <template>
   <!-- <p>{{cartData}}</p>
@@ -206,8 +249,18 @@ function onPushOrder(){
           no-today
         />
       </div>
-      
-      <button v-on:click="onPushBuy">購入する</button>
+      <div class="selectdate">  
+        <p>配達場所</p>
+        <input
+        class="form-control"
+        type="text"
+        placeholder="一関市～～～"
+        aria-label="default input example"
+        v-model="place"
+        
+        />
+      </div>
+      <button v-on:click="onPushBuy" v-bind:class="{disable:!isDay}">購入する</button>
     </article>
 
     
@@ -239,6 +292,10 @@ function onPushOrder(){
 <style scoped>
 p{
   margin: 0;
+}
+.disable{
+  pointer-events: none;
+  opacity: 0.5;
 }
 .cart_popup{
   position: fixed;
@@ -284,7 +341,7 @@ p{
   padding: 10px;
   border-radius: 5px;
   width: 340px;
-  height: 200px;
+  height: 250px;
   margin: 20px auto;
 }
 .cart_card h1{

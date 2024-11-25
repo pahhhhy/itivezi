@@ -54,6 +54,7 @@ interface OrdertablesElement{
   selectData:string
   state:OrderStete
   totalMoney:number
+place:string
 }
 enum Gender{
   men="男",

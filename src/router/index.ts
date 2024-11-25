@@ -3,6 +3,8 @@ import OrderPage from '../views/OrderPage.vue'
 import AppTop from '../views/AppTop.vue'
 import RegistrationPage from '../views/RegistrationPage.vue'
 import MyPage from '../views/MyPage.vue'
+import MyPageorder from '../views/components/mypage/myPageOrderDetail.vue'
+import MyAllorderView from '@/views/components/mypage/MyAllorderView.vue'
 import Signup from '../views/SignupPage.vue'
 import Login from '../views/LoginPage.vue'
 import Addinfo from '../views/AddInfo.vue'
@@ -45,6 +47,16 @@ const router = createRouter({
       path: '/my-page',
       name: 'my-page',
       component: MyPage
+    },
+    {
+      path: '/my-allorder',
+      name: 'my-allorder',
+      component: MyAllorderView
+    },
+    {
+      path: '/my-page/:unique',
+      name: 'my-page-order',
+      component:MyPageorder
     },
     {
       path: '/signup',
