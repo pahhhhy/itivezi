@@ -224,7 +224,6 @@ p{
 .myvege_popup{
   position: fixed;
   width: 340px;
-  height: 310px;
   z-index: 10;
   border: 1px solid gray;
   border-radius: 20px;
@@ -263,5 +262,15 @@ p{
 .form p{
   width: 50px;
   margin: auto 0;
+}
+.unit {
+  display: flex;
+  width: 250px;
+}
+.form-control{
+  width: 250px;
+}
+.unit>.form-control{
+  width: 175px;
 }
 </style>

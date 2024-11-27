@@ -176,7 +176,7 @@ function onPushBack(){
 </script>
 <template>
     <article class="myorderelement_card">
-      <div class="title">
+      <div class="title_order">
         <i class="bi bi-chevron-left" v-on:click="onPushBack"></i>
         <h2>注文内容の確認</h2>
     </div>
@@ -222,11 +222,11 @@ function onPushBack(){
 p{
   margin: 0;
 }
-.title{
+.title_order{
   display: flex;
   justify-content: flex-start;
 }
-.title i{
+.title_order i{
   font-size: 24px;
   padding: 0 5px;
 }

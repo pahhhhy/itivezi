@@ -79,7 +79,7 @@ function onPushAllview(){
   <!-- <h3>{{ nyOrderKeysNum }}</h3> -->
   <!-- <h3>{{ OrderTimeList }}</h3> -->
    <article class="myorder_card" v-if="props.currentUser!=null">
-    <div class="title">
+    <div class="title_order">
       <h2>過去の注文</h2>
       <p v-on:click="onPushAllview">全て見る</p>
     </div>
@@ -107,14 +107,14 @@ h2{
   margin :20px auto;
   padding: 5px 20px;
 }
-.title{
+.title_order{
   display: flex;
   justify-content: space-between;
   border-bottom: 1px solid var(--text-color);
   align-items: center;
   height: 40px;
 }
-.title p{
+.title_order p{
   color: blue;
   margin: 0;
 }

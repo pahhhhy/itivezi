@@ -59,9 +59,6 @@ function updateUproadData(Data:Vegetables){
   {{ vegeUnitList }} -->
    <!-- {{ vegeKeys }} -->
      <!-- {{ vegeList }} -->
-  <div class="title">
-    <h1>登録</h1>
-  </div>
   <!-- {{ uniqueKey }}
   {{ uproadVegeData }} -->
   <RegistrationStep1

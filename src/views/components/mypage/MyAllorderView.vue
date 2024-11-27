@@ -73,7 +73,7 @@ function reverseOrdertables(data: Ordertables): Ordertables {
 </script>
 <template>
     <article class="myAllorder_card" v-if="currentUser!=null">
-        <div class="title">
+        <div class="title_order">
             <i class="bi bi-chevron-left" v-on:click="onPushBack"></i>
             <h2>過去の注文</h2>
         </div>
@@ -101,11 +101,11 @@ function reverseOrdertables(data: Ordertables): Ordertables {
   .myorder_card h2{
     border-bottom: 1px solid var(--text-color);
   }
-  .title{
+  .title_order{
     display: flex;
     justify-content: flex-start;
   }
-  .title i{
+  .title_order i{
     font-size: 24px;
     padding: 0 5px;
   }

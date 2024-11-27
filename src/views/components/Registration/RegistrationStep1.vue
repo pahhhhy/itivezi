@@ -94,12 +94,21 @@ watch(selectVegeList, (newVal, oldVal) => {
     removedItems.forEach(item => handleCheckboxChange(item))
   }
 })
+function onPushX(element:string){
+    selectVegeList.value=selectVegeList.value.filter(item=>item !== element)
+}
 </script>
 <template>
   <!-- {{ uproadData }}
   {{ selectVege }} -->
-  <section>
-    <h1>野菜を選択してください</h1>
+  <section class="reg1_card">
+    <h2>野菜を選択してください</h2>
+    <div class="select_group">
+      <div class="select_element" v-for="(element) in selectVegeList" v-bind:key="element">
+        <p>{{element}}</p>
+        <button v-on:click="onPushX(element)"><i class="bi bi-x-circle-fill"></i></button>
+      </div>
+    </div>
     <div class="form">
       <div class="form-check" v-for="(element, index) in props.vegeKeys" :key="element">
         <input
@@ -120,7 +129,62 @@ watch(selectVegeList, (newVal, oldVal) => {
     <h1 style="color: red" v-show="step1Error && selectVegeList.length == 0">
       野菜を選択してください
     </h1>
-    <button v-on:click="onStep(true)" class="btn btn-primary">次へ</button>
+    <button v-on:click="onStep(true)" >次へ</button>
   </section>
 </template>
-<style></style>
+<style>
+.reg1_card{
+  width: 340px;
+  border: none;
+  overflow:auto ;
+  background-color: white;
+  border-radius: 5px;
+  margin :20px auto;
+  padding: 5px 20px;
+}
+.reg1_card h2{
+  border-bottom: 1px solid var(--text-color); 
+}
+.reg1_card>button {
+  background-color: var(--main-color);
+  color: white;
+  padding: 10px 100px;
+  border-radius: 50px;
+  font-size: 20px;
+  margin: 20px 20px;
+  font-weight: bolder;
+  border: none;
+  margin-top: 30px;
+}
+.select_group{
+  border-radius: 5px;
+  border: 1px solid var(--line-color);
+  width: 100%;
+  padding: 5px;
+}
+.select_element{
+  background-color: var(--line-color);
+  display: inline-block;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: 5px;
+  margin: 1px 5px;
+}
+.select_element button{
+  background-color: var(--line-color);
+  border: 0;
+  display: inline-block;
+}
+.select_element p{
+  margin-bottom: 0;
+  display: inline-block;
+}
+.form{
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+}
+.form-check{
+  min-width: 50%;
+}
+</style>

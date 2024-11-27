@@ -49,6 +49,9 @@ interface Emits {
 const roadStationUnitTempList = ref<string[]>(useRoadStationStore().roadStationTemp)
 const emit = defineEmits<Emits>()
 const props = defineProps<Props>()
+  const Index =ref<number>(props.index)
+const vegename=ref<string>(props.vegeName)
+const uniqueKeys=ref<string|null|number>(props.uniqueKey)
 const vegeAmount=ref<number>(0)
 const vegeUnit = ref<string>("")
 const vegeUnitTempList = ref<string[]>(Object.values(vegeUnitTemp))
@@ -117,11 +120,14 @@ function uproadImage(URL:string,index:number){
 watch(roadStationList, (newValue) => {
   updateStep2List(Mode.RoadStation, props.index);
 });
+
 </script>
 
 <template>
-<h1>{{ props.vegeName}}</h1>
-      <h4>どのぐらいの量ですか？</h4>
+  <article  class="myvege_popup">
+    <h1>{{ vegename}}</h1>
+    <div class="form">
+      <p>単位</p>
       <div class="unit">
         <input
           class="form-control"
@@ -129,13 +135,13 @@ watch(roadStationList, (newValue) => {
           placeholder="単価"
           aria-label="default input example"
           v-model="vegeAmount"
-          @change="updateVegeMoney(vegeAmount, index,Mode.Amount)"
+          @change="updateVegeMoney(vegeAmount,props.index,Mode.Amount)"
         />
         <select
           class="form-select"
           aria-label="Default select example"
           v-model="vegeUnit"
-          @change="updateStep2List(Mode.Unit,index)"
+          @change="updateStep2List(Mode.Unit,props.index)"
         >
           <!-- 選択式ではなく野菜を決めた時点でその野菜に対応した単位を決めてしまった方が良かった -->
           <option selected value="-1" disabled hidden>単位</option>
@@ -148,35 +154,100 @@ watch(roadStationList, (newValue) => {
           </option>
         </select>
       </div>
-      <h4>何円にしますか？</h4>
+    </div>
+    <div class="form">
+      <p>値段</p>
       <input
         class="form-control"
         type="number"
         placeholder="何円にしますか？"
         aria-label="default input example"
         v-model="vegeMoney"
-        @input="updateVegeMoney(vegeMoney, index,Mode.Money)"
+        @input="updateVegeMoney(vegeMoney,props.index, Mode.Money)"
       />
-      <h4>道の駅を選択してください</h4>
-      <div class="form-check" v-for="(element, index) in roadStationUnitTempList" :key="element">
-        <input
-          class="form-check-input"
-          type="checkbox"
-          :value="element"
-          v-model="roadStationList"
-          :id="'flexCheckIndeterminate' + index"
-        />
-        <label class="form-check-label" :for="'flexCheckIndeterminate' + index">
-          {{ element }}
-        </label>
+    </div>
+    <div class="form">
+      <p>画像(任意)</p>
+      <RegStep2image
+      v-if="uniqueKey"
+      v-bind:index="Index"
+      v-bind:uniquw-keys="uniqueKey"
+      v-bind:vege-name="vegename"
+      v-bind:photo=uproadData[vegename][uniqueKey].photo
+      v-on:uproad-image="uproadImage"></RegStep2image>
+    </div>
+    <div class="form">
+      <p>卸先</p>
+      <article class="form_check">
+        <div  v-for="(element, index) in roadStationUnitTempList" :key="element" class="form_check_element">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            :value="element"
+            v-model="roadStationList"
+            :id="'flexCheckIndeterminate' + index"
+            @change="updateStep2List(Mode.RoadStation,props.index)"
+          />
+          <label class="form-check-label" for="'flexCheckIndeterminate' + index">
+            {{ element }}
+          </label>
+        </div>
+      </article>
       </div>
-        <RegStep2image
-        v-bind:index="index"
-        v-bind:vegekeys="vegeKeys"
-        v-bind:uniquw-keys="props.uniqueKey"
-        v-bind:vege-name="props.vegeName"
-        v-on:uproad-image="uproadImage"></RegStep2image>
+  </article>
 </template>
 <style scoped>
-
+p{
+  margin: 0;
+}
+.myvege_popup{
+  width: 340px;
+  z-index: 10;
+  border-radius: 20px;
+  padding: 20px;
+  background-color: white;
+  margin:  20px auto;
+}
+.myvege_popup h1{
+  border-bottom: 1px solid var(--text-color);
+  font-size: 24px;
+  font-weight: bolder;
+}
+.myvege_popup button{
+  margin: 10px 5px;
+}
+.blackback{
+  position: fixed ;
+  height: calc(100vh - 60px);
+  width: 100vw;
+  top: 60px;
+  left: 0;
+  z-index: 5;
+  background-color: rgba(3,3,3,0.5);;
+}
+.form{
+  display: flex;
+  margin-top: 10px;
+}
+.form_check{
+  display: flex;
+}
+.form_check_element{
+  width: 60px;
+}.form-check-label{
+}
+.form p{
+  width: 50px;
+  margin: auto 0;
+}
+.unit {
+  display: flex;
+  width: 250px;
+}
+.form-control{
+  width: 250px;
+}
+.unit>.form-control{
+  width: 175px;
+}
 </style>
