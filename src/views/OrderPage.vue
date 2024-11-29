@@ -8,7 +8,7 @@ import { useCartStore } from '@/stores/cart';
 import { useSortVegeStore } from '@/stores/sortByVege';
 import router from '@/router'
 enum SortMode{
-    All="all",
+  All="all",
     Kawasaki="川崎",
     Murone="室根",
     Other="その他"
@@ -55,6 +55,8 @@ const vegeAllData = ref<Vegetables>(vegeStore.VegeAllData)
 const cartStore=useCartStore()
 const cartData=ref<CartTables>(cartStore.cartData)
 const selectedFilter=ref<SortMode>(SortMode.All)
+const isfliter=ref<boolean>(false)
+  const roles = ref<SortMode[]>(Object.values(SortMode).filter((item): item is SortMode => item !== SortMode.All));
   onMounted(() => {
     sortVegeOrder.value=sortVegeStore.sortbyVege
     vegeAllData.value=vegeStore.VegeAllData
@@ -99,20 +101,30 @@ function onPushCart(){
 }
 async function onPushfilter(mode:SortMode){
   selectedFilter.value=mode
-  if(mode==SortMode.All){
-    filterVegeData.value=vegeAllData.value
-    await sortVegeStore.roadData(mode)
-    filterVegeData.value=makeSortData(filterVegeData.value,sortVegeOrder.value)
-  }else{
-    filterVegeData.value=filterByRoadStation(vegeAllData.value,mode)
-    await sortVegeStore.roadData(mode)
-    filterVegeData.value=makeSortData(filterVegeData.value,sortVegeOrder.value)
-  }
-  if(mode==SortMode.Other){
-    sortVegeOrder.value= Object.keys(filterVegeData.value)
-  }
-  else{
-    sortVegeOrder.value= await sortVegeStore.roadData(mode) as string[]
+  switch(selectedFilter.value){
+    case SortMode.Kawasaki:
+      filterVegeData.value=filterByRoadStation(vegeAllData.value,selectedFilter.value)
+      await sortVegeStore.roadData(selectedFilter.value)
+      filterVegeData.value=makeSortData(filterVegeData.value,sortVegeOrder.value)
+      sortVegeOrder.value= await sortVegeStore.roadData(selectedFilter.value) as string[]
+      break;
+    case SortMode.Murone:
+      filterVegeData.value=filterByRoadStation(vegeAllData.value,selectedFilter.value)
+      await sortVegeStore.roadData(selectedFilter.value)
+      filterVegeData.value=makeSortData(filterVegeData.value,sortVegeOrder.value)
+      sortVegeOrder.value= await sortVegeStore.roadData(selectedFilter.value) as string[]
+      break;
+    case SortMode.Other:
+      filterVegeData.value=filterByRoadStation(vegeAllData.value,selectedFilter.value)
+      await sortVegeStore.roadData(selectedFilter.value)
+      filterVegeData.value=makeSortData(filterVegeData.value,sortVegeOrder.value)
+      sortVegeOrder.value= Object.keys(filterVegeData.value)
+    break
+    default://全ての時
+      filterVegeData.value=vegeAllData.value
+      await sortVegeStore.roadData(selectedFilter.value)
+      filterVegeData.value=makeSortData(filterVegeData.value,sortVegeOrder.value)
+      sortVegeOrder.value= await sortVegeStore.roadData(selectedFilter.value) as string[]
   }
   
 
@@ -149,23 +161,44 @@ function makeSortData(data: Vegetables, order: string[]): Vegetables {
 
   return sortedData;
 }
-
+function onpushhistory(){
+  router.push("/my-allorder")
+}
+function onpushfilter(){
+  isfliter.value=!isfliter.value
+}
 </script>
 <template>
   <article class="module">
-    <button>
+    <button v-on:click="onpushfilter">
       フィルター
-      <i class="bi bi-chevron-down"></i>
+      <i class="bi bi-chevron-down" v-if="!isfliter"></i>
+      <i class="bi bi-chevron-up" v-if="isfliter"></i>
     </button>
-    <button>過去の注文</button>
+    <button v-on:click="onpushhistory">過去の注文</button>
   </article>
 
   <article v-if="Object.keys(orderData).length===0">
-    <!-- <h3>フィルター</h3>
-<button v-on:click="onPushfilter(SortMode.All)" class="filter_button" v-bind:class="{fliter_active:selectedFilter==SortMode.All}">全て</button>
-<button v-on:click="onPushfilter(SortMode.Kawasaki)" class="filter_button" v-bind:class="{fliter_active:selectedFilter==SortMode.Kawasaki}">川崎</button>
-<button v-on:click="onPushfilter(SortMode.Murone)" class="filter_button" v-bind:class="{fliter_active:selectedFilter==SortMode.Murone}">室根</button>
-<button v-on:click="onPushfilter(SortMode.Other)" class="filter_button" v-bind:class="{fliter_active:selectedFilter==SortMode.Other}">その他</button> -->
+    <article class="filter_group" v-if="isfliter">
+      <h4>卸先</h4>
+      <div class="filter_button_group">
+        <div v-for="(element,index) in roles" v-bind:key="index" class="filter_button">
+          <input
+            class="form-check-input"
+            type="radio"
+            :value="element"
+            v-model="selectedFilter"
+            v-on:click="onPushfilter(element)"
+            :id="'flexCheckIndeterminate' + index"
+          />
+          <label class="form-check-label" :for="'flexCheckIndeterminate' + index">
+            {{ element }}
+          </label>
+        </div>
+      </div>
+      
+    </article>
+
     <div v-for="(data,vegeName,index) in filterVegeData" :key=index>
     <OrderEachToggle
     v-bind:data="data"
@@ -198,10 +231,23 @@ function makeSortData(data: Vegetables, order: string[]): Vegetables {
 }
 .filter_button{
   background-color: white;
-  padding: 10px;
+  padding: 4px 10px;
 }
 .fliter_active{
   background-color: rgb(209, 209, 209);
 }
-
+.filter_group{
+  margin: 0 auto;
+  background-color: white;
+  padding: 15px;
+  border-radius: 10px;
+  width: 340px;
+}
+.filter_group h4{
+  border-bottom: 1px solid var(--text-color);
+  width: 100%;
+}
+.filter_button_group{
+  display: flex;
+}
 </style>
