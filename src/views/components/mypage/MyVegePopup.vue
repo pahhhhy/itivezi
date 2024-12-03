@@ -223,12 +223,12 @@ p{
 }
 .myvege_popup{
   position: fixed;
-  width: 340px;
+  width: 512px;
   z-index: 10;
   border: 1px solid gray;
   border-radius: 20px;
-  top: calc(50% - 150px);
-  left: calc(50% - 170px);
+  top: calc(50% - 200px);
+  left: calc(50% - 256px);
   padding: 20px;
   background-color: white;
 }
@@ -237,8 +237,9 @@ p{
   font-size: 24px;
   font-weight: bolder;
 }
-.myvege_popup button{
+.myvege_popup>button{
   margin: 10px 5px;
+  padding: 10px 15px;
 }
 .blackback{
   position: fixed ;
@@ -259,7 +260,8 @@ p{
 .form_check_element{
   width: 60px;
 }
-.form p{
+.form>p{
+  font-size: 20px;
   width: 50px;
   margin: auto 0;
 }
@@ -273,4 +275,17 @@ p{
 .unit>.form-control{
   width: 175px;
 }
+@media (max-width: 575.98px) { 
+  .myvege_popup{
+    width: 340px;
+    top: calc(50% - 180px);
+  left: calc(50% - 170px);
+  }
+  .form p{
+    width: 50px;
+    margin: auto 0;
+    font-size: 16px;
+  }
+}
+
 </style>

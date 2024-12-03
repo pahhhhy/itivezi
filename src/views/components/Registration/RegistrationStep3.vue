@@ -75,9 +75,13 @@ const refreshPage = () => {
           </div>
       </article>
     </div>
+    
+  </section>
+  <div class="reg3_button">
     <button v-on:click="onStep(false)" >戻る</button>
     <button v-on:click="vegeWriteHandler" >送信</button>
-  </section>
+  </div>
+  
   <div class="card_popup"  v-show="finishSend">
     <div class="card-body">
       <h5 class="card-title">送信が完了しました</h5>
@@ -117,12 +121,13 @@ p{
   margin-top: 30px;
 }
 .myvege_popup{
-  width: 340px;
+  width: 400px;
   z-index: 10;
   border-radius: 20px;
   padding: 20px;
   background-color: white;
-  margin:  20px auto;
+  margin:  20px ;
+
 }
 .myvege_popup h1{
   border-bottom: 1px solid var(--text-color);
@@ -153,14 +158,16 @@ p{
 .form_check{
   display: flex;
 }
-.form_check_element{
-  width: 60px;
-}
 .form p{
-  width: 50px;
+  font-size: 20px;
+  width: 80px;
   margin: auto 0;
 }
-.chack_data >button{
+.reg3_button{
+  width: 400px;
+  margin: auto;
+}
+.reg3_button >button{
   background-color: var(--main-color);
   color: white;
   padding: 10px 50px;
@@ -170,5 +177,21 @@ p{
   font-weight: bolder;
   border: none;
   margin-top: 10px;
+}
+.chack_data{
+  display: flex;
+  width: 900px;
+  margin: 0 auto;
+}
+@media (max-width: 575.98px) { 
+  .myvege_popup{
+    width: 340px;
+    margin: 20px auto;
+  }
+  .form p{
+    font-size: 16px;
+    width: 50px;
+  }
+
 }
 </style>

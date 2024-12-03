@@ -118,10 +118,10 @@ const gridClass = computed(() => {
 <style scoped>
 .myorder_element{
   display: flex;
-  height: 50px;
+  height: 70px;
   border-top:1px solid var(--line-color) ;
   border-bottom:1px solid var(--line-color) ;
-  width: 270px;
+  width: 100%;
 }
 .myorder_element button{
   border: none;
@@ -129,8 +129,9 @@ const gridClass = computed(() => {
   
 }
 .name_time{
-  width: 150px;
+  width: 100%;
   height: 100%;
+  margin-left: 20px;
 }
 .name_time h4{
   white-space: nowrap; /* テキストを1行に制限 */
@@ -141,12 +142,13 @@ const gridClass = computed(() => {
 }
 .name_time p{
   margin: 0;
+  margin-top: 10px;
   font-size: 14px;
 }
 .image-container {
   display: grid;
   width: 80px;
-  height: 50px;
+  height: 100%;
 }
 .image-item {
   display: flex;
@@ -183,4 +185,16 @@ const gridClass = computed(() => {
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
 }
+
+@media (max-width: 575.98px) { 
+  .name_time{
+    width: 150px;
+  }
+  .myorder_element{
+    height: 60px;
+  }
+  .name_time{
+    margin: 0;
+  }
+  }
 </style>

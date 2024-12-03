@@ -112,7 +112,9 @@ p{
   background-color: white;
   margin: 0 auto;
   border-radius: 5px;
-
+  
+  margin: 20px;
+  margin-bottom: 15px;
   }
   .Wholesaler {
     font-size: 14px!important;
@@ -169,4 +171,11 @@ p{
     color: var(--main-color);
     font-weight: bolder;
   }
+  @media (max-width: 575.98px) { 
+    .buyitem_card{
+      margin: 0;
+      margin-bottom: 15px;
+    }
+  }
+
 </style>

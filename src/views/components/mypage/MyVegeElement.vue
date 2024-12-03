@@ -77,6 +77,7 @@ button{
 .card_element{
   border-top: var(--line-color) 1px solid;
   border-bottom: var(--line-color) 1px solid;
+  padding: 0 20px;
 }
 .card_name_money{
   border-bottom: 1px solid var(--line-color);
@@ -95,6 +96,7 @@ button{
 .img_name_money{
   display: flex;
   height: 45px;
+  margin:  auto 0;
 }
 .img_name_money img{
   height: 40px; 
@@ -107,7 +109,7 @@ button{
 }
 .name_money h5{
   padding-left: 5px;
-  font-size: 16px;
+  font-size: 20px;
 }
 .money_unit{
   display: flex;
@@ -130,5 +132,13 @@ button{
 .icons i{
   color: var(--other-color);
   font-size: 25px;
+}
+@media (max-width: 575.98px) { 
+  .name_money h5{
+    font-size: 16px;
+  }
+  .card_element{
+    padding: 0;
+  }
 }
 </style>

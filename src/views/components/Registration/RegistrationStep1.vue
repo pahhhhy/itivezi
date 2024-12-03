@@ -134,7 +134,7 @@ function onPushX(element:string){
 </template>
 <style>
 .reg1_card{
-  width: 340px;
+  width: 800px;
   border: none;
   overflow:auto ;
   background-color: white;
@@ -178,6 +178,7 @@ function onPushX(element:string){
 .select_element p{
   margin-bottom: 0;
   display: inline-block;
+  font-size: 20px;
 }
 .form{
   display: flex;
@@ -185,6 +186,31 @@ function onPushX(element:string){
   flex-wrap: wrap;
 }
 .form-check{
-  min-width: 50%;
+  min-width: 33%;
+}
+.form-check label{
+  font-size: 20px;
+}
+.form-check input{
+  height: 20px;
+  width: 20px;
+}
+@media (max-width: 575.98px) { 
+  .reg1_card{
+    width: 340px;
+  }
+  .form-check{
+    min-width: 50%;
+  }
+  .form-check label{
+    font-size: 16px;
+  }
+  .form-check input{
+    height: 16px;
+    width: 16px;
+  }
+  .select_element p{
+    font-size: 16px;
+  }
 }
 </style>

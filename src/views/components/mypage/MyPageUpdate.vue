@@ -409,8 +409,7 @@ p{
   margin: 0;
 }
 .myacount_card{
-  width: 340px;
-  height: 220px;
+  width: 512px;
   border: none;
   background-color: white;
   border-radius: 5px;
@@ -418,8 +417,8 @@ p{
   padding: 5px 20px;
 }
 .icon-image{
-  height: 50px;
-  width: 50px;
+  height: 75px;
+  width: 75px;
   margin: 5px auto;
 }
 .icon-image img{
@@ -443,7 +442,7 @@ p{
   margin: 5px;
 }
 .changename h2{
-  font-size: 18px;
+  font-size: 24px;
 }
 .changename button{
   border: none;
@@ -463,11 +462,13 @@ p{
   width: 20%;
   margin: 0;
   margin-bottom: 5px;
+  font-size: 20px;
 }
 .element{
   width: 70%;
   margin: 0;
   margin-bottom: 5px;
+  font-size: 20px;
 }
 .myacount_card i{
   width: 10%;
@@ -492,5 +493,22 @@ p{
 .hidden-input {
   display: none;
 }
-
+@media (max-width: 575.98px) { 
+  .myacount_card{
+    width: 340px;
+  }
+  .icon-image{
+    height: 50px;
+    width: 50px;
+  }
+  .changename h2{
+    font-size: 18px;
+  }
+  .head{
+    font-size: 16px;
+  }
+  .element{
+    font-size: 16px;
+  }
+}
 </style>

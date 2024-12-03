@@ -231,17 +231,16 @@ p{
   padding: 0 5px;
 }
 .myorderelement_card{
-  width: 340px;
+  width: 512px;
   background-color: white;
   margin: 0 auto;
+  margin-top: 20px;
   border-radius: 5px;
 }
 .myorderelement_card h2{
-  border-bottom: 1px solid var(--line-color);
   margin: 20px;
 }
 .myorderelement_card h3{
-  border-bottom: 1px solid var(--line-color);
   margin: 20px;
 }
 .error{
@@ -290,7 +289,7 @@ p{
   object-fit: contain;
 }
 .buyitem_card{
-  width: 340px;
+  width: 512px;
   height: 135px;
   padding: 5px;
   background-color: white;
@@ -329,7 +328,7 @@ p{
   }
   .selectnumber{
     display: flex;
-    width: 40%;
+    width: 100px;
     height: 30px;
   }
   .backbutton{
@@ -350,10 +349,21 @@ p{
   }
   .price{
     display: flex;
-    width: 100%;
+    width: 150px;
     justify-content: space-around;
     font-size: 20px;
     color: var(--other-color);
     font-weight: bolder;
+  }
+  @media (max-width: 575.98px) { 
+    .myorderelement_card{
+      width: 340px;
+    }
+    .buyitem_card{
+      width: 340px;
+    }
+    .price{
+      width: 100%;
+    }
   }
 </style>

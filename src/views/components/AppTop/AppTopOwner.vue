@@ -96,7 +96,7 @@ watch(() => fireUseStore.myUserData, (newUser) => {
   </div>
   <div class="card" v-if="myRole!=Role.Buyer">
     <h2>登録</h2>
-    <p>自分が作った野菜を登録することができます。</p>
+    <p>自分が作った野菜を登録することができます</p>
     <button v-on:click="onClickCard(PageMode.registration)">登録へ</button>
   </div>
   <div class="card">
@@ -106,17 +106,17 @@ watch(() => fireUseStore.myUserData, (newUser) => {
   </div>
   <div class="card">
     <h2>掲示板</h2>
-    <p>管理者からの連絡事項を見ることができます。</p>
+    <p>管理者からの連絡事項を見ることができます</p>
     <button v-on:click="onClickCard(PageMode.announcements)">掲示板へ</button>
   </div>
   <div class="card">
     <h2>マイページ</h2>
-    <p>自分の情報の更新や過去の注文を確認することができます。</p>
+    <p>自分の情報の更新や過去の注文を確認することができます</p>
     <button v-on:click="onClickCard(PageMode.mypage)">マイページへ</button>
   </div>
   <div class="card" v-if="myRole!=Role.Buyer && myRole!=Role.Farmer">
     <h2>管理者画面</h2>
-    <p>注文画面の野菜の並べ替えや各種データの出力や初期設定などをすることができます。</p>
+    <p>注文画面の野菜の並べ替えや各種データの出力や初期設定などができます</p>
     <button v-on:click="onClickCard(PageMode.announcements)">管理者画面へ</button>
   </div>
 </div>
@@ -133,7 +133,7 @@ p{
   width: 340px;
   height: 175px;
   padding: 10px 20px;
-  margin: 10px 0;
+  margin: 20px 20px;
   border: none;
   text-align: left;
   color: var(--text-color);
@@ -166,7 +166,8 @@ p{
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-
+  width: 800px;
+  margin: auto;
 }
 .card p{
   font-size: 18px;
@@ -182,9 +183,15 @@ p{
   font-size: 18px;
   border: none;
 }
-@media (max-width: 850.98px) { 
+@media (max-width: 575.98px) { 
   .card_group{
     justify-content: center;
+  }
+  .card{
+    margin: 10px 0;
+  }
+  .card_group{
+    width: auto;
   }
  }
 </style>

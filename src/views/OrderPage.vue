@@ -214,14 +214,14 @@ function onpushfilter(){
 <style scoped>
 .module{
   margin: auto;
-  width: 340px;
-  height: 60px;
+  width: 800px;
+  height: 100px;
   display: flex;
   align-items: center;
 }
 .module button{
-  height: 40px;
-  width: 150px;
+  height: 50px;
+  width: 200px;
   border-radius: 5px;
   color: white;
   text-align: center;
@@ -241,7 +241,7 @@ function onpushfilter(){
   background-color: white;
   padding: 15px;
   border-radius: 10px;
-  width: 340px;
+  width: 800px;
 }
 .filter_group h4{
   border-bottom: 1px solid var(--text-color);
@@ -249,5 +249,20 @@ function onpushfilter(){
 }
 .filter_button_group{
   display: flex;
+}
+.filter_button label{
+  font-size: 18px;
+}
+@media (max-width: 575.98px) { 
+  .module{
+    width: 340px;
+  }
+  .module button{
+    height: 40px;
+    width: 150px;
+  }
+  .filter_button_group{
+    width: 340px;
+  }
 }
 </style>

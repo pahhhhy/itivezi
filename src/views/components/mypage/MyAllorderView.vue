@@ -90,7 +90,7 @@ function reverseOrdertables(data: Ordertables): Ordertables {
 </template>
 <style scoped>
 .myAllorder_card{
-    width: 340px;
+    width: 512px;
     border: none;
     overflow:auto ;
     background-color: white;
@@ -111,6 +111,23 @@ function reverseOrdertables(data: Ordertables): Ordertables {
   }
   .myallorder_elementgroup{
     overflow-y: scroll;
-    height: 600px;
+    height: 700px;
+  }
+  .myallorder_elementgroup::-webkit-scrollbar {
+    width:10px;
+  }
+  .myallorder_elementgroup::-webkit-scrollbar-thumb {
+    background: var(--line-color);
+    width: 6px;
+    height: 6px;
+    border-radius: 5px;
+  }
+  @media (max-width: 575.98px) { 
+    .myAllorder_card{
+      width: 340px;
+    }
+    .myallorder_elementgroup{
+      height: 600px;
+    }
   }
 </style>

@@ -190,7 +190,7 @@ async function onPushCart(){
     </div>
     
     <nav>
-      <button v-on:click="onPushComment"><i class="bi bi-chat-right-text comment"  ></i></button>
+      <button v-on:click="onPushComment" v-if="currentUser != null"><i class="bi bi-chat-right-text comment"  ></i></button>
         <div class="cart "  v-on:click="onPushCart" v-if="currentUser != null">
           <div class="cart_icon" v-if="cartCount==0">
             <img src="../assets/cart.png" alt="">
@@ -286,10 +286,10 @@ button{
 }
 .blank{
   width: 100%;
-  height: 60px;
+  height: 80px;
 }
 header {
-  height: 60px;
+  height: 80px;
   width: 100vw;
   display: flex;
   top:0;
@@ -308,17 +308,18 @@ header i{
 }
 .header-icon{
   width: 35%;
-  height: 60px;
+  height: 80px;
   display: flex;
   align-items: center;
 }
 .header-icon img{
   width: 100%;
+  height: 100%;
   object-fit: contain;
 }
 .myacount{
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
   height: 100%;
 }
@@ -328,12 +329,14 @@ header i{
   position: relative;
   flex-direction: column;
 }
-.cart_icon i{
-  text-align: center;
-  font-size: 40px;
-  margin: 20%;
+.cart_icon{
+  display: flex;
+  align-items: center;
 }
 .cart_icon img{
+  margin: auto;
+  margin-top: 13px;
+  margin-bottom: 5px;
   width: 40px;
   height: 40px;
 }
@@ -376,9 +379,9 @@ nav >p{
 }
 aside {
   left: -205px;
-  height: calc(100% - 60px);
+  height: calc(100% - 80px);
   width: 200px;
-  top: 60px;
+  top: 80px;
   position: fixed;
   background-color: white;
   z-index: 20;
@@ -430,7 +433,7 @@ li.active .sidebar_element{
 .blackback{
   position: fixed;
   display: block;
-  top: 60px;
+  top: 80px;
   left: 0;
   background-color:rgba(3,3,3); ;
   opacity: 0;
@@ -442,7 +445,6 @@ li.active .sidebar_element{
 }
 
 .blackback.active{
-  top: 60px;
   left: 0;
   background-color:rgba(3,3,3); ;
   width: 100vw;
@@ -455,7 +457,7 @@ li.active .sidebar_element{
 .background{
   position: fixed;
   display: block;
-  top: 60px;
+  top: 80px;
   left: 0;
   background-color:var(--background-color) ;
   width: 100vw;
@@ -471,6 +473,26 @@ li.active .sidebar_element{
   }
   .comment{
     margin-right: 0px;
+  }
+  .header-icon{
+    width: 35%;
+    height: 60px;
+  }
+  header {
+    height: 60px;
+  }
+  .blank{
+    height: 60px;
+  }
+  aside{
+    top: 60px;
+    height:calc(100% - 60px); 
+  }
+  .background{
+    top: 60px;
+  }
+  .blackback{
+    top: 60px;
   }
  }
 </style>

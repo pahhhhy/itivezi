@@ -167,7 +167,7 @@ watch(roadStationList, (newValue) => {
       />
     </div>
     <div class="form">
-      <p>画像(任意)</p>
+      <p>画像</p>
       <RegStep2image
       v-if="uniqueKey"
       v-bind:index="Index"
@@ -201,12 +201,12 @@ p{
   margin: 0;
 }
 .myvege_popup{
-  width: 340px;
+  width: 400px;
   z-index: 10;
   border-radius: 20px;
   padding: 20px;
   background-color: white;
-  margin:  20px auto;
+  margin:  20px;
 }
 .myvege_popup h1{
   border-bottom: 1px solid var(--text-color);
@@ -229,15 +229,19 @@ p{
   display: flex;
   margin-top: 10px;
 }
+
 .form_check{
   display: flex;
 }
+.form_check label{
+  font-size: 18px;
+}
 .form_check_element{
-  width: 60px;
-}.form-check-label{
+  width: 80px;
 }
 .form p{
-  width: 50px;
+  font-size: 20px;
+  width: 80px;
   margin: auto 0;
 }
 .unit {
@@ -249,5 +253,21 @@ p{
 }
 .unit>.form-control{
   width: 175px;
+}
+@media (max-width: 575.98px) { 
+  .myvege_popup{
+    width: 340px;
+    margin: 20px auto;
+  }
+  .form p{
+    font-size: 16px;
+    width: 50px;
+  }
+  .form_check label{
+    font-size: 16px;
+  }
+  .form_check_element{
+    width: 60px;
+  }
 }
 </style>

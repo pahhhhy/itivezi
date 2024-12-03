@@ -188,7 +188,7 @@ function onPushBack(){
 </template>
 <style>
 .myvege_card{
-  width: 340px;
+  width: 512px;
   height: 250px;
   border: none;
   background-color: white;
@@ -200,8 +200,21 @@ function onPushBack(){
   overflow-y: scroll;
   height: 200px;
 }
+.myvege_elementgroup::-webkit-scrollbar {
+  width:10px;
+}
+.myvege_elementgroup::-webkit-scrollbar-thumb {
+  background: var(--line-color);
+  width: 6px;
+  height: 6px;
+  border-radius: 5px;
+}
 .myvege_card h2{
   border-bottom: 1px solid var(--text-color);
 }
-
+@media (max-width: 575.98px) { 
+  .myvege_card{
+    width: 340px;
+  }
+}
 </style>

@@ -99,7 +99,7 @@ h2{
   margin-bottom: 0;
 }
 .myorder_card{
-  width: 340px;
+  width: 512px;
   height: 250px;
   border: none;
   background-color: white;
@@ -123,4 +123,19 @@ h2{
   overflow-y: scroll;
   height: 200px;
 }
+.myorder_elementgroup::-webkit-scrollbar {
+  width:10px;
+}
+.myorder_elementgroup::-webkit-scrollbar-thumb {
+  background: var(--line-color);
+  width: 6px;
+  height: 6px;
+  border-radius: 5px;
+}
+@media (max-width: 575.98px) { 
+  .myorder_card{
+    width: 340px;
+  }
+}
+
 </style>

@@ -65,14 +65,13 @@ function onPushCart(){
     background-color: white;
     border-radius: 10px;
     border: none;
-    width: 340px;
+    width: 800px;
     height: 240px;
-    padding: 15px ;
+    padding: 25px ;
     margin: 10px auto;
 }
 .Order_title{
-    width: 270px;
-    margin: 0 20px;
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -81,6 +80,9 @@ function onPushCart(){
     border-bottom:1px  solid  var(--text-color);
     background-color: white;
     color: var(--text-color);
+}
+.Order_title h1{
+    font-size: 27px;
 }
 .Order_title i{
     font-size: 25px;
@@ -95,10 +97,25 @@ function onPushCart(){
     padding: 20px;
     background-color: white;
 }
-    
-    .vege_group{
-        display: flex;
-        overflow-x: scroll;
-        overflow-y: hidden;
+.vege_group{
+    display: flex;
+    overflow-x: scroll;
+    overflow-y: hidden;
+}
+.vege_group::-webkit-scrollbar {
+    width:0px;
+}
+.vege_group::-webkit-scrollbar-thumb {
+    background: var(--line-color);
+    width: 6px;
+    height: 1px;
+    border-radius: 5px;
+}
+@media (max-width: 575.98px) { 
+    .Order_card{
+        width: 340px;
+        padding: 10px 15px;
     }
+}
+
 </style>

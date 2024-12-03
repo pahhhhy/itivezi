@@ -272,7 +272,7 @@ function isday(){
     
   </article>
   <div class="blackback" v-if="isPopup"></div>
-<div v-if="currentUser&&!isNone">
+<div v-if="currentUser&&!isNone" class="item_group">
         <div v-for="(element,uniqueKey) in cartData[currentUser.uid]" :key="uniqueKey">
             <cartElement 
             v-bind:data="element"
@@ -323,7 +323,7 @@ p{
   border-bottom: 1px solid var(--text-color);
 }
 .cart_card p{
-  font-size: 16px;
+  font-size: 20px;
   font-weight: bolder;
 }
 .cartnone{
@@ -338,23 +338,20 @@ p{
 }
 .cart_card{
   background-color: white;
-  padding: 10px;
+  padding: 30px;
   border-radius: 5px;
-  width: 340px;
-  height: 250px;
+  width: 800px;
+
   margin: 20px auto;
 }
 .cart_card h1{
   border-bottom: 1px solid var(--text-color);
   color: var(--text-color);
-  font-size: 20px;
+  font-size: 32px;
   font-weight: bolder;
 }
 .cart_card h2{
   color: var(--other-color);
-}
-.cart_card p{
-  font-size: 14px;
 }
 .selectdate{
   display: flex;
@@ -381,5 +378,27 @@ p{
   left: 0;
   z-index: 5;
   background-color: rgba(3,3,3,0.5);;
+}
+.item_group{
+  display: flex;
+  width: 800px;
+  margin: auto;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+@media (max-width: 575.98px) { 
+  .cart_card{
+    width: 340px;
+    padding: 10px;
+  }
+  .cart_card h1{
+    font-size: 20px;
+  }
+  .cart_card p{
+    font-size: 16px;
+  }
+  .item_group{
+    width: 340px;
+  }
 }
 </style>
