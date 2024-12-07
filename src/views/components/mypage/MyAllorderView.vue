@@ -111,7 +111,7 @@ function reverseOrdertables(data: Ordertables): Ordertables {
   }
   .myallorder_elementgroup{
     overflow-y: scroll;
-    height: 700px;
+    height: calc(100vh - 200px);
   }
   .myallorder_elementgroup::-webkit-scrollbar {
     width:10px;

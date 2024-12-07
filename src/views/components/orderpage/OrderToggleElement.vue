@@ -191,13 +191,12 @@ p{
 }
 .popup_order{
   position: fixed;
-  width: 340px;
-  height: 300px;
+  width: 512px;
   z-index: 10;
   border: 1px solid gray;
   border-radius: 20px;
   top: calc(50% - 150px);
-  left: calc(50% - 170px);
+  left: calc(50% - 256px);
   padding: 20px;
   background-color: white;
 }
@@ -206,15 +205,17 @@ p{
 }
 .popup_order h1{
   border-bottom: 1px solid var(--text-color);
-  font-size: 24px;
+  font-size: 36px;
   font-weight: bolder;
 }
 .popup_order h4{
   color: var(--other-color);
 }
-
+.popup_order label{
+  font-size: 18px;
+}
 .Wholesaler {
-  font-size: 14px!important;
+  font-size: 20px!important;
   text-align: left;
   border-radius: 10px;
   display: inline-block;
@@ -223,14 +224,33 @@ p{
   border: 2px solid var(--main-color);
 }
 .popup_order p{
-  margin: 5px 0;
-
-  font-size: 18px;
+  margin: 10px 0;
+  font-size: 24px;
   font-weight: bolder;
 }
 .popup_order button{
   font-size: 16px;
   margin: 0 5px;
   font-weight: bolder;
+}
+@media (max-width: 575.98px) { 
+  .popup_order{
+    width: 340px;
+    left: calc(50% - 170px);
+  }
+  .popup_order h1{
+    font-size: 24px;
+  }
+  .Wholesaler{
+    font-size: 14px!important;
+  }
+  .popup_order p{
+    margin: 5px 0;
+    font-size: 18px;
+    font-weight: bolder;
+  }
+  .popup_order label{
+    font-size: 14px;
+  }
 }
 </style>
