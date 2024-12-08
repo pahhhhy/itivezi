@@ -7,9 +7,9 @@ import {
   updateProfile,
   type User
 } from 'firebase/auth'
+import {  watch } from 'vue'
 import { ref, onMounted } from 'vue'
 import '../assets/main.css'
-import email_form from './components/SignupForm.vue'
 import router from '../router'
 // ログインしているユーザーデータ
 const currentUser = ref<User | null>(null)
@@ -18,18 +18,12 @@ const password = ref<string>('')
 const isPopup = ref<boolean>(false)
 const errorMes = ref<string>('')
 const name = ref<string>('')
-const onInput = (inputEmail: string, inputPassword: string, inputName: string): void => {
-  
-  if (inputEmail != '') {
-    email.value = inputEmail
-  }
-  if (inputPassword != '') {
-    password.value = inputPassword
-  }
-  if (inputName != '') {
-    name.value = inputName
-  }
-}
+const onemorePas=ref<string>("")
+const isName=ref<boolean>(true)
+const isPassword=ref<boolean>(true)
+const isEmail=ref<boolean>(true)
+const isOnemore=ref<boolean>(true)
+const errorPassword=ref<string>('')
 //確認メールの送信
 function sendEmailVerifi(user: User) {
   sendEmailVerification(user)
@@ -40,14 +34,41 @@ function sendEmailVerifi(user: User) {
     
 }
 
+watch(email, (): void => {
+  if(email.value!='')isEmail.value=true
+})
+watch(password, (): void => {
+  if(password.value!='')isPassword.value=true
+})
+watch(name, (): void => {
+  if(name.value!='')isName.value=true
+})
+watch(onemorePas, (): void => {
+  if(onemorePas.value!='')isOnemore.value=true
+})
 // サインアップ処理
-function createAccount(email: string, password: string, name: string) {
+function isValidPassword(password:string) {
+  // 正規表現: 英数字のみ、8〜20文字
+  const passwordRegex = /^[a-zA-Z0-9]{8,20}$/;
+  return passwordRegex.test(password);
+}
+async function createAccount(email: string, password: string, name: string) {
   const auth = getAuth()
-  if (email == '' || email == '') {
+  if (email == '' || password == ''||name ==''||!isValidPassword(password)||onemorePas.value!=password) {
+    if(name=='')isName.value=false
+    if(!isValidPassword(password)) {
+      isPassword.value=false
+    errorPassword.value="パスワードは英数字を使用した8~20文字にしてください"
+  }
+    if(password==''){
+      isPassword.value=false
+      errorPassword.value="パスワードを入力してください"
+    }
+    if(email=='')isEmail.value=false
+    if(onemorePas.value!=password) isOnemore.value=false
     return
   }
-
-  createUserWithEmailAndPassword(auth, email, password)
+  await createUserWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
       // 成功時処理
       const user = userCredential.user
@@ -75,13 +96,14 @@ function setErrorMsg(element: string) {
       errorMes.value = '正しいメールアドレスをいれてください'
       break
     case ' Firebase: Password should be at least 6 characters (auth/weak-password).':
-      errorMes.value = '6~20文字以内でパスワードを作ってください'
+      errorMes.value = 'パスワードは英数字を使用した8~20文字にしてください'
       break
     case 'Firebase: Error (auth/email-already-in-use).':
       errorMes.value = 'メールアドレスはもうつかわれています'
       break
     default:
       errorMes.value = ''
+      break
   }
 }
 onMounted(() => {
@@ -123,9 +145,52 @@ function OnPushBack(){
       <h1>アカウントの新規作成</h1>
     </div>
     <article class="form_card">
-      <email_form v-on:OnInput="onInput"></email_form>
-      <h1 v-if="currentUser != null">{{ currentUser.displayName }}様</h1>
-      <h2 v-if="errorMes != ''" style="color: red">{{ errorMes }}</h2>
+      <div class="mb-3">
+        <label for="exampleFormControlInput1" class="form-label">アカウント名</label>
+        <input
+          type="text"
+          class="form-control"
+          id="exampleFormControlInput1"
+          placeholder="name"
+          v-model="name"
+        />
+      </div>
+      <p v-if="!isName" class="errorMessage">アカウント名を入力してください</p>
+      <div class="mb-3">
+        <label for="exampleFormControlInput1" class="form-label">メールアドレス</label>
+        <input
+          type="email"
+          class="form-control"
+          id="exampleFormControlInput1"
+          placeholder="name@example.com"
+          v-model="email"
+        />
+      </div>
+      <p v-if="!isEmail" class="errorMessage">メールアドレスを入力してください</p>
+      <p v-if="errorMes != ''" class="errorMessage">{{ errorMes }}</p>
+      <label for="inputPassword5" class="form-label">パスワード</label>
+      <input
+        type="password"
+        id="inputPassword5"
+        class="form-control"
+        aria-labelledby="passwordHelpBlock"
+        v-model="password"
+      />
+      
+      <div id="passwordHelpBlock" class="form-text">
+        パスワードは 8 ～ 20
+        文字で、文字と数字を含める必要があります。スペース、特殊文字、絵文字を含めることはできません。
+      </div>
+      <p v-if="!isPassword" class="errorMessage">{{errorPassword}}</p>
+      <label for="inputPassword5" class="form-label">パスワードの再入力</label>
+      <input
+        type="password"
+        id="inputPassword5"
+        class="form-control"
+        aria-labelledby="passwordHelpBlock"
+        v-model="onemorePas"
+      />
+      <p v-if="!isOnemore" class="errorMessage">パスワードが一致しません</p>
       <div class="d-flex justify-content-center my-3 ">
         <button type="button" class="btn btn-success form_button" @click="createAccount(email, password, name)">
           登録する
@@ -136,7 +201,7 @@ function OnPushBack(){
     </article>
     <section class="popup_signup" v-show="isPopup">
       <h2>
-        メールアドレスの確認メールをおくりました。<br />メールを確認してください<br />認証しないとログインできません
+        メールアドレスの確認メールをおくりました<br />メールを確認してください<br />認証しないとログインできません
       </h2>
       <button class="btn btn-success form_button " v-on:click="OnPushBack"> 戻る</button>
     </section>
@@ -183,6 +248,9 @@ body {
   background-color: white;
   box-shadow: rgba(60, 69, 50, 0.2) 0px 6px 20px;
   padding: 1.5rem;
+}
+.errorMessage{
+  color: red;
 }
 .popup_signup >button{
   margin-top: 30px;
