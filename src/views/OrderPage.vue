@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useVegeStore } from '@/stores/vege'
 import { ref,watch,onMounted} from 'vue'
-import OrderHistory from './components/orderpage/OrderHistory.vue';
 import { useOrderDataStore } from '@/stores/orderData';
 import OrderEachToggle from './components/orderpage/OrderEachToggle.vue';
 import { useCartStore } from '@/stores/cart';
