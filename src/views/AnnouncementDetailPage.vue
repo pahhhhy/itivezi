@@ -1,19 +1,22 @@
 <script setup lang="ts">
-import {getCurrentInstance, onMounted, ref} from 'vue'
-import {getDatabase, onValue, ref as fireRef} from 'firebase/database'
-import {useRoute} from 'vue-router'
-import type {Announcement, MavonEditorToolbars} from '@/types/announcement/announcement'
-import {formatServerTimestamp} from '@/utils/database'
-import {useAuthData} from '@/utils/auth'
-import {deleteAnnouncement, updateAnnouncement} from '@/utils/announcement/announcements'
+import { getCurrentInstance, onMounted, ref } from 'vue'
+import { getDatabase, onValue, ref as fireRef } from 'firebase/database'
+import { useRoute } from 'vue-router'
+import type { Announcement, MavonEditorToolbars } from '@/types/announcement/announcement'
+import { formatServerTimestamp } from '@/utils/database'
+import { useAuthData } from '@/utils/auth'
+import { deleteAnnouncement, updateAnnouncement } from '@/utils/announcement/announcements'
 import router from '@/router'
-import {useAnnouncementFiles} from '@/utils/announcement/useAnnouncementFilesHook'
-import {storageURLPattern} from '@/types/files'
+import { useAnnouncementFiles } from '@/utils/announcement/useAnnouncementFilesHook'
+import { storageURLPattern } from '@/types/files'
 import KebabMenu from '@/views/components/common/kebabMenu.vue'
-import type {AnnouncementCommentType, AnnouncementCommentWithViewData} from '@/types/announcement/announcementComments'
+import type {
+  AnnouncementCommentType,
+  AnnouncementCommentWithViewData
+} from '@/types/announcement/announcementComments'
 import AnnouncementCommentWrapper from '@/views/components/announcementPage/announcementCommentWrapper.vue'
-import {useUserDataStore} from "@/stores/userPublicData";
-import type {UserPublicData} from "@/types/common/userPublicData";
+import { useUserDataStore } from '@/stores/userPublicData'
+import type { UserPublicData } from '@/types/common/userPublicData'
 
 const route = useRoute()
 // 実際に表示する投稿内容。編集する場合はこちらが変更される
@@ -23,15 +26,15 @@ const originalAnnouncement = ref<Announcement>()
 // ユーザーアイコンつきコメントを保管する変数
 const commentsWithViewData = ref<AnnouncementCommentWithViewData[] | null>(null)
 // 画像やファイルを扱うHooks
-const {files, content, imgAdd, deleteImgFromStorage, splitFiles} = useAnnouncementFiles()
+const { files, content, imgAdd, deleteImgFromStorage, splitFiles } = useAnnouncementFiles()
 // 編集モードかどうかを保管する変数
 const editMode = ref<boolean>(false)
 // 保存していない変更があったかどうかを保管する変数
 const isEdited = ref(false)
 // ログイン中のユーザー情報
-const {user, role} = useAuthData()
+const { user, role } = useAuthData()
 // ユーザー情報を取得する関数
-const {getUserPublicData} = useUserDataStore()
+const { getUserPublicData } = useUserDataStore()
 // 投稿者のpublicData
 const authorPublicData = ref<null | UserPublicData>(null)
 
@@ -43,14 +46,12 @@ const announceId = route.params.announceId
 // このページで表示する投稿のリファレンス
 const announcementRef = fireRef(getDatabase(), 'testAnnouncements/announcements/' + announceId)
 
-
 onMounted(() => {
   // 投稿を非同期で取得
   onValue(announcementRef, async (snapshot) => {
     originalAnnouncement.value = snapshot.val()
     title.value = snapshot.val().title
     content.value = snapshot.val().content
-
 
     // 投稿ページへの直リンクでない限りキャッシュを利用できる
     authorPublicData.value = await getUserPublicData(snapshot.val().userId)
@@ -79,17 +80,17 @@ onMounted(() => {
 
       // 親コメントを日時順にソート
       parentComments.sort(
-          (a, b) =>
-              (typeof a.updatedAt === 'number'
-                  ? a.updatedAt
-                  : typeof a.createdAt === 'number'
-                      ? a.createdAt
-                      : 0) -
-              (typeof b.updatedAt === 'number'
-                  ? b.updatedAt
-                  : typeof b.createdAt === 'number'
-                      ? b.createdAt
-                      : 0)
+        (a, b) =>
+          (typeof a.updatedAt === 'number'
+            ? a.updatedAt
+            : typeof a.createdAt === 'number'
+              ? a.createdAt
+              : 0) -
+          (typeof b.updatedAt === 'number'
+            ? b.updatedAt
+            : typeof b.createdAt === 'number'
+              ? b.createdAt
+              : 0)
       )
 
       // ソート済みの配列に結果を格納
@@ -99,17 +100,17 @@ onMounted(() => {
         sortedComments.push(parent)
         if (childComments[parent.commentId]) {
           childComments[parent.commentId].sort(
-              (a, b) =>
-                  (typeof a.updatedAt === 'number'
-                      ? a.updatedAt
-                      : typeof a.createdAt === 'number'
-                          ? a.createdAt
-                          : 0) -
-                  (typeof b.updatedAt === 'number'
-                      ? b.updatedAt
-                      : typeof b.createdAt === 'number'
-                          ? b.createdAt
-                          : 0)
+            (a, b) =>
+              (typeof a.updatedAt === 'number'
+                ? a.updatedAt
+                : typeof a.createdAt === 'number'
+                  ? a.createdAt
+                  : 0) -
+              (typeof b.updatedAt === 'number'
+                ? b.updatedAt
+                : typeof b.createdAt === 'number'
+                  ? b.createdAt
+                  : 0)
           )
           sortedComments.push(...childComments[parent.commentId])
         }
@@ -119,9 +120,9 @@ onMounted(() => {
     }
 
     const commentsArray = sortComments(
-        Object.keys(comments).map((key) => {
-          return {...comments[key], commentId: key}
-        })
+      Object.keys(comments).map((key) => {
+        return { ...comments[key], commentId: key }
+      })
     )
 
     const commentsInfoAdded = commentsArray.map(async (comment) => {
@@ -135,9 +136,8 @@ onMounted(() => {
 
 // コメントを渡すと送信者のアイコンと名前を追加して返す関数
 const addUserInfoToComment = async (
-    comment: AnnouncementCommentType
+  comment: AnnouncementCommentType
 ): Promise<AnnouncementCommentWithViewData> => {
-
   const userPublicData = await getUserPublicData(comment.userId)
 
   return {
@@ -155,14 +155,14 @@ const addUserInfoToComment = async (
 const updateFilesFromContent = () => {
   // "![<id>](<URLPatternから始まるurl>)"のような形式の文字列を探す正規表現
   const regex = new RegExp(
-      `!\\[(.*)]\\((${storageURLPattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}.*)\\)`,
-      'g'
+    `!\\[(.*)]\\((${storageURLPattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}.*)\\)`,
+    'g'
   )
   // contentの中身から画像ファイルを検知してfilesに追加
   for (const match of content.value.matchAll(regex)) {
     const id = match[1]
     const url = match[2]
-    files.value.push({id, url})
+    files.value.push({ id, url })
   }
 }
 
@@ -185,7 +185,7 @@ const deleteAnnounce = async () => {
 // mdエディターのツールバーの表示を制御する関数
 const toolbarsPropertiesForVisibility = (visible: boolean) => {
   function createUniformObjectFromType<T extends MavonEditorToolbars>(
-      value: any
+    value: any
   ): { [K in keyof T]: any } {
     const result: { [K in keyof T]: any } = {} as { [K in keyof T]: any }
     return new Proxy(result, {
@@ -207,7 +207,7 @@ const saveAnnounce = () => {
   console.log(content.value)
 
   // 編集したかの検知は外部で行っている
-  updateAnnouncement(announcementRef, {title: title.value, content: content.value})
+  updateAnnouncement(announcementRef, { title: title.value, content: content.value })
   if (originalAnnouncement.value) {
     originalAnnouncement.value.title = title.value
     originalAnnouncement.value.content = content.value
@@ -215,7 +215,7 @@ const saveAnnounce = () => {
   isEdited.value = checkIsEdited()
 
   updateFilesFromContent()
-  const {deleteFiles} = splitFiles(files.value, content.value)
+  const { deleteFiles } = splitFiles(files.value, content.value)
   deleteImgFromStorage(deleteFiles)
 }
 
@@ -268,15 +268,32 @@ const onChange = (mdEditorsContent: string | null = null) => {
     <div class="contents-wrapper" v-if="originalAnnouncement">
       <div class="scroll-wrapper">
         <div class="announcement-wrapper">
-          <p class="announcement-title">{{ title }}</p>
+          <div class="announcement-title-wrapper">
+            <router-link to="/announcements">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                height="24px"
+                viewBox="0 -960 960 960"
+                width="24px"
+                fill="#5C5C5C"
+              >
+                <path d="M640-80 240-480l400-400 71 71-329 329 329 329-71 71Z" />
+              </svg>
+            </router-link>
+            <h1 class="announcement-title">{{ title }}</h1>
+          </div>
           <div class="announcement-head">
-            <img v-if="authorPublicData?.iconURL" :src="authorPublicData.iconURL" alt="掲示板投稿者アイコン"/>
+            <img
+              v-if="authorPublicData?.iconURL"
+              :src="authorPublicData.iconURL"
+              alt="掲示板投稿者アイコン"
+            />
             <div class="announcement-head-text">
               <p class="announcement-author">{{ authorPublicData?.userName }}</p>
               <p class="announcement-date">
-                <span>{{ formatServerTimestamp(originalAnnouncement.createdAt) }}</span>
+                <span>{{ formatServerTimestamp(originalAnnouncement.createdAt, "yyyy/MM/dd hh:mm") }}</span>
                 <span v-if="originalAnnouncement.updatedAt">
-                  (最終更新: {{ formatServerTimestamp(originalAnnouncement.updatedAt) }})</span
+                  (最終更新: {{ formatServerTimestamp(originalAnnouncement.updatedAt, "yyyy/MM/dd hh:mm") }})</span
                 >
               </p>
             </div>
@@ -300,33 +317,40 @@ const onChange = (mdEditorsContent: string | null = null) => {
           </div>
           <p v-if="editMode">
             <input
-                @change="onChange()"
-                v-model="title"
-                @keydown="onChange()"
-                @keyup="onChange()"
-                :readonly="!editMode"
+              @change="onChange()"
+              v-model="title"
+              @keydown="onChange()"
+              @keyup="onChange()"
+              :readonly="!editMode"
             />
           </p>
           <mavon-editor
-              :key="editMode"
-              v-model="content"
-              :class="`announcement-content ${editMode ? 'editing' : ''}`"
-              language="ja"
-              :subfield="editMode"
-              defaultOpen="preview"
-              :boxShadow="false"
-              placeholder="ここにテキストを入力..."
-              :toolbars="toolbarsPropertiesForVisibility(editMode)"
-              @change="
+            :key="editMode"
+            v-model="content"
+            :class="`announcement-content ${editMode ? 'editing' : ''}`"
+            language="ja"
+            :subfield="editMode"
+            defaultOpen="preview"
+            :boxShadow="false"
+            placeholder="ここにテキストを入力..."
+            editor-background="white"
+            preview-background="white"
+            style="background: white"
+            :toolbars="toolbarsPropertiesForVisibility(editMode)"
+            @change="
               (changedContent: string) => {
                 onChange(changedContent)
               }
             "
-              @imgAdd="imgAdd"
+            @imgAdd="imgAdd"
           />
 
-          <AnnouncementCommentWrapper v-if="user" :user="user" :commentsWithViewData="commentsWithViewData ?? []"
-                                      :announcementRef="announcementRef"/>
+          <AnnouncementCommentWrapper
+            v-if="user"
+            :user="user"
+            :commentsWithViewData="commentsWithViewData ?? []"
+            :announcementRef="announcementRef"
+          />
         </div>
       </div>
     </div>
@@ -365,6 +389,13 @@ const onChange = (mdEditorsContent: string | null = null) => {
   scrollbar-width: none;
 }
 
+.announcement-title-wrapper {
+  display: flex;
+  flex-direction: row;
+  margin: 1em 0;
+  border-bottom: 1px solid var(--text-color)
+}
+
 .announcement-title {
   font-size: 1.5em;
   font-weight: bold;
@@ -374,8 +405,10 @@ const onChange = (mdEditorsContent: string | null = null) => {
   height: fit-content;
 }
 
-.announcement-content { /* mavon-editorで使う */
+.announcement-content {
+  /* mavon-editorで使用中 */
   z-index: 0;
+  background: white !important;
 }
 
 .announcement-head {
