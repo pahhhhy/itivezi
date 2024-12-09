@@ -30,6 +30,7 @@ const setTextInputMatchHeight = () => {
 </script>
 <template>
   <div class="messageBox">
+
     <textarea rows="1" required placeholder="コメントを入力..." id="messageInput"
               @focus="setTextInputMatchHeight()" @keyup="setTextInputMatchHeight()" @keydown="setTextInputMatchHeight()" @change="setTextInputMatchHeight"  v-model="model"/>
     <button id="sendButton" @click="onSendClicked">
@@ -60,7 +61,7 @@ const setTextInputMatchHeight = () => {
   justify-content: center;
   background-color: #f8f8f8;
   padding: 0 15px;
-  border-radius: 10px;
+  border-radius: 20px;
   border: 1px solid rgb(110, 110, 110);
 }
 

@@ -210,24 +210,30 @@ const fileUpload = async (files: File[]): Promise<{ [fileId: string]: ChatFile }
             <!--          1メッセージカード-->
             <div
                 v-else
-                class="message-container"
+                :class="`message-container ${message.senderUid === userid ? 'my-message' : 'other-message'}`"
             >
-              <!--            アイコン, 送信者名, 送信日時-->
-              <div class="message-header">
-                <img :src="usersPublicData[message.senderUid].iconURL" alt="user icon"/>
-                <div>{{ usersPublicData[message.senderUid].userName }}</div>
-                <div>{{ formatServerTimestamp(message.createdAt) }}</div>
-                <!--                操作-->
-                <div v-if="message.senderUid === userid">
-                  <button @click="undoMessage(message)">送信取り消し</button>
 
-                </div>
+
+              <div v-if="message.senderUid !== userid" class="message-icon">
+                <img :src="usersPublicData[message.senderUid].iconURL" alt="user icon"/>
               </div>
 
-              <!--            本文-->
-              <div class="message-content">
-                {{ message.message }}
+              <!--            アイコン, 送信者名, 送信日時-->
+<!--              <div class="message-header">-->
+<!--                <div>{{ formatServerTimestamp(message.createdAt) }}</div>-->
+<!--                &lt;!&ndash;                操作&ndash;&gt;-->
+<!--                <div v-if="message.senderUid === userid">-->
+<!--                  <button @click="undoMessage(message)">送信取り消し</button>-->
 
+<!--                </div>-->
+<!--              </div>-->
+
+              <!--            本文と投稿者-->
+              <div class="message-content">
+                <p v-if="message.senderUid !== userid" class="message-user-name">{{ usersPublicData[message.senderUid].userName }}</p>
+                <p class="message-text">
+                  {{ message.message }}
+                </p>
                 <!--              添付ファイル-->
                 <div v-if="message.attachedFiles" style="margin-top: 10px; border-top: 1px solid #252525;">
                   <div v-for="file in message.attachedFiles" :key="file.fileId">
@@ -247,6 +253,9 @@ const fileUpload = async (files: File[]): Promise<{ [fileId: string]: ChatFile }
                   </div>
                 </div>
               </div>
+
+              <p class="date">{{ formatServerTimestamp(message.createdAt, "hh:mm") }}</p>
+
             </div>
             <!--          1メッセージカードここまで-->
           </div>
@@ -276,23 +285,38 @@ const fileUpload = async (files: File[]): Promise<{ [fileId: string]: ChatFile }
 </template>
 
 <style scoped>
+p {
+  margin: 0;
+}
 .message-container {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  gap: 10px;
 
-  border: 1px solid #ccc;
-  margin: 10px;
-  padding: 10px;
-
+  margin: 0 10px;
+  padding: 0 5px;
+  max-width: 80%;
 }
 
-.message-header {
+.my-message {
+  align-self: flex-end;
+  margin-left: auto;
+  flex-direction: row-reverse;
+}
+
+.other-message {
+  align-self: flex-start;
+  margin-right: auto;
+}
+
+.message-icon {
   display: flex;
   align-items: start;
   height: 30px;
+  margin-top: 1em;
 }
 
-.message-header img {
+.message-icon img {
   width: 30px;
   height: 30px;
   border-radius: 50%;
@@ -302,7 +326,29 @@ const fileUpload = async (files: File[]): Promise<{ [fileId: string]: ChatFile }
   margin-left: 10px;
 }
 
+.message-user-name {
+  font-size: .85em;
+}
+
+.date {
+  font-size: .8em;
+  margin: auto 0 4px;
+}
+
 .message-content {
-  margin: -10px 0 20px 40px;
+}
+
+.message-text {
+  padding: 10px;
+  border-radius: 20px;
+}
+
+.my-message .message-text {
+  background-color: var(--sub-color);
+
+}
+
+.other-message .message-text  {
+  background-color: var(--background-color);
 }
 </style>
