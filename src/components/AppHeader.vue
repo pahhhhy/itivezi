@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref,watch } from 'vue'
+import { ref,watch,onMounted } from 'vue'
 import { RouterLink,useRoute } from 'vue-router'
 import {
   getAuth,
@@ -7,7 +7,6 @@ import {
 } from 'firebase/auth'
 import router from '@/router'
 import {useIconStore}from "../stores/icon"
-import gsap from 'gsap';
 import { useUserStore } from '@/stores/userData';
 import { usefireUserStore } from '@/stores/fireUserdata';
 import { useCartStore } from '@/stores/cart';
@@ -54,7 +53,8 @@ enum PageMode{
   login="login",
   logout="Logout",
   chat="Chat",
-  announcements="Announcements"
+  announcements="Announcements",
+  addinfo="Addinfo"
 }
 
 const userStore=useUserStore()
@@ -71,6 +71,7 @@ const cartCount=ref<number>(0)
   const route = useRoute();
   const isBurger=ref<boolean>()
 const blackback=ref(null)
+const isAddInfo=ref<boolean>(false)
 if(currentUser.value)
 cartCount.value=cartStore.getCountCart(currentUser.value.uid)
 //バーガーの押したときにはアニメーションを走らせ、
@@ -137,15 +138,21 @@ function isActive(page: PageMode): boolean {
       return route.path === '/chat';
     case PageMode.login:
       return route.path === '/login';
+      case PageMode.addinfo:
+        isAddInfo.value=true
+        return route.path === '/add-info';
     default:
       return false;
   }
 }
-
+onMounted(() => {
+  isAddInfo.value=isActive(PageMode.addinfo)
+})
 watch(() => userStore.currentUser, (newUser) => {
   currentUser.value = newUser;
   if(currentUser.value)
   iconStore.initURL(currentUser.value)
+  isAddInfo.value=isActive(PageMode.addinfo)
 });
 watch(() => fireUseStore.myUserData, (newUser) => {
   myUserData.value = newUser;
@@ -190,8 +197,8 @@ async function onPushCart(){
     </div>
     
     <nav>
-      <button v-on:click="onPushComment" v-if="currentUser != null"><i class="bi bi-chat-right-text comment"  ></i></button>
-        <div class="cart "  v-on:click="onPushCart" v-if="currentUser != null">
+      <button v-on:click="onPushComment" v-if="currentUser != null&&!isAddInfo"><i class="bi bi-chat-right-text comment"  ></i></button>
+        <div class="cart "  v-on:click="onPushCart" v-if="currentUser != null &&!isAddInfo">
           <div class="cart_icon" v-if="cartCount==0">
             <img src="../assets/cart.png" alt="">
           </div>
@@ -200,12 +207,12 @@ async function onPushCart(){
           </div>
           <p class="d-none d-sm-block">買い物かご</p>
         </div>
-        <div class="myacount" v-if="currentUser != null" v-on:click="onPushMypage">
+        <div class="myacount" v-if="currentUser != null &&!isAddInfo" v-on:click="onPushMypage">
           <div v-if="iconURL != null&&iconURL != '' "><img v-bind:src="iconURL" alt="" class="aicon-image"></div>
           <p v-if="currentUser != null" class="d-none d-sm-block">{{ currentUser.displayName }}様</p>
         </div>
-      <i v-if="!isBurger" v-on:click="onClickBurger(PageMode.None)" class="bi bi-justify burger"></i>
-      <i v-if="isBurger" v-on:click="onClickBurger(PageMode.None)" class="bi bi-x-lg burger"></i>
+      <i v-if="!isBurger&&!isAddInfo" v-on:click="onClickBurger(PageMode.None)" class="bi bi-justify burger"></i>
+      <i v-if="isBurger&&!isAddInfo" v-on:click="onClickBurger(PageMode.None)" class="bi bi-x-lg burger"></i>
     </nav>
   </header>
   <aside  ref="sidebar" v-bind:class="{active:isBurger}">

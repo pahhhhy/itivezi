@@ -117,7 +117,7 @@ watch(() => fireUseStore.myUserData, (newUser) => {
   <div class="card" v-if="myRole!=Role.Buyer && myRole!=Role.Farmer">
     <h2>管理者画面</h2>
     <p>注文画面の野菜の並べ替えや各種データの出力や初期設定などができます</p>
-    <button v-on:click="onClickCard(PageMode.announcements)">管理者画面へ</button>
+    <button v-on:click="onClickCard(PageMode.owner)">管理者画面へ</button>
   </div>
 </div>
 </template>

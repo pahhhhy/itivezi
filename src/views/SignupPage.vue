@@ -7,7 +7,7 @@ import {
   updateProfile,
   type User
 } from 'firebase/auth'
-import {  watch } from 'vue'
+import {  computed, watch } from 'vue'
 import { ref, onMounted } from 'vue'
 import '../assets/main.css'
 import router from '../router'
@@ -24,6 +24,48 @@ const isPassword=ref<boolean>(true)
 const isEmail=ref<boolean>(true)
 const isOnemore=ref<boolean>(true)
 const errorPassword=ref<string>('')
+//メールの認証メールを送ってから認証するまでユーザーでータを監視して
+//認証したらログインページに飛ばすようにする
+let intervalId:ReturnType<typeof setInterval>|null=null
+const isVerified=computed(() => currentUser.value!=null&&currentUser.value.emailVerified);
+const isClear=computed(() => currentUser.value!=null&&!currentUser.value.emailVerified);
+watch(isClear, (newVal): void => {
+  if (newVal) {
+    startUpdatingInfo();
+  } else {
+    stopUpdatingInfo();
+  }
+})
+watch(isVerified, (newVal): void => {
+  if (newVal) {
+    router.push("/add-info")
+  }
+})
+// 情報を更新する関数
+async function updateInfo() {
+  const auth = getAuth();
+  if (auth.currentUser) {
+    await auth.currentUser.reload(); // ユーザー情報を更新
+    currentUser.value = { ...auth.currentUser }; // 新しいオブジェクトとして再代入
+  } else {
+    currentUser.value = null;
+  }
+}
+// インターバルを開始する関数
+function startUpdatingInfo() {
+  if (intervalId !== null) return; // 既にインターバルが実行中の場合は何もしない
+  intervalId = setInterval(() => {
+    updateInfo();
+  }, 1000); // 1秒ごとに更新
+}
+
+// インターバルを停止する関数
+function stopUpdatingInfo() {
+  if (intervalId !== null) {
+    clearInterval(intervalId);
+    intervalId = null; // インターバルIDをリセット
+  }
+}
 //確認メールの送信
 function sendEmailVerifi(user: User) {
   sendEmailVerification(user)
@@ -75,6 +117,15 @@ async function createAccount(email: string, password: string, name: string) {
       
       isPopup.value = true
       sendEmailVerifi(user)
+      const auth = getAuth()
+  onAuthStateChanged(auth, (user) => {
+    if (user != null ) {
+      currentUser.value = user
+      
+    } else {
+      currentUser.value = null
+    }
+  })
       return updateProfile(user, { displayName: name })
     })
     .then(() => {
@@ -109,20 +160,6 @@ function setErrorMsg(element: string) {
 onMounted(() => {
   const auth = getAuth()
   onAuthStateChanged(auth, (user) => {
-    if (user) {
-      if (user.emailVerified) {
-        // メール確認済み、ログイン許可
-        
-      } else {
-        // メール未確認、ログイン不許可
-        
-      }
-    } else {
-      // ユーザーがサインアウトしている状態
-    }
-  })
-  // ログインしているユーザーを取得する
-  onAuthStateChanged(auth, (user) => {
     if (user != null && user.emailVerified) {
       currentUser.value = user
       
@@ -131,16 +168,14 @@ onMounted(() => {
     }
   })
 })
-function OnPushBack(){
-  router.push('/login')
-  window.scrollTo({
-    top: 0,       // 一番上に移動
-  });
-}
+
 </script>
 
 <template>
+ 
+  
   <article class="signup_page">
+    
     <div class="title">
       <h1>アカウントの新規作成</h1>
     </div>
@@ -201,9 +236,9 @@ function OnPushBack(){
     </article>
     <section class="popup_signup" v-show="isPopup">
       <h2>
-        メールアドレスの確認メールをおくりました<br />メールを確認してください<br />認証しないとログインできません
+        メールアドレスの確認メールをおくりました<br />メールの認証を行うと自動で次のページに移ります
       </h2>
-      <button class="btn btn-success form_button " v-on:click="OnPushBack"> 戻る</button>
+      <!-- <button class="btn btn-success form_button " v-on:click="OnPushBack"> 戻る</button> -->
     </section>
   </article>
   
