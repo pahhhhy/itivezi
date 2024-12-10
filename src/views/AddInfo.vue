@@ -123,7 +123,7 @@ const handleFileChange = async (event: Event) => {
         </div>
         <div  class="uproad_image">
           <img v-if="userProfileImage&&userProfileImage!='' " :src="userProfileImage" alt="Uploaded Image" />
-          <img src="../../../assets/Noimage.jpeg" alt="何もない" v-if="userProfileImage==''">
+          <img src="../assets/Noimage.jpeg" alt="何もない" v-if="userProfileImage==''">
         </div>
       </div>
     </div>
