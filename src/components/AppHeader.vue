@@ -172,6 +172,9 @@ watch(
     }
   }
 );
+watch(() => route.path, (newPath) => {
+    isAddInfo.value=isActive(PageMode.addinfo)
+});
 async function onPushComment(){
   await router.push('/chat')
 }
