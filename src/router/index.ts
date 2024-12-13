@@ -13,6 +13,8 @@ import Cart from '../views/CartPage.vue'
 import Chat from '../views/ChatPage.vue'
 import AnnouncementsPage from "@/views/AnnouncementsPage.vue";
 import AnnouncementDetailPage from "@/views/AnnouncementDetailPage.vue";
+import ResetPasswordPage from '@/views/ResetPasswordPage.vue'
+import VerifiPage from '@/views/VerifiPage.vue'
 import {
   getAuth
 } from 'firebase/auth'
@@ -106,6 +108,16 @@ const router = createRouter({
       path: '/announcements/:announceId',
       name: 'announcement',
       component: AnnouncementDetailPage,
+    },
+    {
+      path: '/reset',
+      name: 'reset',
+      component: ResetPasswordPage,
+    },
+    {
+      path: '/verifi',
+      name: 'verifi',
+      component: VerifiPage,
     },
   ]
 })
