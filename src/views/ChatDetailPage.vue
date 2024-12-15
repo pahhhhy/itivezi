@@ -140,13 +140,13 @@ const checkFile = (file: File) => {
 
 const mediaType = (file: File) => {
   const extension = file.name.split('.').pop()
-  if (extension === 'jpg' || extension === 'jpeg' || extension === 'png' || extension === 'gif' || extension === 'svg' || extension === 'webp') {
+  if (extension === 'jpg' || extension === 'jpeg' || extension === 'png' || extension === 'gif' || extension === 'svg' || extension === 'webp' || extension === 'JPG' || extension === 'JPEG' || extension === 'PNG' || extension === 'GIF' || extension === 'SVG' || extension === 'WEBP') {
     return 'image'
   }
-  if (extension === 'mp4' || extension === 'webm' || extension === 'ogg') {
+  if (extension === 'mp4' || extension === 'webm' || extension === 'MP4' || extension === 'WEBM') {
     return 'video'
   }
-  if (extension === 'mp3' || extension === 'wav' || extension === 'ogg') {
+  if (extension === 'mp3' || extension === 'wav' || extension === 'ogg' || extension === 'MP3' || extension === 'WAV' || extension === 'OGG') {
     return 'audio'
   }
   return 'file'
@@ -256,7 +256,15 @@ const fileUpload = async (files: File[]): Promise<{ [fileId: string]: ChatFile }
                       <audio :src="file.fileUrl" controls></audio>
                       <p>{{ file.fileName }}</p>
                     </div>
-                    <a class="message-attached-file" v-else :href="file.fileUrl" target="_blank">{{ file.fileName }}</a>
+                    <div v-else class="message-attached-file">
+                      <svg width="33" height="33" viewBox="0 0 33 33" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <g clip-path="url(#clip0_505_827)">
+                          <path d="M18.9097 2.44824H9.64697C8.71871 2.44824 7.82848 2.81699 7.1721 3.47337C6.51572 4.12975 6.14697 5.01998 6.14697 5.94824V26.9482C6.14697 27.8765 6.51572 28.7667 7.1721 29.4231C7.82848 30.0795 8.71871 30.4482 9.64697 30.4482H23.647C24.5752 30.4482 25.4655 30.0795 26.1218 29.4231C26.7782 28.7667 27.147 27.8765 27.147 26.9482V10.6855C27.1469 10.2214 26.9624 9.77635 26.6342 9.44824L20.147 2.96099C19.8189 2.63278 19.3738 2.44834 18.9097 2.44824ZM19.272 8.57324V5.07324L24.522 10.3232H21.022C20.5578 10.3232 20.1127 10.1389 19.7845 9.81068C19.4563 9.48249 19.272 9.03737 19.272 8.57324ZM10.522 18.1982C10.2899 18.1982 10.0673 18.1061 9.90325 17.942C9.73916 17.7779 9.64697 17.5553 9.64697 17.3232C9.64697 17.0912 9.73916 16.8686 9.90325 16.7045C10.0673 16.5404 10.2899 16.4482 10.522 16.4482H22.772C23.004 16.4482 23.2266 16.5404 23.3907 16.7045C23.5548 16.8686 23.647 17.0912 23.647 17.3232C23.647 17.5553 23.5548 17.7779 23.3907 17.942C23.2266 18.1061 23.004 18.1982 22.772 18.1982H10.522ZM9.64697 20.8232C9.64697 20.5912 9.73916 20.3686 9.90325 20.2045C10.0673 20.0404 10.2899 19.9482 10.522 19.9482H22.772C23.004 19.9482 23.2266 20.0404 23.3907 20.2045C23.5548 20.3686 23.647 20.5912 23.647 20.8232C23.647 21.0553 23.5548 21.2779 23.3907 21.442C23.2266 21.6061 23.004 21.6982 22.772 21.6982H10.522C10.2899 21.6982 10.0673 21.6061 9.90325 21.442C9.73916 21.2779 9.64697 21.0553 9.64697 20.8232ZM10.522 25.1982C10.2899 25.1982 10.0673 25.1061 9.90325 24.942C9.73916 24.7779 9.64697 24.5553 9.64697 24.3232C9.64697 24.0912 9.73916 23.8686 9.90325 23.7045C10.0673 23.5404 10.2899 23.4482 10.522 23.4482H17.522C17.754 23.4482 17.9766 23.5404 18.1407 23.7045C18.3048 23.8686 18.397 24.0912 18.397 24.3232C18.397 24.5553 18.3048 24.7779 18.1407 24.942C17.9766 25.1061 17.754 25.1982 17.522 25.1982H10.522Z" fill="black"/>
+                        </g>
+                      </svg>
+
+                      <a :href="file.fileUrl" target="_blank">{{ file.fileName }}</a>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -361,22 +369,44 @@ p {
 }
 
 .my-message .message-text, .my-message .message-attached {
+  border-radius: 20px;
   background-color: var(--sub-color);
 
 }
 
 .other-message .message-text, .other-message .message-attached  {
+  border-radius: 20px;
   background-color: var(--background-color);
 }
 
 .message-attached {
-
 }
 
 .message-attached-file {
-  display: block;
-  height: 24px;
+  position: relative;
+  height: 64px;
+  width: fit-content;
 
+  svg {
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    transform: translateY(-50%);
+
+  }
+
+  a {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-content: center;
+    padding: 0 20px 0 48px;
+    height: 100%;
+    width: fit-content;
+    text-decoration: none;
+    text-align: center;
+    color: var(--text-color);
+  }
 
 }
 </style>

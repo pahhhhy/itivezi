@@ -59,12 +59,11 @@ onMounted(async () => {
       </div>
       <div class="lower-wrapper" v-if="usersPublicData && room.lastMessage">
         <!--          最終メッセージ-->
-        <p class="last-message">{{ room.lastMessage?.message }}</p>
+        <p class="last-message" v-if="room.lastMessage">{{ room.lastMessage.attachedFiles ? "ファイルを送信しました" : room.lastMessage.message }}</p>
         <!--          未読数-->
         <p v-if="room.lastReadAt[user.uid] && room.unreadCount !== 0" class="unread">
           {{ room.unreadCount <= 99 ? room.unreadCount : "99+" }}</p>
 
-          {{ room.unreadCount}}
       </div>
       <div class="right-wrapper">
         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#666666">
