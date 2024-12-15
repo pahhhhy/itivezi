@@ -13,6 +13,10 @@ export interface ChatRoom {
     lastReadAt: Record<string, ServerTimestamp>; // userIdをキーにして最後に表示されたメッセージのtimestampを保持
 }
 
+export interface ChatRoomWithUnreadCount extends ChatRoom {
+    unreadCount: number;
+}
+
 export interface ChatFile {
     fileId: string;
     messageId: string;

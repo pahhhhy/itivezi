@@ -10,21 +10,26 @@ import {RouterLink} from 'vue-router'
 import type {UserPublicData} from '@/types/common/userPublicData'
 import {v4 as uuidv4} from 'uuid';
 import {getDownloadURL, getStorage, ref as storageRef, uploadBytes} from 'firebase/storage'
+import {collectRoomName} from "../utils/chat/chat";
+import {useChatRoomStore} from "@/stores/chatRoom";
 
 interface HTMLInputEvent extends Event {
   target: HTMLInputElement & EventTarget
 }
 
-const {user, roomId} = defineProps<{
+const {user} = defineProps<{
   user: User
-  roomId: string
 }>()
 const userid = ref<string>(user.uid)
 
 // piniaのuseUserStoreから登場ユーザーをすべて取得
 const {getUserPublicData} = useUserDataStore();
 
+const {currentRoom} = useChatRoomStore()
+const roomId = currentRoom?.roomId || '';
+
 const usersPublicData = ref<Record<string, UserPublicData> | undefined>(undefined) // undefinedにしているのは、getUserPublicDataが非同期で呼ばれるため
+
 let unmounted = false
 onMounted(() => {
   unmounted = false
@@ -32,6 +37,7 @@ onMounted(() => {
 onUnmounted(() => {
   unmounted = true
 })
+
 const {messages, isEnd, checkUpdateLastReadAt, sendMessage, undoMessage, readMoreMessages} = useChatMessageHook(roomId, user, (data) => {
   // onMessageUpdatedのコールバック
   // dataは{messageId: ChatMessage}の形式
@@ -195,7 +201,8 @@ const fileUpload = async (files: File[]): Promise<{ [fileId: string]: ChatFile }
 
 <template>
   <div>
-    <h1>chat detail</h1>
+<!--    ルーム名-->
+<!--    <h1>{{collectRoomName(room, )}}</h1>-->
     <router-link to="/chat">&lg;戻る</router-link>
     <div class="chat">
       <div v-if="messages">
@@ -254,7 +261,17 @@ const fileUpload = async (files: File[]): Promise<{ [fileId: string]: ChatFile }
                 </div>
               </div>
 
-              <p class="date">{{ formatServerTimestamp(message.createdAt, "hh:mm") }}</p>
+              <p class="date">
+                {{
+                // 今年送信されたメッセージで無いなら年も表示
+                new Date().getFullYear() !== new Date(message.createdAt as number).getFullYear()
+                ? formatServerTimestamp(message.createdAt as number, "yyyy")+"/": ""
+                }}{{
+                  // 今日送信されたメッセージかどうか
+                  new Date().toDateString() === new Date(message.createdAt as number).toDateString()
+                  ? formatServerTimestamp(message.createdAt as number, "hh:mm")
+                  : formatServerTimestamp(message.createdAt as number, "MM/dd hh:mm")
+                }}</p>
 
             </div>
             <!--          1メッセージカードここまで-->
