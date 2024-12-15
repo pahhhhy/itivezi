@@ -231,11 +231,11 @@ const fileUpload = async (files: File[]): Promise<{ [fileId: string]: ChatFile }
               <!--            本文と投稿者-->
               <div class="message-content">
                 <p v-if="message.senderUid !== userid" class="message-user-name">{{ usersPublicData[message.senderUid].userName }}</p>
-                <p class="message-text">
+                <p class="message-text" v-if="message.message || !message.attachedFiles" > <!-- 本文が空白でファイルが付いているのなら、本文を表示しない -->
                   {{ message.message }}
                 </p>
                 <!--              添付ファイル-->
-                <div v-if="message.attachedFiles" style="margin-top: 10px; border-top: 1px solid #252525;">
+                <div class="message-attached" v-if="message.attachedFiles">
                   <div v-for="file in message.attachedFiles" :key="file.fileId">
                     <div v-if="file.fileType === 'image'">
                       <img :src="file.fileUrl" alt="attached file"/>
@@ -249,7 +249,7 @@ const fileUpload = async (files: File[]): Promise<{ [fileId: string]: ChatFile }
                       <audio :src="file.fileUrl" controls></audio>
                       <p>{{ file.fileName }}</p>
                     </div>
-                    <a v-else :href="file.fileUrl" target="_blank">{{ file.fileName }}</a>
+                    <a class="message-attached-file" v-else :href="file.fileUrl" target="_blank">{{ file.fileName }}</a>
                   </div>
                 </div>
               </div>
@@ -343,12 +343,23 @@ p {
   border-radius: 20px;
 }
 
-.my-message .message-text {
+.my-message .message-text, .my-message .message-attached {
   background-color: var(--sub-color);
 
 }
 
-.other-message .message-text  {
+.other-message .message-text, .other-message .message-attached  {
   background-color: var(--background-color);
+}
+
+.message-attached {
+
+}
+
+.message-attached-file {
+  display: block;
+  height: 24px;
+
+
 }
 </style>

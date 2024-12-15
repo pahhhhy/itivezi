@@ -291,20 +291,18 @@ const onChange = (mdEditorsContent: string | null = null) => {
             <div class="announcement-head-text">
               <p class="announcement-author">{{ authorPublicData?.userName }}</p>
               <p class="announcement-date">
-                <span>{{ formatServerTimestamp(originalAnnouncement.createdAt, "yyyy/MM/dd hh:mm") }}</span>
+                <span>{{
+                  formatServerTimestamp(originalAnnouncement.createdAt, 'yyyy/MM/dd hh:mm')
+                }}</span>
                 <span v-if="originalAnnouncement.updatedAt">
-                  (最終更新: {{ formatServerTimestamp(originalAnnouncement.updatedAt, "yyyy/MM/dd hh:mm") }})</span
-                >
+                  (最終更新:
+                  {{ formatServerTimestamp(originalAnnouncement.updatedAt, 'yyyy/MM/dd hh:mm') }})
+                </span>
               </p>
             </div>
             <div class="kebab">
               <div v-if="role == '管理者'">
                 <kebabMenu>
-                  <!--                  TODO: 次やるのはこれ作るでもいいし, 喫緊なのはコメントの体裁を整えてコメントの編集, ユーザーアイコンと投稿者表示,-->
-                  <!--                  すること (画像は不要) ← これやる-->
-                  <!--                  TODO: コメントのmd対応は本質ではないのでwysiwygは投稿のところにのみ使おう-->
-                  <!--                  TODO: その後に投稿カテゴリー追加もやる ← categoryIdはもうあるのでこれを追加する処理,-->
-                  <!--                  作成編集削除一覧管理する処理(AnnouncementsList内で良し)を作る-->
                   <button v-if="!editMode" @click="allowEditMode">編集</button>
                   <button v-if="editMode" :disabled="!isEdited" @click="saveAnnounce">
                     保存して公開
@@ -336,6 +334,7 @@ const onChange = (mdEditorsContent: string | null = null) => {
             editor-background="white"
             preview-background="white"
             style="background: white"
+            :toolbars-flag="editMode"
             :toolbars="toolbarsPropertiesForVisibility(editMode)"
             @change="
               (changedContent: string) => {
@@ -393,7 +392,7 @@ const onChange = (mdEditorsContent: string | null = null) => {
   display: flex;
   flex-direction: row;
   margin: 1em 0;
-  border-bottom: 1px solid var(--text-color)
+  border-bottom: 1px solid var(--text-color);
 }
 
 .announcement-title {
@@ -408,7 +407,7 @@ const onChange = (mdEditorsContent: string | null = null) => {
 .announcement-content {
   /* mavon-editorで使用中 */
   z-index: 0;
-  background: white !important;
+  padding-top: 1em;
 }
 
 .announcement-head {
@@ -417,7 +416,8 @@ const onChange = (mdEditorsContent: string | null = null) => {
   justify-content: start;
   align-items: start;
   gap: 1rem;
-  border-bottom: 1px solid var(--text-color);
+  border-bottom: 1px solid lightgray;
+  margin-bottom: 4px;
   padding-bottom: 1em;
   height: fit-content;
 }
@@ -460,7 +460,6 @@ p {
 }
 
 .announcement-author {
-  font-size: 1.2em;
   font-weight: bold;
 }
 
