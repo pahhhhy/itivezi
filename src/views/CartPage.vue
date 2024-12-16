@@ -8,7 +8,7 @@ import router from '@/router'
 import { usefireUserStore } from '@/stores/fireUserdata';
 interface Usertables{
     affiliation:String[]
-    gender:string
+   
     name:string
     phoneNumber:number
     place:string

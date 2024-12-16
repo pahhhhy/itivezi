@@ -3,24 +3,6 @@ import {ref,watch} from 'vue'
 import {RouterLink} from 'vue-router'
 import AppTopOwner from './components/AppTop/AppTopOwner.vue';
 import { useUserStore } from '@/stores/userData';
-import { usefireUserStore } from '@/stores/fireUserdata';
-interface Usertables{
-    affiliation:String[]
-    gender:string
-    name:string
-    phoneNumber:number
-    place:string
-    role:Role
-    email:string
-}
-enum Role{
-    Onwer="管理者",
-    Buyer="飲食店",
-    Farmer="農家",
-    Murone="室根",
-    Kawasaki="川崎",
-    None=""
-  }
 const userStore=useUserStore()
 const currentUser = ref(userStore.currentUser);
 watch(() => userStore.currentUser, (newUser) => {

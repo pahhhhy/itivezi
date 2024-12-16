@@ -24,7 +24,7 @@ interface AllUserTables{
 }
 interface Usertables{
     affiliation:String[]
-    gender:string
+   
     name:string
     phoneNumber:number
     place:string
@@ -87,9 +87,6 @@ async function checkMyData() {
     if (userData.value[currentUser.value.uid] == null) {
       isOk = false
     } else {
-      if (userData.value[currentUser.value.uid].gender == null) {
-        isOk = false
-      }
       if (
         userData.value[currentUser.value.uid].place == null ||
         userData.value[currentUser.value.uid].place == ''

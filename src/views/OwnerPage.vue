@@ -10,7 +10,6 @@ import OwnerUserList from './components/OwnerPage/OwnerUserList.vue'
 import { usefireUserStore } from '@/stores/fireUserdata';
 interface Usertables{
     affiliation:String[]
-    gender:string
     name:string
     phoneNumber:number
     place:string

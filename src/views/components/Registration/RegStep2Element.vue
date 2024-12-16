@@ -58,6 +58,12 @@ const vegeUnitTempList = ref<string[]>(Object.values(vegeUnitTemp))
 const vegeMoney=ref<number>(0)
 const roadStationList=ref<string[]>([])
 const uproadData=ref<Vegetables>(props.uproadData)
+  const Checklist = ref(
+  Object.values(Mode).reduce((acc, key) => {
+    acc[key] = false; // 初期値を false に設定
+    return acc;
+  }, {} as Record<string, boolean>)
+);
 function updateVegeMoney(value: number, index: number,mode:string) {
   
   if(mode==Mode.Money){

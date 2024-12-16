@@ -8,7 +8,6 @@ import { useUserStore } from '@/stores/userData';
 
 interface Usertables{
     affiliation:String[]
-    gender:string
     name:string
     phoneNumber:number
     place:string
@@ -23,7 +22,6 @@ enum Role{
   }
   enum CheckList{
     Name="name",
-    Gender="gender",
     Role="role",
     place="place",
     phoneNumber="number",
@@ -60,12 +58,14 @@ watch(() => fireUseStore.myUserData, (newUser) => {
 // Firebase Storageに画像をアップロードし、Firebase Authのプロフィールを更新
 const uploadImage = async () => {
   if (currentUser.value) {
-    console.log("uploadimgage"+selectedImage.value+":::"+currentUser.value)
+    console.log(selectedImage.value)
     await iconStore.uploadImage(selectedImage.value, currentUser.value);
     currentUser.value.reload()
     if(currentUser.value.photoURL)
     userProfileImage.value=currentUser.value.photoURL
-  } 
+  } else{
+    console.log("cunnetiuserがない")
+  }
 };
 function updateDisName(user: User, name: string) {
   updateProfile(user, { displayName: name })
@@ -80,24 +80,26 @@ async function updateInfo() {
     userData.value.role != '' &&
     userData.value.place!= '' &&
     userData.value.phoneNumber != 0&&
-    userData.value.gender != ''&&
-    userData.value.name!=""&&
-    userData.value.affiliation.length !=0&&
-    currentUser.value?.photoURL!=null
+    userData.value.name!=""
   ) {
-    if (currentUser.value&&currentUser.value.email) {
+    if(userData.value.role==Role.Farmer&&userData.value.affiliation.length == 0){
+      
+      if(userData.value.affiliation.length == 0) Checklist.value[CheckList.affiliation]=true
+      return
+    }
+      if (currentUser.value&&currentUser.value.email) {
       updateDisName(currentUser.value, userData.value.name)
       userData.value.email=currentUser.value.email
       await fireUseStore.update(userData.value,currentUser.value.uid)
       await fireUseStore.roadFireUseData(currentUser.value.uid)
       router.push('/')
     }
+    
+    
   } else{
     if(userData.value.role == '') Checklist.value[CheckList.Role]=true
     if(userData.value.place == '') Checklist.value[CheckList.place]=true
     if(userData.value.phoneNumber == 0) Checklist.value[CheckList.phoneNumber]=true
-    if(userData.value.gender == '') Checklist.value[CheckList.Gender]=true
-    if(userData.value.affiliation.length == 0) Checklist.value[CheckList.affiliation]=true
   }
 }
 // ファイルが選択されたときにファイルデータを保持
@@ -122,7 +124,6 @@ function stringToNumber(event:Event){
 function inputdata(mode:CheckList){
   if(mode==CheckList.Role&&Checklist.value[CheckList.Role]){Checklist.value[CheckList.Role]=false}
   if(mode==CheckList.affiliation&&Checklist.value[CheckList.affiliation]){Checklist.value[CheckList.affiliation]=false}
-  if(mode==CheckList.Gender&&Checklist.value[CheckList.Gender]){Checklist.value[CheckList.Gender]=false}
   if(mode==CheckList.place&&Checklist.value[CheckList.place]){Checklist.value[CheckList.place]=false}
   return
 }
@@ -134,12 +135,12 @@ function inputdata(mode:CheckList){
       <h1>追加情報</h1>
     </div>
     <div class="mb-3">
-      <h4 for="exampleFormControlInput1" class="form-label">名前</h4>
+      <h4 for="exampleFormControlInput1" class="form-label">屋号・店名</h4>
       <input
         type="text"
         class="form-control"
         id="exampleFormControlInput1"
-        placeholder="name"
+        placeholder="○○商事"
         v-model="userData.name"
       />
     </div>
@@ -152,25 +153,17 @@ function inputdata(mode:CheckList){
         </div>
         <div  class="uproad_image">
           <img v-if="userProfileImage&&userProfileImage!='' " :src="userProfileImage" alt="Uploaded Image" />
-          <img src="../assets/Noimage.jpeg" alt="何もない" v-if="userProfileImage==''">
+          <img src="../assets/icon.png" alt="何もない" v-if="userProfileImage==''">
         </div>
       </div>
     </div>
-    <h4>性別</h4>
-    <select class="form-select-addinfo" aria-label="Default select example" v-model="userData.gender" v-on:change="inputdata(CheckList.Gender)">
-      <option selected disabled value=""> 選択してください</option>
-      <option value="men">男性</option>
-      <option value="women">女性</option>
-      <option value="other">その他</option>
-    </select>
-    <p class="errorMes" v-show="Checklist[CheckList.Gender]">性別を選択してください</p>
-    <h4>役職</h4>
+    <h4>事業種</h4>
     <select class="form-select-addinfo" aria-label="Default select example" v-model="userData.role" v-on:change="inputdata(CheckList.Role)">
       <option selected disabled value=""> 選択してください</option>
-      <option value="農家">農家</option>
-      <option value="飲食店">飲食店</option>
+      <option :value="Role.Farmer">加工業</option>
+      <option :value="Role.Buyer">飲食店・ホテル</option>
     </select>
-    <p class="errorMes" v-show="Checklist[CheckList.Role]">役職を選択してください</p>
+    <p class="errorMes" v-show="Checklist[CheckList.Role]">自業種を選択してください</p>
     <div class="mb-3">
       <h4 for="exampleFormControlInput1" class="form-label">住所</h4>
       <input
@@ -195,7 +188,8 @@ function inputdata(mode:CheckList){
       />
     </div>
     <p class="errorMes" v-show="Checklist[CheckList.phoneNumber]">電話番号を入力してください</p>
-    <h4>所属</h4>
+    <article v-if="userData.role==Role.Farmer">
+      <h4>所属</h4>
   <div class="form-check">
     <input
       class="form-check-input"
@@ -219,9 +213,10 @@ function inputdata(mode:CheckList){
     <label class="form-check-label" for="affiliationWomen"> 川崎 </label>
   </div>
     <p class="errorMes" v-show="Checklist[CheckList.affiliation]">所属を選択してください</p>
+    </article>
+    
     <button type="button" class="btn btn-primary" @click="updateInfo">更新する</button>
   </article>
-  
 </template>
 <style>
 .title {

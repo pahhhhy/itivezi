@@ -103,8 +103,8 @@ function onPushX(element:string){
   {{ selectVege }} -->
   <section class="reg1_card">
     <h2>野菜を選択してください</h2>
-    <div class="select_group">
-      <div class="select_element" v-for="(element) in selectVegeList" v-bind:key="element">
+    <div class="select_group" v-if="selectVegeList.length!=0">
+      <div class="select_element" v-for="(element) in selectVegeList" v-bind:key="element" >
         <p>{{element}}</p>
         <button v-on:click="onPushX(element)"><i class="bi bi-x-circle-fill"></i></button>
       </div>

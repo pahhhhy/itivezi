@@ -28,7 +28,7 @@ interface CartElementTables{
 }
 interface Usertables{
     affiliation:String[]
-    gender:string
+   
     name:string
     phoneNumber:number
     place:string
@@ -218,7 +218,8 @@ async function onPushCart(){
         </div>
         <div class="myacount" v-if="currentUser != null &&!isHide" v-on:click="onPushMypage">
           <div v-if="iconURL != null&&iconURL != '' "><img v-bind:src="iconURL" alt="" class="aicon-image"></div>
-          <p v-if="currentUser != null" class="d-none d-sm-block">{{ currentUser.displayName }}様</p>
+          <div v-if="iconURL == null||iconURL == '' " style="text-align: center;"><img src="../assets/icon.png" alt="" class="aicon-image"></div>
+          <p v-if="currentUser != null" class="d-none d-sm-block">{{ currentUser.displayName }}</p>
         </div>
       <i v-if="!isBurger&&!isHide" v-on:click="onClickBurger(PageMode.None)" class="bi bi-justify burger"></i>
       <i v-if="isBurger&&!isHide" v-on:click="onClickBurger(PageMode.None)" class="bi bi-x-lg burger"></i>

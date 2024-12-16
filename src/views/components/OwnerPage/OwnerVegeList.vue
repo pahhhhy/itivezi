@@ -7,7 +7,7 @@ import { usefireUserStore } from '@/stores/fireUserdata';
 import OwnerVegeOwnerPage from './OwnerVegeOwnerPage.vue'
 interface Usertables{
     affiliation:String[]
-    gender:string
+   
     name:string
     phoneNumber:number
     place:string

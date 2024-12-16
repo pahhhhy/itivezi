@@ -13,7 +13,7 @@ enum Role{
 }
 interface Usertables{
     affiliation:String[]
-    gender:string
+   
     name:string
     phoneNumber:number
     place:string
@@ -36,7 +36,6 @@ async function onPushDelete(){
 </script>
 <template>
 <th>{{props.UserData.name}}</th>
-<th>{{props.UserData.gender}}</th>
 <th>{{props.uid}}</th>
 <th>{{props.UserData.phoneNumber}}</th>
 <th> {{props.UserData.email}}</th>
