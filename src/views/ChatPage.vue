@@ -25,7 +25,6 @@ watch(() => chatRoomStore.currentRoom, (value) => {
       <ChatDetailPage v-else :user="user"/>
     </ChatRoomDataWrapper>
   </div>
-  <button @click="console.log(currentRoomId)">currentRoom</button>
 </template>
 
 
@@ -34,6 +33,8 @@ watch(() => chatRoomStore.currentRoom, (value) => {
   display: flex;
   flex-direction: column;
   align-items: center;
+  max-width: min(var(--breakpoint),100vw);
+  margin: 0 auto;
 }
 
 </style>

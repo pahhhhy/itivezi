@@ -5,6 +5,8 @@
     --acsent-color:#77AF9C;
     --background-color:#f8f8f8;
     --other-color:#008037;
+
+    --breakpoint: 851px;
   }
 /* Eric Meyer's Reset CSS v2.0 */
 html, body, div, span, applet, object, iframe,
