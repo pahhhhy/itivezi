@@ -1,19 +1,13 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useChatMessageHook } from '@/utils/chat/useChatMessageHook'
-import type { ChatFile, ChatMessage } from '@/types/chat/chat'
-import { serverTimestamp } from 'firebase/database'
 import type { User } from 'firebase/auth'
 import { useUserDataStore } from '@/stores/userPublicData'
 import { RouterLink } from 'vue-router'
 import type { UserPublicData } from '@/types/common/userPublicData'
-import { v4 as uuidv4 } from 'uuid'
-import { getDownloadURL, getStorage, ref as storageRef, uploadBytes } from 'firebase/storage'
 import { useChatRoomStore } from '@/stores/chatRoom'
 import ChatMessageCard from '@/views/components/chatPage/ChatMessageCard.vue'
 import ChatInputArea from '@/views/ChatInputArea.vue'
-
-
 
 const { user } = defineProps<{
   user: User
@@ -21,12 +15,11 @@ const { user } = defineProps<{
 const userid = ref<string>(user.uid)
 
 // piniaのuseUserStoreから登場ユーザーをすべて取得
-const { getUserPublicData } = useUserDataStore()
+const { getUserPublicData, usersPublicData } = useUserDataStore()
 
 const { currentRoom } = useChatRoomStore()
 const roomId = currentRoom?.roomId || ''
 
-const usersPublicData = ref<Record<string, UserPublicData> | undefined>(undefined) // undefinedにしているのは、getUserPublicDataが非同期で呼ばれるため
 
 let unmounted = false
 onMounted(() => {
@@ -40,34 +33,31 @@ const { messages, isEnd, checkUpdateLastReadAt, sendMessage, undoMessage, readMo
   useChatMessageHook(roomId, user, (data) => {
     // onMessageUpdatedのコールバック
     // dataは{messageId: ChatMessage}の形式
+
     if (unmounted) return
-    const allMessageSenders = Object.values(data).map((message) => message.senderUid)
-    const uniqueMessageSenders = Array.from(new Set(allMessageSenders))
-    uniqueMessageSenders.forEach((uid: string) => {
-      getUserPublicData(uid).then((data) => {
-        if (!usersPublicData.value) usersPublicData.value = {}
-        if (!usersPublicData.value[uid] && data)
-          usersPublicData.value = {
-            ...usersPublicData.value,
-            [uid]: data
-          }
-      })
-    })
+    // const allMessageSenders = Object.values(data).map((message) => message.senderUid)
+    // const uniqueMessageSenders = Array.from(new Set(allMessageSenders))
+    // uniqueMessageSenders.forEach((uid: string) => {
+    //   getUserPublicData(uid).then((data) => {
+    //     if (!usersPublicData.value) usersPublicData.value = {}
+    //     if (!usersPublicData.value[uid] && data)
+    //       usersPublicData.value = {
+    //         ...usersPublicData.value,
+    //         [uid]: data
+    //       }
+    //   })
+    // })
+
     checkUpdateLastReadAt() // ChatDetailPageからのみ呼び出すことで表示されていることが保証される
   })
-
-
-
-
-
 </script>
 
 <template>
-  <div>
+  <div class="chatroom-wrapper">
     <!--    ルーム名-->
     <!--    <h1>{{collectRoomName(room, )}}</h1>-->
     <router-link to="/chat">&lg;戻る</router-link>
-    <div class="chat">
+    <div class="chatroom-viewport">
       <div v-if="messages">
         <p v-if="isEnd">一番上まで読み込みました</p>
         <button v-else @click="readMoreMessages()">さらに読み込む</button>
@@ -80,8 +70,8 @@ const { messages, isEnd, checkUpdateLastReadAt, sendMessage, undoMessage, readMo
           />
         </div>
       </div>
-      <ChatInputArea :roomId="roomId" :user="user"/>
     </div>
+    <ChatInputArea class="input-area" :roomId="roomId" :user="user" />
   </div>
 </template>
 
@@ -89,6 +79,40 @@ const { messages, isEnd, checkUpdateLastReadAt, sendMessage, undoMessage, readMo
 p {
   margin: 0;
 }
+
+.chatroom-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  height: calc(100vh - 80px); /* ヘッダーの高さ*/
+
+  overflow: hidden;
+}
+
+.chatroom-viewport {
+  flex-grow: 0;
+  top: 0;
+  left: 0;
+  height: auto;
+  overflow-y: scroll;
+
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.input-area {
+  flex-grow: 1;
+  bottom: 0;
+  left: 0;
+  height: fit-content;
+  max-height: 50%;
+  border-top: gray 1px solid;
+  display: flex;
+  flex-direction: column;
+  padding: 0 12px;
+}
+
 .message-container {
   display: flex;
   flex-direction: row;
