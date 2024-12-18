@@ -30,22 +30,24 @@ interface Emits {
   (event: 'updateUproadData', element: Vegetables): void
   (event: 'changeSelectList', element: string[]): void
 }
-
-const userStore=useUserStore()
-const currentUser = ref(userStore.currentUser);
-const myName=ref<string|null|undefined>(currentUser.value?.displayName) 
-const myUid=ref<string|undefined>(currentUser.value?.uid)
-watch(() => userStore.currentUser, (newUser) => {
-  currentUser.value = newUser;
-  myName.value=currentUser.value?.displayName
-  myUid.value=currentUser.value?.uid
-});
 const emit = defineEmits<Emits>()
 const props = defineProps<Props>()
+const userStore=useUserStore()
+const currentUser = ref(userStore.currentUser);
+const AllVegeList=ref<string[]>(props.vegeKeys)
+const searchVegeList=ref<string[]>(AllVegeList.value)
+const myName=ref<string|null|undefined>(currentUser.value?.displayName) 
+const myUid=ref<string|undefined>(currentUser.value?.uid)
+const searchText=ref<string>("")
 const selectVege = ref<string>("")
   const selectVegeList = ref<string[]>(props.vegeList)
 const step1Error = ref<boolean>(false)
 const uproadData=ref<Vegetables>(props.uproadData)
+  watch(() => userStore.currentUser, (newUser) => {
+  currentUser.value = newUser;
+  myName.value=currentUser.value?.displayName
+  myUid.value=currentUser.value?.uid
+});
 function onStep(next:boolean) {
   if(!next)emit('OnStep', false)
   else{
@@ -97,12 +99,44 @@ watch(selectVegeList, (newVal, oldVal) => {
 function onPushX(element:string){
     selectVegeList.value=selectVegeList.value.filter(item=>item !== element)
 }
+//入力欄から野菜を絞り込む
+async function searchVege(){
+
+  if(searchText.value!=""){
+   // 文字列をひらがなに統一する関数
+   const toHiragana = (text: string): string =>
+    text
+      .normalize("NFKC") // 正規化（全角・半角を統一）
+      .replace(/[\u30a1-\u30f6]/g, match =>
+        String.fromCharCode(match.charCodeAt(0) - 0x60) // カタカナをひらがなに変換
+      );
+
+  // 入力テキストをひらがなに統一
+  const normalizedSearchText = toHiragana(searchText.value);
+
+  // 配列内の各要素をフィルタリング
+  searchVegeList.value= AllVegeList.value.filter(item => toHiragana(item).includes(normalizedSearchText));
+  }else{
+    searchVegeList.value=AllVegeList.value
+  }
+}
 </script>
 <template>
   <!-- {{ uproadData }}
   {{ selectVege }} -->
   <section class="reg1_card">
     <h2>野菜を選択してください</h2>
+    <div class="search_group">
+      <input
+        class="form-control"
+        type="text"
+        placeholder="野菜名を入力してください"
+        aria-label="default input example"
+        v-model="searchText"
+        @input="searchVege"
+      />
+      <i></i>
+    </div>
     <div class="select_group" v-if="selectVegeList.length!=0">
       <div class="select_element" v-for="(element) in selectVegeList" v-bind:key="element" >
         <p>{{element}}</p>
@@ -110,7 +144,7 @@ function onPushX(element:string){
       </div>
     </div>
     <div class="form">
-      <div class="form-check" v-for="(element, index) in props.vegeKeys" :key="element">
+      <div class="form-check" v-for="(element, index) in searchVegeList" :key="element">
         <input
           class="form-check-input"
           type="checkbox"
