@@ -194,6 +194,7 @@ p{
   border-radius: 10px;
   display: inline-block;
   text-align: center;
+  padding: 2px;
   border: 2px solid var(--main-color);
 }
 .card{

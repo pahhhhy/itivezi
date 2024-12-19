@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref,watch } from 'vue'
 import { useUserStore } from '@/stores/userData';
+import router from '@/router';
 enum VegeState{
   Discontinued="Discontinued",
   Available="Available"
@@ -120,6 +121,9 @@ async function searchVege(){
     searchVegeList.value=AllVegeList.value
   }
 }
+async function onPushOwner(){
+  await router.push("/chat")
+}
 </script>
 <template>
   <!-- {{ uproadData }}
@@ -127,6 +131,7 @@ async function searchVege(){
   <section class="reg1_card">
     <h2>野菜を選択してください</h2>
     <div class="search_group">
+      <label><i class="bi bi-search"></i>野菜検索</label>
       <input
         class="form-control"
         type="text"
@@ -164,9 +169,14 @@ async function searchVege(){
       野菜を選択してください
     </h1>
     <button v-on:click="onStep(true)" >次へ</button>
+    <p>もし、登録したい野菜がない場合は管理者まで連絡をお願いします</p>
+    <p v-on:click="onPushOwner" class="Link">管理者へ連絡</p>
   </section>
 </template>
 <style>
+.Link{
+  color: blue;
+}
 .reg1_card{
   width: 800px;
   border: none;
@@ -192,6 +202,7 @@ async function searchVege(){
 }
 .select_group{
   border-radius: 5px;
+  margin-top: 10px;
   border: 1px solid var(--line-color);
   width: 100%;
   padding: 5px;
@@ -214,13 +225,31 @@ async function searchVege(){
   display: inline-block;
   font-size: 20px;
 }
+.search_group label{
+  font-size: 18px;
+  font-weight:bolder ;
+}
 .form{
   display: flex;
   width: 100%;
+  height: 200px;
+  overflow-y: scroll;
   flex-wrap: wrap;
+  align-content: flex-start;
+  margin-top: 20px!important;
+}
+.form::-webkit-scrollbar {
+  width:10px;
+}
+.form::-webkit-scrollbar-thumb {
+  background: var(--line-color);
+  width: 6px;
+  height: 6px;
+  border-radius: 5px;
 }
 .form-check{
   min-width: 33%;
+  height: 25px;
 }
 .form-check label{
   font-size: 20px;
