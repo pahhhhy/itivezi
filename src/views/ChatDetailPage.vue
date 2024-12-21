@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { useChatMessageHook } from '@/utils/chat/useChatMessageHook'
 import type { User } from 'firebase/auth'
 import { useUserDataStore } from '@/stores/userPublicData'
 import { RouterLink } from 'vue-router'
-import type { UserPublicData } from '@/types/common/userPublicData'
 import { useChatRoomStore } from '@/stores/chatRoom'
 import ChatMessageCard from '@/views/components/chatPage/ChatMessageCard.vue'
 import ChatInputArea from '@/views/ChatInputArea.vue'
+import { collectRoomName } from '@/utils/chat/chat'
 
 const { user } = defineProps<{
   user: User
@@ -15,19 +15,28 @@ const { user } = defineProps<{
 const userid = ref<string>(user.uid)
 
 // piniaのuseUserStoreから登場ユーザーをすべて取得
-const { getUserPublicData, usersPublicData } = useUserDataStore()
-
+const { usersPublicData } = useUserDataStore()
 const { currentRoom } = useChatRoomStore()
 const roomId = currentRoom?.roomId || ''
 
+const chatroomViewport = ref<null | HTMLElement>(null);
+const didInitialScroll = ref<boolean>(false);
+const currentTopMessageRef = ref<HTMLElement | null>(null);
 
 let unmounted = false
 onMounted(() => {
   unmounted = false
 })
+
 onUnmounted(() => {
   unmounted = true
 })
+const scrollToBottom = () => {
+  if (!chatroomViewport.value) return;
+  // chatroomViewport.value.scrollTop = chatroomViewport.value.scrollHeight;
+  chatroomViewport.value.scrollTop = 9999999999;
+};
+
 
 const { messages, isEnd, checkUpdateLastReadAt, sendMessage, undoMessage, readMoreMessages } =
   useChatMessageHook(roomId, user, (data) => {
@@ -50,24 +59,48 @@ const { messages, isEnd, checkUpdateLastReadAt, sendMessage, undoMessage, readMo
 
     checkUpdateLastReadAt() // ChatDetailPageからのみ呼び出すことで表示されていることが保証される
   })
+
+// const unsub = watch (() => messages.value.length, () => {
+//   // 新しいメッセージが追加されとき
+// })
+
+const refBottom = ref<null | HTMLElement>(null)
 </script>
 
 <template>
-  <div class="chatroom-wrapper">
+  <div class="chatroom-wrapper" v-if="currentRoom">
     <!--    ルーム名-->
     <!--    <h1>{{collectRoomName(room, )}}</h1>-->
-    <router-link to="/chat">&lg;戻る</router-link>
-    <div class="chatroom-viewport">
+    <div class="room-header">
+      <p>
+        <router-link to="/chat">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            height="24px"
+            viewBox="0 -960 960 960"
+            width="24px"
+            fill="#5C5C5C"
+          >
+            <path d="M640-80 240-480l400-400 71 71-329 329 329 329-71 71Z" />
+          </svg>
+        </router-link>
+        {{ collectRoomName(currentRoom, userid) }}
+      </p>
+    </div>
+    <div class="chatroom-viewport" ref="chatroomViewport">
       <div v-if="messages">
         <p v-if="isEnd">一番上まで読み込みました</p>
         <button v-else @click="readMoreMessages()">さらに読み込む</button>
-        <div v-for="message in messages" :key="message.messageId" style="margin-top: 20px">
+        <div v-for="(message, index) in messages" :key="message.messageId" style="margin-top: 20px">
           <ChatMessageCard
             v-if="usersPublicData && usersPublicData[message.senderUid]"
             :userId="userid"
             :message="message"
             :senderPublicData="usersPublicData[message.senderUid]"
+            :onLoad="messages.length-1 === index && !didInitialScroll ? () => {scrollToBottom();didInitialScroll = true;}: undefined"
+            :ref="index === 0 ? 'currentTopMessageRef' : undefined"
           />
+          <div ref="refBottom" style="margin-bottom: 20px"></div>
         </div>
       </div>
     </div>
@@ -88,6 +121,17 @@ p {
   height: calc(100vh - 80px); /* ヘッダーの高さ*/
 
   overflow: hidden;
+}
+
+.room-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  height: 50px;
+  border-bottom: gray 1px solid;
+  font-size: 1.8em;
+  font-weight: bold;
 }
 
 .chatroom-viewport {

@@ -3,12 +3,19 @@ import type { ChatMessage } from '@/types/chat/chat'
 import type { UserPublicData } from '@/types/common/userPublicData'
 import { formatServerTimestamp } from '@/utils/database'
 import ChatAttachedFile from '@/views/components/chatPage/ChatAttachedFile.vue'
+import { onMounted } from 'vue'
 
-const { userId, message } = defineProps<{
+const { userId, message, senderPublicData, onLoad } = defineProps<{
   userId: string
   message: ChatMessage
   senderPublicData: UserPublicData
+  onLoad?: () => void
 }>()
+
+onMounted(() => {
+  if (!onLoad) return;
+  onLoad();
+})
 </script>
 
 <template>
