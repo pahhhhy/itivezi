@@ -1,110 +1,195 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, watch } from 'vue'
-import { useChatMessageHook } from '@/utils/chat/useChatMessageHook'
-import type { User } from 'firebase/auth'
-import { useUserDataStore } from '@/stores/userPublicData'
-import { RouterLink } from 'vue-router'
-import { useChatRoomStore } from '@/stores/chatRoom'
+import {onMounted, onUnmounted, provide, ref, watch} from 'vue'
+import {useChatMessageHook} from '@/utils/chat/useChatMessageHook'
+import type {User} from 'firebase/auth'
+import {useUserDataStore} from '@/stores/userPublicData'
+import {RouterLink} from 'vue-router'
+import {useChatRoomStore} from '@/stores/chatRoom'
 import ChatMessageCard from '@/views/components/chatPage/ChatMessageCard.vue'
 import ChatInputArea from '@/views/ChatInputArea.vue'
-import { collectRoomName } from '@/utils/chat/chat'
+import {collectRoomName} from '@/utils/chat/chat'
 
-const { user } = defineProps<{
+const {user} = defineProps<{
   user: User
 }>()
 const userid = ref<string>(user.uid)
-
 // piniaのuseUserStoreから登場ユーザーをすべて取得
-const { usersPublicData } = useUserDataStore()
-const { currentRoom } = useChatRoomStore()
+const {getUserPublicData, usersPublicData} = useUserDataStore()
+const {currentRoom} = useChatRoomStore()
 const roomId = currentRoom?.roomId || ''
+provide('user', user);
+provide('roomId', roomId);
+const {messages, isEnd, checkUpdateLastReadAt, readMoreMessages} =
+    useChatMessageHook(roomId, user, (data) => {
+      // onMessageUpdatedのコールバック
+      // dataは{messageId: ChatMessage}の形式
 
+      const allMessageSenders = Object.values(data).map((message) => message.senderUid)
+      const uniqueMessageSenders = Array.from(new Set(allMessageSenders))
+      uniqueMessageSenders.forEach((uid: string) => {
+        getUserPublicData(uid)
+      })
+
+      checkUpdateLastReadAt() // ChatDetailPageからのみ呼び出すことで表示されていることが保証される
+    })
 const chatroomViewport = ref<null | HTMLElement>(null);
+const chatMessagesContainer = ref<null | HTMLElement>(null);
+const oldChatMessagesContainerHeight = ref<number>(0);
+const oldScrollTop = ref<number>(0);
 const didInitialScroll = ref<boolean>(false);
-const currentTopMessageRef = ref<HTMLElement | null>(null);
+const scrollIgnoreFlag = ref<boolean>(false);
+const loadOldMessagesFlag = ref<boolean>(false);
+const isThereUnReadMessage = ref(false); // スクロール中に新しいメッセージが追加されてかつまだ表示されていないかどうかを格納するref
+const isBottomMessageInView = ref(false);
+const refTop = ref<HTMLElement | null>(null);
+const refBottom = ref<HTMLElement | null>(null);
+const refMessages = ref<HTMLElement[] | null>(null);
 
-let unmounted = false
+const selectedContextMenuMessageId = ref<string | null>(null);
+
+const topObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting && !isEnd.value && didInitialScroll.value && chatMessagesContainer.value) {
+      oldScrollTop.value = chatMessagesContainer.value?.scrollTop || 0;
+      oldChatMessagesContainerHeight.value = chatMessagesContainer.value.scrollHeight;
+      loadOldMessagesFlag.value = true;
+      readMoreMessages().then(() => {
+        // chatMessagesContainer.value!.scrollTop = chatMessagesContainer.value!.scrollHeight - oldChatMessagesContainerHeight.value + oldScrollTop.value;
+        loadOldMessagesFlag.value = false;
+        chatMessagesContainer.value!.scrollTop += 10;
+      });
+    }
+  });
+});
+const bottomObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    isBottomMessageInView.value = entry.isIntersecting;
+    if (isThereUnReadMessage.value) isThereUnReadMessage.value = false; // もし一番下に来たときにまだ未読メッセージフラグが立っているならば折る
+
+  });
+});
+
+const heightObserver = new ResizeObserver((entries) => {
+  if (!didInitialScroll.value || !chatMessagesContainer.value) return;
+
+  if (scrollIgnoreFlag.value) {
+    scrollIgnoreFlag.value = false;
+    return;
+  }
+
+  if (oldChatMessagesContainerHeight.value === 0) {
+    oldChatMessagesContainerHeight.value = chatMessagesContainer.value.scrollHeight;
+  } else {
+    if (isThereUnReadMessage.value) return;
+    const diff = chatMessagesContainer.value.scrollHeight - oldChatMessagesContainerHeight.value;
+    chatroomViewport.value!.scrollTop += diff;
+  }
+});
+
+
 onMounted(() => {
-  unmounted = false
-})
+  if (refTop.value) {
+    topObserver.observe(refTop.value);
+  }
+  if (refBottom.value) {
+    bottomObserver.observe(refBottom.value);
+  }
+  if (refMessages.value) {
+    refMessages.value.forEach((message) => {
+      bottomObserver.observe(message);
+    });
+  }
+  if (chatMessagesContainer.value) {
+    // heightObserver.observe(chatMessagesContainer.value);
+  }
+
+  // タイミングを調整してスクロールを実行
+  setTimeout(() => {
+    scrollToBottom();
+    didInitialScroll.value = true;
+  });
+});
 
 onUnmounted(() => {
-  unmounted = true
+  if (refBottom.value) {
+    bottomObserver.unobserve(refBottom.value);
+  }
+  if (refTop.value) {
+    topObserver.unobserve(refTop.value);
+  }
+  if (refMessages.value) {
+    refMessages.value.forEach((message) => {
+      bottomObserver.unobserve(message);
+    });
+  }
+  if (chatMessagesContainer.value) {
+    // heightObserver.unobserve(chatMessagesContainer.value);
+  }
 })
+
+watch(() => refMessages.value?.length, () => {
+  if (isBottomMessageInView.value && didInitialScroll.value) {
+    scrollToBottom();
+  } else {
+    if (!loadOldMessagesFlag.value) isThereUnReadMessage.value = true;
+  }
+})
+
 const scrollToBottom = () => {
   if (!chatroomViewport.value) return;
-  // chatroomViewport.value.scrollTop = chatroomViewport.value.scrollHeight;
-  chatroomViewport.value.scrollTop = 9999999999;
+
+  // スクロール位置を最下部に設定
+  chatroomViewport.value.scrollTop = chatroomViewport.value.scrollHeight;
 };
 
-
-const { messages, isEnd, checkUpdateLastReadAt, sendMessage, undoMessage, readMoreMessages } =
-  useChatMessageHook(roomId, user, (data) => {
-    // onMessageUpdatedのコールバック
-    // dataは{messageId: ChatMessage}の形式
-
-    if (unmounted) return
-    // const allMessageSenders = Object.values(data).map((message) => message.senderUid)
-    // const uniqueMessageSenders = Array.from(new Set(allMessageSenders))
-    // uniqueMessageSenders.forEach((uid: string) => {
-    //   getUserPublicData(uid).then((data) => {
-    //     if (!usersPublicData.value) usersPublicData.value = {}
-    //     if (!usersPublicData.value[uid] && data)
-    //       usersPublicData.value = {
-    //         ...usersPublicData.value,
-    //         [uid]: data
-    //       }
-    //   })
-    // })
-
-    checkUpdateLastReadAt() // ChatDetailPageからのみ呼び出すことで表示されていることが保証される
-  })
-
-// const unsub = watch (() => messages.value.length, () => {
-//   // 新しいメッセージが追加されとき
-// })
-
-const refBottom = ref<null | HTMLElement>(null)
+const initialScroll = () => {
+  scrollToBottom();
+  didInitialScroll.value = true;
+};
 </script>
 
 <template>
   <div class="chatroom-wrapper" v-if="currentRoom">
-    <!--    ルーム名-->
-    <!--    <h1>{{collectRoomName(room, )}}</h1>-->
     <div class="room-header">
       <p>
         <router-link to="/chat">
           <svg
-            xmlns="http://www.w3.org/2000/svg"
-            height="24px"
-            viewBox="0 -960 960 960"
-            width="24px"
-            fill="#5C5C5C"
+              xmlns="http://www.w3.org/2000/svg"
+              height="24px"
+              viewBox="0 -960 960 960"
+              width="24px"
+              fill="#5C5C5C"
           >
-            <path d="M640-80 240-480l400-400 71 71-329 329 329 329-71 71Z" />
+            <path d="M640-80 240-480l400-400 71 71-329 329 329 329-71 71Z"/>
           </svg>
         </router-link>
         {{ collectRoomName(currentRoom, userid) }}
       </p>
     </div>
     <div class="chatroom-viewport" ref="chatroomViewport">
-      <div v-if="messages">
-        <p v-if="isEnd">一番上まで読み込みました</p>
-        <button v-else @click="readMoreMessages()">さらに読み込む</button>
-        <div v-for="(message, index) in messages" :key="message.messageId" style="margin-top: 20px">
+      <div v-if="messages" ref="chatMessagesContainer">
+        <p v-if="isEnd" class="message-top">一番上まで読み込みました</p>
+        <div ref="refTop"></div>
+        <div v-for="(message) in messages" :key="message.messageId" style="margin-top: 20px" ref="refMessages">
           <ChatMessageCard
-            v-if="usersPublicData && usersPublicData[message.senderUid]"
-            :userId="userid"
-            :message="message"
-            :senderPublicData="usersPublicData[message.senderUid]"
-            :onLoad="messages.length-1 === index && !didInitialScroll ? () => {scrollToBottom();didInitialScroll = true;}: undefined"
-            :ref="index === 0 ? 'currentTopMessageRef' : undefined"
+              v-if="usersPublicData && usersPublicData[message.senderUid]"
+              :userId="userid"
+              :message="message"
+              :senderPublicData="usersPublicData[message.senderUid]"
+              :selectedContextMenuMessageId="selectedContextMenuMessageId"
+              :onContextMenu="(e: MouseEvent) => {
+                selectedContextMenuMessageId = message.messageId
+              }"
+              @closeContextMenu="selectedContextMenuMessageId = null"
           />
-          <div ref="refBottom" style="margin-bottom: 20px"></div>
         </div>
+        <div ref="refBottom" style="margin-bottom: 10px;"></div>
       </div>
     </div>
-    <ChatInputArea class="input-area" :roomId="roomId" :user="user" />
+    <p v-if="isThereUnReadMessage" class="unReadNotice" @click="scrollToBottom">新着メッセージがあります</p>
+    <ChatInputArea class="input-area" :roomId="roomId" :user="user"
+                   :beforeSendMessage="() => {scrollToBottom();scrollIgnoreFlag = true;}"
+                   :afterSendMessage="() => {scrollToBottom(); isThereUnReadMessage=false}"/>
   </div>
 </template>
 
@@ -118,7 +203,7 @@ p {
   flex-direction: column;
   justify-content: space-between;
   width: 100%;
-  height: calc(100vh - 80px); /* ヘッダーの高さ*/
+  height: calc(100dvh - 80px); /* ヘッダーの高さ*/
 
   overflow: hidden;
 }
@@ -141,8 +226,17 @@ p {
   height: auto;
   overflow-y: scroll;
 
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+  /*-ms-overflow-style: none;*/
+  /*scrollbar-width: none;*/
+}
+
+.message-top {
+  text-align: center;
+  margin-top: 10px;
+  background: var(--background-color);
+  color: gray;
+  padding: 5px;
+
 }
 
 .input-area {
@@ -251,5 +345,13 @@ p {
     text-align: center;
     color: var(--text-color);
   }
+}
+
+.unReadNotice {
+  text-align: right;
+  background: var(--background-color);
+  color: gray;
+  padding: 5px;
+  cursor: pointer;
 }
 </style>

@@ -40,3 +40,9 @@ export interface ChatMessage {
     updatedAt?: ServerTimestamp;
     undo?: boolean;
 }
+
+export interface ContextMenu {
+    anchorEl: HTMLElement | null;
+    messageId: string;
+    message: ChatMessage;
+}

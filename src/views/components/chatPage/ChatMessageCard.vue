@@ -1,44 +1,58 @@
 <script lang="ts" setup>
-import type { ChatMessage } from '@/types/chat/chat'
-import type { UserPublicData } from '@/types/common/userPublicData'
-import { formatServerTimestamp } from '@/utils/database'
+import type {ChatMessage} from '@/types/chat/chat'
+import type {UserPublicData} from '@/types/common/userPublicData'
+import {formatServerTimestamp} from '@/utils/database'
 import ChatAttachedFile from '@/views/components/chatPage/ChatAttachedFile.vue'
-import { onMounted } from 'vue'
+import {onMounted, ref} from 'vue'
+import MessageContextMenu from "@/views/components/chatPage/MessageContextMenu.vue";
 
-const { userId, message, senderPublicData, onLoad } = defineProps<{
+const {userId, message, senderPublicData, onContextMenu} = defineProps<{
   userId: string
   message: ChatMessage
   senderPublicData: UserPublicData
-  onLoad?: () => void
+  selectedContextMenuMessageId: string | null
+  onContextMenu?: (e: MouseEvent) => void
 }>()
+const emit = defineEmits<{
+  (event: 'closeContextMenu'): void
+}>()
+const messageContainerRef = ref<HTMLElement | null>(null)
+const rightClickedCount = ref(0)
 
 onMounted(() => {
-  if (!onLoad) return;
-  onLoad();
+  // 右クリックや長押しされたときの挙動について
+  if (messageContainerRef.value && onContextMenu) {
+
+    if (message.senderUid === userId) { // 現状は自分のメッセージでのみ右クリックメニューを開けるようにする
+      messageContainerRef.value.addEventListener('contextmenu', (e: MouseEvent) => {
+        if (rightClickedCount.value === 0) e.preventDefault(); // 二回目以降はデフォルトの右クリックメニューを表示
+        rightClickedCount.value++
+        onContextMenu(e)
+      })
+    }
+  }
 })
+
+const onCloseContextMenu = () => {
+  rightClickedCount.value = 0
+  emit('closeContextMenu')
+}
+
+
 </script>
 
 <template>
-  <div v-if="message.undo" style="margin: 10px" class="message-container">
-    <div>&lang;&lang; このメッセージは削除されました &rang;&rang;</div>
+  <div v-if="message.undo" style="text-align: center; margin: 10px auto;width: 100%;color: gray;">
+    &lang;&lang; このメッセージは取り消されました &rang;&rang;
   </div>
   <div
-    v-else
-    :class="`message-container ${message.senderUid === userId ? 'my-message' : 'other-message'}`"
+      v-else
+      :class="`message-container ${message.senderUid === userId ? 'my-message' : 'other-message'}`"
+      ref="messageContainerRef"
   >
     <div v-if="message.senderUid !== userId" class="message-icon">
-      <img :src="senderPublicData.iconURL" alt="user icon" />
+      <img :src="senderPublicData.iconURL" alt="user icon"/>
     </div>
-
-    <!--            アイコン, 送信者名, 送信日時-->
-    <!--              <div class="message-header">-->
-    <!--                <div>{{ formatServerTimestamp(message.createdAt) }}</div>-->
-    <!--                &lt;!&ndash;                操作&ndash;&gt;-->
-    <!--                <div v-if="message.senderUid === userId">-->
-    <!--                  <button @click="undoMessage(message)">送信取り消し</button>-->
-
-    <!--                </div>-->
-    <!--              </div>-->
 
     <!--            本文と投稿者-->
     <div class="message-content">
@@ -57,15 +71,17 @@ onMounted(() => {
       {{
         // 今年送信されたメッセージで無いなら年も表示
         new Date().getFullYear() !== new Date(message.createdAt as number).getFullYear()
-          ? formatServerTimestamp(message.createdAt as number, 'yyyy') + '/'
-          : ''
+            ? formatServerTimestamp(message.createdAt as number, 'yyyy') + '/'
+            : ''
       }}{{
         // 今日送信されたメッセージかどうか
         new Date().toDateString() === new Date(message.createdAt as number).toDateString()
-          ? formatServerTimestamp(message.createdAt as number, 'hh:mm')
-          : formatServerTimestamp(message.createdAt as number, 'MM/dd hh:mm')
+            ? formatServerTimestamp(message.createdAt as number, 'hh:mm')
+            : formatServerTimestamp(message.createdAt as number, 'MM/dd hh:mm')
       }}
     </p>
+    <MessageContextMenu v-if="selectedContextMenuMessageId === message.messageId" :message
+                        @close="onCloseContextMenu"/>
   </div>
 </template>
 <style scoped>
@@ -77,6 +93,7 @@ p {
   display: flex;
   flex-direction: row;
   gap: 10px;
+  position: relative;
 
   margin: 0 10px;
   padding: 0 5px;

@@ -11,15 +11,21 @@ interface HTMLInputEvent extends Event {
   target: HTMLInputElement & EventTarget
 }
 
-const { roomId, user } = defineProps<{
+const { roomId, user, beforeSendMessage, afterSendMessage } = defineProps<{
   roomId: string
   user: User
+  beforeSendMessage?: () => void
+  afterSendMessage?: () => void
 }>()
 
-const { messages, isEnd, checkUpdateLastReadAt, sendMessage, undoMessage, readMoreMessages } =
-  useChatMessageHook(roomId, user, () => {})
+const { sendMessage} = useChatMessageHook(roomId, user, () => {});
 const message = ref<string>('')
+const isSending = ref<boolean>(false);
+
 const sendMessageCallback = async () => {
+  if (!message.value) return
+  isSending.value = true
+  if (beforeSendMessage) beforeSendMessage();
   // 画像をアップロード
   let files: ChatFile[] = []
   if (rawAttachmentFiles.value.length) {
@@ -46,6 +52,8 @@ const sendMessageCallback = async () => {
   message.value = ''
   rawAttachmentFiles.value = []
   attachmentFilesAsDataUrl.value = []
+  if (afterSendMessage) afterSendMessage();
+  isSending.value = false
 }
 
 // file関連の処理
@@ -261,8 +269,8 @@ const inputFile = ref<null | HTMLInputElement>(null);
           </svg>
         </button>
       </div>
-      <textarea type="text" v-model="message" placeholder="メッセージを入力" />
-      <button class="send-button" @click="sendMessageCallback()">
+      <textarea type="text" v-model="message" placeholder="メッセージを入力" :disabled="isSending"></textarea>
+      <button class="send-button" @click="sendMessageCallback()" type="button" :disabled="isSending || (!message && !rawAttachmentFiles.length)">
         <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M30.2735 0.278526C30.4057 0.410962 30.4962 0.579328 30.5335 0.76271C30.5709 0.946092 30.5535 1.13641 30.4836 1.31002L19.3684 29.0972C19.2704 29.3419 19.1068 29.5549 18.8957 29.7126C18.6845 29.8704 18.4339 29.9668 18.1714 29.9913C17.909 30.0158 17.6449 29.9674 17.4081 29.8514C17.1714 29.7355 16.9713 29.5565 16.8298 29.3341L10.7592 19.7928L1.21796 13.7223C0.995075 13.5809 0.815584 13.3807 0.69929 13.1437C0.582995 12.9068 0.534419 12.6423 0.558921 12.3795C0.583423 12.1167 0.680051 11.8658 0.838142 11.6544C0.996233 11.4431 1.20964 11.2795 1.45482 11.1818L29.242 0.0703176C29.4156 0.000428871 29.606 -0.0169149 29.7893 0.0204407C29.9727 0.0577962 30.1411 0.148205 30.2735 0.280436V0.278526ZM12.6656 19.235L17.9396 27.5213L26.9804 4.92023L12.6656 19.235ZM25.6299 3.56974L3.0288 12.6106L11.317 17.8826L25.6299 3.56974Z" fill="#434343"/>
         </svg>
@@ -335,7 +343,8 @@ button {
   align-items: center;
   width: 100%;
   height: max-content;
-  margin: 16px 0;
+  margin: 0 0  16px;
+  padding-top: 16px;
 }
 
 textarea {
@@ -346,5 +355,13 @@ textarea {
   field-sizing: content;
   border-radius: 20px;
   padding: .4em 1em;
+
+  & [disabled] {
+    background-color: #f0f0f0;
+  }
+}
+
+.send-button[disabled] > svg > path {
+  fill: #ccc;
 }
 </style>
