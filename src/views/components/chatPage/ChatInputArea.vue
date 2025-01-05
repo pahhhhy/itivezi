@@ -21,7 +21,7 @@ const { roomId, user, beforeSendMessage, afterSendMessage } = defineProps<{
 const { sendMessage} = useChatMessageHook(roomId, user, () => {});
 
 const sendMessageCallback = async () => {
-  if (!message.value) return
+  if (!message.value && !attachmentFiles.value.length) return
   isSending.value = true
   if (beforeSendMessage) beforeSendMessage();
   // 画像をアップロード
@@ -81,9 +81,9 @@ const onFileChange = (e: HTMLInputEvent | DragEvent) => {
   const eventFiles = Array.from(files) // FileListをArrayに変換
   if (eventFiles) {
     // ファイルが選択されている場合
-    for (let i = 0; i < eventFiles.length; i++) {
+    for (const element of eventFiles) {
       // ファイルの数だけループ
-      const file = eventFiles[i] // ファイルを取得
+      const file = element // ファイルを取得
       const reader = new FileReader() // ファイルを読み込むためのFileReaderを作成
       reader.onload = (e) => {
         // readAsDataURLのコールバックを登録
@@ -149,8 +149,8 @@ const fileUpload = async (files: File[]): Promise<{ [fileId: string]: ChatFile }
 
   const uploadedChatFiles: { [fileId: string]: ChatFile } = {}
 
-  for (let index = 0; index < files.length; index++) {
-    const file = files[index]
+  for (const element of files) {
+    const file = element
     if (!checkFile(file)) {
       continue // 無効なファイルをエラーなしでスキップ
     }
@@ -189,8 +189,6 @@ const deleteFile = (index: number): void => {
 
 
 
-const inputImg = ref<null | HTMLInputElement>(null);
-const inputFile = ref<null | HTMLInputElement>(null);
 const message = ref<string>('')
 const isSending = ref<boolean>(false);
 </script>
@@ -216,6 +214,7 @@ const isSending = ref<boolean>(false);
         v-model:message="message"
         v-model:isSending="isSending"
         v-model:attachmentFiles="attachmentFiles"
+        @fileChange="onFileChange"
         @send="sendMessageCallback"
         placeholder="メッセージを入力"
     />
