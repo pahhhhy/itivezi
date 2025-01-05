@@ -22,12 +22,33 @@ interface Emits {
 
 const emit = defineEmits<Emits>()
 
+const send = () => {
+  emit('send')
+  inputFile!.value = null
+  inputImg!.value = null
+}
+
 const inputImg = ref<null | HTMLInputElement>(null);
 const inputFile = ref<null | HTMLInputElement>(null);
 </script>
 <template>
   <div class="input-area">
     <!-- 添付ファイル -->
+    <div v-if="!isTextMode">
+      <input
+          type="file"
+          multiple
+          @change="emit('fileChange', $event as HTMLInputEvent | DragEvent)"
+          id="file-input"
+          ref="inputFile"
+          style="display: none;"
+          accept="application/pdf, video/*, image/*, audio/*"
+      />
+      <button type="button" @click="inputFile!.click();">
+        <IconClip/>
+      </button>
+    </div>
+    <!-- 画像 -->
     <div v-if="!isTextMode">
       <input
           type="file"
@@ -39,27 +60,13 @@ const inputFile = ref<null | HTMLInputElement>(null);
           style="display: none;"
       />
       <button type="button" @click="inputImg!.click();">
-        <IconClip/>
-      </button>
-    </div>
-    <!-- 画像 -->
-    <div v-if="!isTextMode">
-      <input
-          type="file"
-          multiple
-          @change="emit('fileChange', $event as HTMLInputEvent | DragEvent)"
-          id="file-input"
-          ref="inputFile"
-          style="display: none;"
-      />
-      <button type="button" @click="inputFile!.click();">
         <IconPhoto/>
       </button>
     </div>
     <!-- テキスト -->
     <textarea type="text" v-model="message" :placeholder="placeholder" :disabled="isSending"></textarea>
     <!-- 送信ボタン -->
-    <button class="send-button" @click="emit('send')" type="button"
+    <button class="send-button" @click="send" type="button"
             :disabled="isSending || !(message || (attachmentFiles && attachmentFiles.length))">
       <IconSend :color="isSending || !(message || (attachmentFiles && attachmentFiles.length)) ? 'gray' : '#000'"/>
     </button>

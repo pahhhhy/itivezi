@@ -39,7 +39,6 @@ onMounted(async () => {
     loadRoomName(chatRooms)
   }
 })
-//TODO: チャットルーム削除時にchatRoomsで変更を検知する
 watch(chatRooms, () => {
   loadRoomName(chatRooms)
 }, {deep: true})

@@ -14,10 +14,7 @@ interface Props {
 const {chatMessageHook, userid, setIsThereUnReadMessage} = defineProps<Props>()
 const {messages, isEnd, readMoreMessages} = chatMessageHook;
 
-interface Emits {
-  (event: 'reachedBottom'): () => void
-}
-
+type Emits = (event: 'reachedBottom') => () => void
 const emit = defineEmits<Emits>();
 
 const chatroomViewport = ref<null | HTMLElement>(null);
@@ -101,8 +98,8 @@ watch(
     () => {
       if (isBottomMessageInView.value && didInitialScroll.value) {
         scrollToBottom()
-      } else {
-        if (!loadOldMessagesFlag.value) setIsThereUnReadMessage(true);
+      } else if (!loadOldMessagesFlag.value) {
+        setIsThereUnReadMessage(true);
       }
     }
 )
@@ -217,9 +214,6 @@ defineExpose({ // scrollToBottomを外部から呼べるようにする
   margin: auto 0 4px;
 }
 
-.message-content {
-}
-
 .message-text {
   padding: 10px;
   border-radius: 20px;
@@ -235,9 +229,6 @@ defineExpose({ // scrollToBottomを外部から呼べるようにする
 .other-message .message-attached {
   background-color: var(--background-color);
   border-radius: 20px;
-}
-
-.message-attached {
 }
 
 .message-attached-file {

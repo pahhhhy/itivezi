@@ -1,52 +1,65 @@
 <script lang="ts" setup>
-import type { ChatFile, ChatMessage } from '@/types/chat/chat'
-import { serverTimestamp } from 'firebase/database'
-import { ref } from 'vue'
-import { v4 as uuidv4 } from 'uuid'
-import { getDownloadURL, getStorage, ref as storageRef, uploadBytes } from 'firebase/storage'
-import { useChatMessageHook } from '@/utils/chat/useChatMessageHook'
-import type { User } from 'firebase/auth'
+import type {ChatFile, ChatMessage} from '@/types/chat/chat'
+import {serverTimestamp} from 'firebase/database'
+import {ref} from 'vue'
+import {v4 as uuidv4} from 'uuid'
+import {getDownloadURL, getStorage, ref as storageRef, uploadBytes} from 'firebase/storage'
+import {useChatMessageHook} from '@/utils/chat/useChatMessageHook'
+import type {User} from 'firebase/auth'
 import type HTMLInputEvent from "@/types/common/HTMLInputEvent";
 import SmallTextInputField from "@/views/components/common/SmallTextInputField.vue";
 
 
-
-const { roomId, user, beforeSendMessage, afterSendMessage } = defineProps<{
+const {roomId, user, beforeSendMessage, afterSendMessage} = defineProps<{
   roomId: string
   user: User
   beforeSendMessage?: () => void
   afterSendMessage?: () => void
 }>()
 
-const { sendMessage} = useChatMessageHook(roomId, user, () => {});
+const {sendMessage} = useChatMessageHook(roomId, user, () => {
+});
 
 const sendMessageCallback = async () => {
   if (!message.value && !attachmentFiles.value.length) return
   isSending.value = true
   if (beforeSendMessage) beforeSendMessage();
+  const createdAt = serverTimestamp()
   // 画像をアップロード
   let files: ChatFile[] = []
+
   if (attachmentFiles.value.length) {
     const fileUploadResult = await fileUpload(attachmentFiles.value)
     files = Object.values(fileUploadResult)
+
+    // ファイルがある場合は1つ1メッセージとしてアップロードする
+    for (const file of files) {
+      const messageData: ChatMessage = {
+        senderUid: user.uid,
+        messageId: '',
+        message: '',
+        attachedFiles: {
+          [file.fileId]: file
+        },
+        roomId,
+        createdAt
+      }
+      await sendMessage(messageData)
+    }
   }
 
-  const createdAt = serverTimestamp()
-  const messageData: ChatMessage = {
-    senderUid: user.uid,
-    messageId: '',
-    message: message.value,
-    attachedFiles: files.reduce(
-      (acc, file) => {
-        acc[file.fileId] = file
-        return acc
-      },
-      {} as { [fileId: string]: ChatFile }
-    ),
-    roomId,
-    createdAt
+  // 文字メッセージをアップロード
+  if (message.value) {
+    const messageData: ChatMessage = {
+      senderUid: user.uid,
+      messageId: '',
+      message: message.value,
+      roomId,
+      createdAt
+    }
+    await sendMessage(messageData)
   }
-  await sendMessage(messageData)
+
   message.value = ''
   attachmentFiles.value = []
   attachmentFilesAsDataUrl.value = []
@@ -102,28 +115,24 @@ const onFileChange = (e: HTMLInputEvent | DragEvent) => {
 // ファイルのサイズをチェック
 const checkFile = (file: File) => {
   const SIZE_LIMIT = 5 * 1024 * 1024 // 5MB
-  if (file.size > SIZE_LIMIT) {
-    return false
-  }
-
-  return true
+  return file.size <= SIZE_LIMIT;
 }
 
 const mediaType = (file: File) => {
   const extension = file.name.split('.').pop()
   if (
-    extension === 'jpg' ||
-    extension === 'jpeg' ||
-    extension === 'png' ||
-    extension === 'gif' ||
-    extension === 'svg' ||
-    extension === 'webp' ||
-    extension === 'JPG' ||
-    extension === 'JPEG' ||
-    extension === 'PNG' ||
-    extension === 'GIF' ||
-    extension === 'SVG' ||
-    extension === 'WEBP'
+      extension === 'jpg' ||
+      extension === 'jpeg' ||
+      extension === 'png' ||
+      extension === 'gif' ||
+      extension === 'svg' ||
+      extension === 'webp' ||
+      extension === 'JPG' ||
+      extension === 'JPEG' ||
+      extension === 'PNG' ||
+      extension === 'GIF' ||
+      extension === 'SVG' ||
+      extension === 'WEBP'
   ) {
     return 'image'
   }
@@ -131,12 +140,12 @@ const mediaType = (file: File) => {
     return 'video'
   }
   if (
-    extension === 'mp3' ||
-    extension === 'wav' ||
-    extension === 'ogg' ||
-    extension === 'MP3' ||
-    extension === 'WAV' ||
-    extension === 'OGG'
+      extension === 'mp3' ||
+      extension === 'wav' ||
+      extension === 'ogg' ||
+      extension === 'MP3' ||
+      extension === 'WAV' ||
+      extension === 'OGG'
   ) {
     return 'audio'
   }
@@ -188,7 +197,6 @@ const deleteFile = (index: number): void => {
 }
 
 
-
 const message = ref<string>('')
 const isSending = ref<boolean>(false);
 </script>
@@ -196,16 +204,43 @@ const isSending = ref<boolean>(false);
   <div>
     <div v-if="attachmentFiles.length" class="preview">
       <!--        ファイル関連-->
-      <div v-for="(url, index) in attachmentFilesAsDataUrl" :key="index" class="image-preview">
-        <!--          削除ボタン-->
-        <button @click="deleteFile(index)" class="image-delete">
-          <IconDelete />
-        </button>
-        <img
-          v-if="mediaType(attachmentFiles[index]) === 'image'"
-          :src="url"
-          alt="attached file"
-        />
+      <div v-for="(url, index) in attachmentFilesAsDataUrl" :key="index">
+        <div class="image-preview" v-if="mediaType(attachmentFiles[index]) === 'image'">
+          <!--          削除ボタン-->
+          <button @click="deleteFile(index)" class="delete">
+            <IconDelete/>
+          </button>
+          <img
+              v-if="mediaType(attachmentFiles[index]) === 'image'"
+              :src="url"
+              alt="attached file"
+          />
+        </div>
+        <div v-else-if="mediaType(attachmentFiles[index]) === 'video'" class="video-preview">
+          <video controls>
+            <source :src="url" type="video/mp4">
+            このブラウザはvideoタグをサポートしていません。
+          </video>
+          <button @click="deleteFile(index)" class="delete">
+            <IconDelete/>
+          </button>
+        </div>
+        <div v-else-if="mediaType(attachmentFiles[index]) === 'audio'" class="audio-preview">
+          <audio controls>
+            <source :src="url" type="audio/mpeg">
+            このブラウザはaudioタグをサポートしていません。
+          </audio>
+          <button @click="deleteFile(index)" class="delete">
+            <IconDelete/>
+          </button>
+        </div>
+        <div v-else class="file-preview">
+          <IconFile/>
+          <a :href="url" target="_blank" download>{{ attachmentFiles[index].name }}</a>
+          <button @click="deleteFile(index)" class="delete">
+            <IconDelete/>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -224,6 +259,7 @@ const isSending = ref<boolean>(false);
 p {
   margin: 0;
 }
+
 button {
   background: none;
   border: none;
@@ -253,29 +289,62 @@ button {
   width: 100%;
 }
 
+.delete {
+  cursor: pointer;
+  position: absolute;
+  top: 0;
+  right: 0;
+  transform: translateX(100%);
+
+  background: none;
+  color: red;
+  width: 36px;
+  height: 36px;
+}
+
 .image-preview {
   position: relative;
   margin-right: 36px;
 
   img {
     max-width: 256px;
+    max-height: 256px;
   }
 
-  .image-delete {
-    cursor: pointer;
-    position: absolute;
-    top: 0;
-    right: 0;
-    transform: translateX(100%);
-    border: var(--text-color) 1px solid;
-    border-left: none;
-    border-top-right-radius: 12px;
-    border-bottom-right-radius: 12px;
-    background: none;
-    color: red;
-    width: 36px;
-    height: 36px;
+}
+
+.video-preview {
+  position: relative;
+  margin-right: 36px;
+
+  video {
+    max-width: 256px;
+    max-height: 256px;
   }
+
+}
+
+.audio-preview {
+  position: relative;
+  margin-right: 36px;
+
+  audio {
+    max-width: 256px;
+    max-height: 256px;
+  }
+
+}
+
+.file-preview {
+  position: relative;
+  margin-right: 36px;
+  height: 64px;
+
+  a {
+    color: var(--text-color);
+    text-decoration: none;
+  }
+
 }
 
 
@@ -286,7 +355,7 @@ button {
   align-items: center;
   width: 100%;
   height: max-content;
-  margin: 0 0  16px;
+  margin: 0 0 16px;
   padding-top: 16px;
 }
 
@@ -300,7 +369,6 @@ textarea {
   field-sizing: content;
   border-radius: 20px;
   padding: .4em 1em;
-
 
 
   & [disabled] {

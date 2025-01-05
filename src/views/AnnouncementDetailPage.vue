@@ -82,6 +82,22 @@ onMounted(async () => {
     }
 
     function sortComments(comments: AnnouncementCommentType[]): AnnouncementCommentType[] {
+      function compareLastUpdated(a: AnnouncementCommentType, b: AnnouncementCommentType) {
+          let aUpdateAt = 0;
+          let bUpdateAt = 0;
+          if (typeof a.updatedAt === 'number') {
+            aUpdateAt = a.updatedAt
+          } else if (typeof a.createdAt === 'number') {
+            aUpdateAt = a.createdAt
+          }
+          if (typeof b.updatedAt === 'number') {
+            bUpdateAt = b.updatedAt
+          } else if (typeof b.createdAt === 'number') {
+            bUpdateAt = b.createdAt
+          }
+          return aUpdateAt - bUpdateAt
+      }
+
       // 親コメントと子コメントを分離
       const parentComments: AnnouncementCommentType[] = []
       const childComments: Record<string, AnnouncementCommentType[]> = {}
@@ -98,19 +114,7 @@ onMounted(async () => {
       })
 
       // 親コメントを日時順にソート
-      parentComments.sort(
-          (a, b) =>
-              (typeof a.updatedAt === 'number'
-                  ? a.updatedAt
-                  : typeof a.createdAt === 'number'
-                      ? a.createdAt
-                      : 0) -
-              (typeof b.updatedAt === 'number'
-                  ? b.updatedAt
-                  : typeof b.createdAt === 'number'
-                      ? b.createdAt
-                      : 0)
-      )
+      parentComments.sort(compareLastUpdated)
 
       // ソート済みの配列に結果を格納
       const sortedComments: AnnouncementCommentType[] = []
@@ -118,19 +122,7 @@ onMounted(async () => {
       parentComments.forEach((parent) => {
         sortedComments.push(parent)
         if (childComments[parent.commentId]) {
-          childComments[parent.commentId].sort(
-              (a, b) =>
-                  (typeof a.updatedAt === 'number'
-                      ? a.updatedAt
-                      : typeof a.createdAt === 'number'
-                          ? a.createdAt
-                          : 0) -
-                  (typeof b.updatedAt === 'number'
-                      ? b.updatedAt
-                      : typeof b.createdAt === 'number'
-                          ? b.createdAt
-                          : 0)
-          )
+          childComments[parent.commentId].sort(compareLastUpdated)
           sortedComments.push(...childComments[parent.commentId])
         }
       })

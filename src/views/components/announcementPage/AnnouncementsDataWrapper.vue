@@ -162,7 +162,3 @@ provide('getMoreAnnounceByCat', getMoreAnnounceByCat);
 <template>
   <slot></slot>
 </template>
-
-<style scoped>
-
-</style>

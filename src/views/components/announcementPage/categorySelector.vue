@@ -10,6 +10,7 @@ interface Props {
 
 interface Emits {
   (event: 'close'): void
+
   (event: 'select', category: Category): void
 }
 
@@ -28,12 +29,9 @@ const isDisableCloseButton = ref<boolean>(false)
 onMounted(() => {
   document.body.style.overflow = 'hidden'
 
-  new Promise<void>((resolve) => {
-    setTimeout(() => {
-      wrapperClass.value = 'enter-active'
-      resolve()
-    }, 0)
-  })
+  setTimeout(() => {
+    wrapperClass.value = 'enter-active'
+  }, 1)
 })
 
 onUnmounted(() => {
@@ -86,7 +84,8 @@ const onSelect = async (categoryId: string) => {
     </div>
     <div class="content">
       <div class="categories" v-if="!isEditing">
-        <button v-for="category in announcementsStore.categories" :key="category.categoryId" @click="onSelect(category.categoryId)">
+        <button v-for="category in announcementsStore.categories" :key="category.categoryId"
+                @click="onSelect(category.categoryId)">
           <IconClipboard color="black"/>
           {{ category.categoryName }}
         </button>

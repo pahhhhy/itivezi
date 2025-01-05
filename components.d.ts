@@ -29,6 +29,7 @@ declare module 'vue' {
     IconEcosystem: typeof import('./src/components/icons/IconEcosystem.vue')['default']
     IconEdit: typeof import('~icons/icon/edit')['default']
     IconEllipse: typeof import('~icons/icon/ellipse')['default']
+    IconFile: typeof import('~icons/icon/file')['default']
     IconLeftArrow: typeof import('~icons/icon/left-arrow')['default']
     IconLeftUpArrow: typeof import('~icons/icon/left-up-arrow')['default']
     IconLoading: typeof import('~icons/icon/loading')['default']

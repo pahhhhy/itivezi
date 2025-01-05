@@ -9,9 +9,7 @@ import type {User} from "firebase/auth";
 const {message} = defineProps<{
   message: ChatMessage
 }>()
-const emit = defineEmits<{
-  (event: 'close'): void
-}>()
+const emit = defineEmits<(event: 'close') => void>()
 
 const user = inject<User>('user')!
 const roomId = inject<string>('roomId')!
