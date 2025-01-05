@@ -26,9 +26,16 @@ export async function postAnnouncement(announcementRootRef: DatabaseReference, p
 
 /**
  * 投稿を削除します。権限の確認はここでは行いません。
+ * @param announcementRootRef データを置く場所のリファレンス。
  * @param announcementRef 削除したい投稿そのもののリファレンス。
+ * @param announceId 削除する投稿のID。
+ * @param categoryId 属していたカテゴリのID。
  */
-export async function deleteAnnouncement(announcementRef: DatabaseReference) {
+export async function deleteAnnouncement(announcementRootRef: DatabaseReference, announcementRef: DatabaseReference, announceId: string, categoryId: string) {
+    if (categoryId) {
+        await removeAnnouncementFromCategory(announcementRootRef, categoryId, announceId);
+    }
+
     await remove(announcementRef);
 }
 
@@ -49,7 +56,7 @@ export async function updateAnnouncement(announcementRef: DatabaseReference, upd
 
 /**
  * カテゴリに投稿を追加または削除します。
- * @param announcementsRef データを置く場所のリファレンス。
+ * @param announcementRootRef データを置く場所のリファレンス。
  * @param categoryId カテゴリのID。
  * @param announceId 投稿のID。
  * @param action アクションタイプ ('add' または 'remove')。
@@ -57,14 +64,14 @@ export async function updateAnnouncement(announcementRef: DatabaseReference, upd
  * @returns 更新した投稿のID。
  */
 async function updateAnnouncementInCategory(
-    announcementsRef: DatabaseReference,
+    announcementRootRef: DatabaseReference,
     categoryId: string,
     announceId: string,
     action: 'add' | 'remove',
     createdAt?: ServerTimestamp
 ) {
 
-    const categoryRef = child(announcementsRef, 'categories/' + categoryId);
+    const categoryRef = child(announcementRootRef, 'categories/' + categoryId);
     const categoryDataSnapshot = await get(categoryRef);
     console.log(categoryRef)
     if (!categoryDataSnapshot.exists()) {
@@ -98,34 +105,62 @@ async function updateAnnouncementInCategory(
     return announceId;
 }
 
+/** 投稿のカテゴリを変更します。
+ * カテゴリが変更されていない場合は何もしません。
+ * @param announcementRootRef
+ * @param announceId
+ * @param oldCategoryId
+ * @param newCategoryId
+ * @param createdAt その投稿の作成日時。
+ */
+export async function changeAnnouncementCategory(
+    announcementRootRef: DatabaseReference,
+    announceId: string,
+    oldCategoryId: string,
+    newCategoryId: string,
+    createdAt: ServerTimestamp
+) {
+    if (oldCategoryId === newCategoryId) {
+        return;
+    }
+
+    // 判定を分けているのはカテゴリ消失によるID空文字等の状況を考慮のため
+    if (oldCategoryId) {
+        await removeAnnouncementFromCategory(announcementRootRef, oldCategoryId, announceId);
+    }
+    if (newCategoryId) {
+        await addAnnouncementToCategory(announcementRootRef, newCategoryId, announceId, createdAt);
+    }
+}
+
 /**
  * カテゴリに投稿を追加します。
- * @param announcementsRef データを置く場所のリファレンス。
+ * @param announcementRootRef データを置く場所のリファレンス。
  * @param categoryId 追加するカテゴリのID。
  * @param announceId 追加する投稿のID。
  * @param createdAt 追加する投稿の作成日時。
  * @returns 追加したデータのID。
  */
 export async function addAnnouncementToCategory(
-    announcementsRef: DatabaseReference,
+    announcementRootRef: DatabaseReference,
     categoryId: string,
     announceId: string,
     createdAt: ServerTimestamp
 ) {
-    return updateAnnouncementInCategory(announcementsRef, categoryId, announceId, 'add', createdAt);
+    return updateAnnouncementInCategory(announcementRootRef, categoryId, announceId, 'add', createdAt);
 }
 
 /**
  * カテゴリから投稿を削除します。
- * @param announcementsRef データを置く場所のリファレンス。
+ * @param announcementRootRef データを置く場所のリファレンス。
  * @param categoryId 削除するカテゴリのID。
  * @param announceId 削除する投稿のID。
  * @returns 削除したデータのID。
  */
 export async function removeAnnouncementFromCategory(
-    announcementsRef: DatabaseReference,
+    announcementRootRef: DatabaseReference,
     categoryId: string,
     announceId: string
 ) {
-    return updateAnnouncementInCategory(announcementsRef, categoryId, announceId, 'remove');
+    return updateAnnouncementInCategory(announcementRootRef, categoryId, announceId, 'remove');
 }

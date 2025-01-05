@@ -1,57 +1,76 @@
 <script setup lang="ts">
-import { getCurrentInstance, onMounted, ref } from 'vue'
-import { getDatabase, onValue, ref as fireRef } from 'firebase/database'
-import { useRoute } from 'vue-router'
-import type { Announcement, MavonEditorToolbars } from '@/types/announcement/announcement'
-import { formatServerTimestamp } from '@/utils/database'
-import { useAuthData } from '@/utils/auth'
-import { deleteAnnouncement, updateAnnouncement } from '@/utils/announcement/announcements'
+import {onMounted, ref, watch} from 'vue'
+import {getDatabase, onValue, ref as fireRef} from 'firebase/database'
+import type {Announcement, MavonEditorToolbars} from '@/types/announcement/announcement'
+import {formatServerTimestamp} from '@/utils/database'
+import {useAuthData} from '@/utils/auth'
+import {changeAnnouncementCategory, deleteAnnouncement, updateAnnouncement} from '@/utils/announcement/announcements'
 import router from '@/router'
-import { useAnnouncementFiles } from '@/utils/announcement/useAnnouncementFilesHook'
-import { storageURLPattern } from '@/types/files'
-import KebabMenu from '@/views/components/common/kebabMenu.vue'
-import type {
-  AnnouncementCommentType,
-  AnnouncementCommentWithViewData
-} from '@/types/announcement/announcementComments'
-import AnnouncementCommentWrapper from '@/views/components/announcementPage/announcementCommentWrapper.vue'
-import { useUserDataStore } from '@/stores/userPublicData'
-import type { UserPublicData } from '@/types/common/userPublicData'
+import {useAnnouncementFiles} from '@/utils/announcement/useAnnouncementFilesHook'
+import {storageURLPattern} from '@/types/files'
+import type {AnnouncementCommentType, AnnouncementCommentWithViewData} from '@/types/announcement/announcementComments'
+import AnnouncementCommentWrapper from '@/views/components/announcementPage/AnnouncementCommentWrapper.vue'
+import {useUserDataStore} from '@/stores/userPublicData'
+import type {UserPublicData} from '@/types/common/userPublicData'
+import SimpleTextButton from "@/views/components/common/SimpleTextButton.vue";
+import SlideMenu from "@/views/components/common/SlideMenu.vue";
+import PostAnnouncementForm from "@/views/components/announcementPage/PostAnnouncementForm.vue";
+import {useAnnouncementsStore} from "@/stores/announcements";
 
-const route = useRoute()
-// 実際に表示する投稿内容。編集する場合はこちらが変更される
-const title = ref('')
+
 // 編集差分の検知などで使うバックアップ投稿
 const originalAnnouncement = ref<Announcement>()
 // ユーザーアイコンつきコメントを保管する変数
 const commentsWithViewData = ref<AnnouncementCommentWithViewData[] | null>(null)
 // 画像やファイルを扱うHooks
-const { files, content, imgAdd, deleteImgFromStorage, splitFiles } = useAnnouncementFiles()
+const {files, content, imgAdd, deleteImgFromStorage, splitFiles} = useAnnouncementFiles()
+const title = ref<string>('');
+const categoryId = ref<string>('');
 // 編集モードかどうかを保管する変数
 const editMode = ref<boolean>(false)
 // 保存していない変更があったかどうかを保管する変数
 const isEdited = ref(false)
 // ログイン中のユーザー情報
-const { user, role } = useAuthData()
+const {user, role} = useAuthData()
 // ユーザー情報を取得する関数
-const { getUserPublicData } = useUserDataStore()
+const {getUserPublicData} = useUserDataStore()
 // 投稿者のpublicData
 const authorPublicData = ref<null | UserPublicData>(null)
 
-// -----表示関連機能-----
+interface Props {
+  announceId: string,
+}
 
-// URLの末尾からこのページのannounceIdを取得して保管
-const announceId = route.params.announceId
+const {announceId} = defineProps<Props>()
+
+const announcementsStore = useAnnouncementsStore();
 
 // このページで表示する投稿のリファレンス
-const announcementRef = fireRef(getDatabase(), 'testAnnouncements/announcements/' + announceId)
+const db = getDatabase();
+const announcementRef = fireRef(db, 'testAnnouncements/announcements/' + announceId)
+const announcementRootRef = fireRef(db, 'testAnnouncements')
 
-onMounted(() => {
-  // 投稿を非同期で取得
-  onValue(announcementRef, async (snapshot) => {
+onMounted(async () => {
+  // storeにキャッシュされていた場合は最初にそれを表示して高速化
+  const announcement = announcementsStore.announcements.find((announce) => announce.announceId === announceId)
+  if (announcement) {
+    originalAnnouncement.value = announcement
+    title.value = announcement.title
+    content.value = announcement.content
+    categoryId.value = announcement.categoryId
+    authorPublicData.value = await getUserPublicData(announcement.userId)
+  }
+
+  // キャッシュの有無に関わらずリスナを設置してコメント含む更新を検知
+  onValue(announcementRef, async (snapshot) => { // 投稿を非同期で取得
     originalAnnouncement.value = snapshot.val()
+    if (!snapshot.exists()) { // 既に削除されていた場合
+      announcementsStore.deleteAnnouncement(announceId)
+      return
+    }
     title.value = snapshot.val().title
     content.value = snapshot.val().content
+    categoryId.value = snapshot.val().categoryId
 
     // 投稿ページへの直リンクでない限りキャッシュを利用できる
     authorPublicData.value = await getUserPublicData(snapshot.val().userId)
@@ -80,17 +99,17 @@ onMounted(() => {
 
       // 親コメントを日時順にソート
       parentComments.sort(
-        (a, b) =>
-          (typeof a.updatedAt === 'number'
-            ? a.updatedAt
-            : typeof a.createdAt === 'number'
-              ? a.createdAt
-              : 0) -
-          (typeof b.updatedAt === 'number'
-            ? b.updatedAt
-            : typeof b.createdAt === 'number'
-              ? b.createdAt
-              : 0)
+          (a, b) =>
+              (typeof a.updatedAt === 'number'
+                  ? a.updatedAt
+                  : typeof a.createdAt === 'number'
+                      ? a.createdAt
+                      : 0) -
+              (typeof b.updatedAt === 'number'
+                  ? b.updatedAt
+                  : typeof b.createdAt === 'number'
+                      ? b.createdAt
+                      : 0)
       )
 
       // ソート済みの配列に結果を格納
@@ -100,17 +119,17 @@ onMounted(() => {
         sortedComments.push(parent)
         if (childComments[parent.commentId]) {
           childComments[parent.commentId].sort(
-            (a, b) =>
-              (typeof a.updatedAt === 'number'
-                ? a.updatedAt
-                : typeof a.createdAt === 'number'
-                  ? a.createdAt
-                  : 0) -
-              (typeof b.updatedAt === 'number'
-                ? b.updatedAt
-                : typeof b.createdAt === 'number'
-                  ? b.createdAt
-                  : 0)
+              (a, b) =>
+                  (typeof a.updatedAt === 'number'
+                      ? a.updatedAt
+                      : typeof a.createdAt === 'number'
+                          ? a.createdAt
+                          : 0) -
+                  (typeof b.updatedAt === 'number'
+                      ? b.updatedAt
+                      : typeof b.createdAt === 'number'
+                          ? b.createdAt
+                          : 0)
           )
           sortedComments.push(...childComments[parent.commentId])
         }
@@ -120,9 +139,9 @@ onMounted(() => {
     }
 
     const commentsArray = sortComments(
-      Object.keys(comments).map((key) => {
-        return { ...comments[key], commentId: key }
-      })
+        Object.keys(comments).map((key) => {
+          return {...comments[key], commentId: key}
+        })
     )
 
     const commentsInfoAdded = commentsArray.map(async (comment) => {
@@ -131,12 +150,15 @@ onMounted(() => {
     Promise.all(commentsInfoAdded).then((commentsInfoAdded: AnnouncementCommentWithViewData[]) => {
       commentsWithViewData.value = commentsInfoAdded
     })
+
+    announcementsStore.updateAnnouncement(snapshot.val()) // storeを更新
+
   })
 })
 
 // コメントを渡すと送信者のアイコンと名前を追加して返す関数
 const addUserInfoToComment = async (
-  comment: AnnouncementCommentType
+    comment: AnnouncementCommentType
 ): Promise<AnnouncementCommentWithViewData> => {
   const userPublicData = await getUserPublicData(comment.userId)
 
@@ -150,19 +172,17 @@ const addUserInfoToComment = async (
 // -----表示関連機能ここまで-----
 
 // -----編集関連機能-----
-// TODO: roleが管理者だった場合にのみ読み込むコンポーネントへの切り出し
-
 const updateFilesFromContent = () => {
   // "![<id>](<URLPatternから始まるurl>)"のような形式の文字列を探す正規表現
   const regex = new RegExp(
-    `!\\[(.*)]\\((${storageURLPattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}.*)\\)`,
-    'g'
+      `!\\[(.*)]\\((${storageURLPattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}.*)\\)`,
+      'g'
   )
   // contentの中身から画像ファイルを検知してfilesに追加
   for (const match of content.value.matchAll(regex)) {
     const id = match[1]
     const url = match[2]
-    files.value.push({ id, url })
+    files.value.push({id, url})
   }
 }
 
@@ -178,14 +198,14 @@ const deleteAnnounce = async () => {
 
   updateFilesFromContent()
   deleteImgFromStorage(files.value)
-  await deleteAnnouncement(announcementRef)
+  await deleteAnnouncement(announcementRootRef, announcementRef, announceId, categoryId.value);
   await router.push('/announcements')
 }
 
 // mdエディターのツールバーの表示を制御する関数
 const toolbarsPropertiesForVisibility = (visible: boolean) => {
   function createUniformObjectFromType<T extends MavonEditorToolbars>(
-    value: any
+      value: any
   ): { [K in keyof T]: any } {
     const result: { [K in keyof T]: any } = {} as { [K in keyof T]: any }
     return new Proxy(result, {
@@ -202,153 +222,149 @@ const toolbarsPropertiesForVisibility = (visible: boolean) => {
 }
 
 // 保存ボタンを押したときの関数
-const saveAnnounce = () => {
-  console.log(title.value)
-  console.log(content.value)
-
+const saveAnnounce = async () => {
+  if (!window.confirm('編集内容を適用します。よろしいですか?')) return
   // 編集したかの検知は外部で行っている
-  updateAnnouncement(announcementRef, { title: title.value, content: content.value })
   if (originalAnnouncement.value) {
     originalAnnouncement.value.title = title.value
     originalAnnouncement.value.content = content.value
+    console.log(originalAnnouncement.value.categoryId)
+    console.log(categoryId.value)
+    if (originalAnnouncement.value.categoryId !== categoryId.value) { // カテゴリが変更された場合はannouncementCountも変更しなければならない
+      await changeAnnouncementCategory(announcementRootRef, originalAnnouncement.value.announceId, originalAnnouncement.value.categoryId, categoryId.value, originalAnnouncement.value.createdAt);
+      originalAnnouncement.value.categoryId = categoryId.value
+    }
   }
+  await updateAnnouncement(announcementRef, {title: title.value, content: content.value, categoryId: categoryId.value})
   isEdited.value = checkIsEdited()
 
   updateFilesFromContent()
-  const { deleteFiles } = splitFiles(files.value, content.value)
+  const {deleteFiles} = splitFiles(files.value, content.value)
   deleteImgFromStorage(deleteFiles)
+
+  announcementsStore.updateAnnouncement(originalAnnouncement.value!)
+  editMode.value = false
+  alert('投稿を保存しました')
 }
 
-// 編集を終了する関数
-const finishEdit = () => {
-  if (isEdited.value) {
-    // もし最後の保存時からなにか変更があれば
-    if (window.confirm('編集内容を破棄しますか？')) {
-      // 確認したうえで
-      title.value = originalAnnouncement.value?.title || '' // もとに戻す
-      content.value = originalAnnouncement.value?.content || ''
-      editMode.value = false // 編集終了
-
-      console.log(getCurrentInstance())
-      getCurrentInstance()?.proxy?.$forceUpdate() // コンポーネント再描画
-    }
-  } else {
-    // 変更がないならそのまま終了
-    editMode.value = false
+const resetContents = () => {
+  if (isEdited.value && window.confirm('編集内容を破棄しますか？')) {
+    title.value = originalAnnouncement.value?.title || '' // もとに戻す
+    content.value = originalAnnouncement.value?.content || ''
+    categoryId.value = originalAnnouncement.value?.categoryId || ''
   }
 }
 
 // 投稿を編集したかどうか検知する関数
-const checkIsEdited = (mdEditorsContent: string | null = null) => {
+const checkIsEdited = () => {
   let result: boolean
-  result = title.value !== originalAnnouncement.value?.title // まずtitleが変更されているかどうか
-
-  if (mdEditorsContent === null) {
-    // もし変更されたのがtitleだけなら
-    result = result || content.value !== originalAnnouncement.value?.content // 加えてannouncementのほうからcontentに変更があったか見る
-  } else {
-    // 引数にcontentが渡されている場合はそれで見る (再描画タイミングが違うため)
-    result = result || mdEditorsContent !== originalAnnouncement.value?.content
-  }
+  result = title.value !== originalAnnouncement.value?.title // titleが変更されているかどうか
+  result = result || content.value !== originalAnnouncement.value?.content // contentが変更されているかどうか
+  result = result || categoryId.value !== originalAnnouncement.value?.categoryId // categoryIdが変更されているかどうか
   return result
 }
 
-// titleやエディタ内で変更があったときのコールバック関数
-const onChange = (mdEditorsContent: string | null = null) => {
-  isEdited.value = checkIsEdited(mdEditorsContent)
-}
+watch([title, content, categoryId], () => {
+  isEdited.value = checkIsEdited()
+})
 
 // -----編集関連機能ここまで-----
+const postAnnouncementFormRef = ref<null | InstanceType<typeof PostAnnouncementForm>>(null);
 
-// const authorUserIconRef = ref<null | string>(getUserIconURL(originalAnnouncement.value?.userId));
-// console.log(authorUserIconRef)
 </script>
 <template>
+  <SlideMenu title="投稿の編集" v-if="editMode" @close="editMode = false">
+    <template #header-button>
+      <SimpleTextButton
+          bold fontSize="1em"
+          @click="deleteAnnounce"
+      >
+        削除
+      </SimpleTextButton>
+      <SimpleTextButton
+          bold fontSize="1em"
+          :disabled="!isEdited || !postAnnouncementFormRef?.isValid"
+          @click="resetContents"
+      >
+        リセット
+      </SimpleTextButton>
+      <SimpleTextButton
+          bold fontSize="1.25em"
+          :disabled="!isEdited || !postAnnouncementFormRef?.isValid"
+          @click="saveAnnounce"
+      >
+        適用
+      </SimpleTextButton>
+    </template>
+    <template #default>
+      <PostAnnouncementForm
+          :editMode="true"
+          v-model:modelValueTitle="title"
+          v-model:modelValueContent="content"
+          v-model:modelValueCategoryId="categoryId"
+          ref="postAnnouncementFormRef"
+      />
+    </template>
+  </SlideMenu>
+
   <div class="screen-wrapper">
     <div class="contents-wrapper" v-if="originalAnnouncement">
       <div class="scroll-wrapper">
         <div class="announcement-wrapper">
           <div class="announcement-title-wrapper">
             <router-link to="/announcements">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                height="24px"
-                viewBox="0 -960 960 960"
-                width="24px"
-                fill="#5C5C5C"
-              >
-                <path d="M640-80 240-480l400-400 71 71-329 329 329 329-71 71Z" />
-              </svg>
+              <IconLeftArrow/>
             </router-link>
-            <h1 class="announcement-title">{{ title }}</h1>
+            <h1 class="announcement-title">{{ originalAnnouncement.title }}</h1>
+
+
+              <button v-if="role == '管理者' && !editMode" @click="allowEditMode" class="edit-button">
+                <IconEdit/>
+              </button>
           </div>
           <div class="announcement-head">
             <img
-              v-if="authorPublicData?.iconURL"
-              :src="authorPublicData.iconURL"
-              alt="掲示板投稿者アイコン"
+                v-if="authorPublicData?.iconURL"
+                :src="authorPublicData.iconURL"
+                alt="掲示板投稿者アイコン"
             />
             <div class="announcement-head-text">
               <p class="announcement-author">{{ authorPublicData?.userName }}</p>
               <p class="announcement-date">
                 <span>{{
-                  formatServerTimestamp(originalAnnouncement.createdAt, 'yyyy/MM/dd hh:mm')
-                }}</span>
+                    formatServerTimestamp(originalAnnouncement.createdAt, 'yyyy/MM/dd hh:mm')
+                  }}</span>
                 <span v-if="originalAnnouncement.updatedAt">
                   (最終更新:
                   {{ formatServerTimestamp(originalAnnouncement.updatedAt, 'yyyy/MM/dd hh:mm') }})
                 </span>
               </p>
             </div>
-            <div class="kebab">
-              <div v-if="role == '管理者'">
-                <kebabMenu>
-                  <button v-if="!editMode" @click="allowEditMode">編集</button>
-                  <button v-if="editMode" :disabled="!isEdited" @click="saveAnnounce">
-                    保存して公開
-                  </button>
-                  <button v-if="editMode" @click="finishEdit">編集を終了</button>
-                  <button @click="deleteAnnounce">投稿を削除</button>
-                </kebabMenu>
-              </div>
-            </div>
+
+
           </div>
-          <p v-if="editMode">
-            <input
-              @change="onChange()"
-              v-model="title"
-              @keydown="onChange()"
-              @keyup="onChange()"
-              :readonly="!editMode"
-            />
-          </p>
           <mavon-editor
-            :key="editMode"
-            v-model="content"
-            :class="`announcement-content ${editMode ? 'editing' : ''}`"
-            language="ja"
-            :subfield="editMode"
-            defaultOpen="preview"
-            :boxShadow="false"
-            placeholder="ここにテキストを入力..."
-            editor-background="white"
-            preview-background="white"
-            style="background: white"
-            :toolbars-flag="editMode"
-            :toolbars="toolbarsPropertiesForVisibility(editMode)"
-            @change="
-              (changedContent: string) => {
-                onChange(changedContent)
-              }
-            "
-            @imgAdd="imgAdd"
+              :key="editMode"
+              v-model="originalAnnouncement.content"
+              class="announcement-content"
+              language="ja"
+              :subfield="false"
+              defaultOpen="preview"
+              :boxShadow="false"
+              placeholder="ここにテキストを入力..."
+              editor-background="white"
+              preview-background="white"
+              style="background: white"
+              :editable="false"
+              :toolbars-flag="false"
+              :toolbars="toolbarsPropertiesForVisibility(false)"
           />
 
           <AnnouncementCommentWrapper
-            v-if="user"
-            :user="user"
-            :commentsWithViewData="commentsWithViewData ?? []"
-            :announcementRef="announcementRef"
+              v-if="user"
+              :user="user"
+              :commentsWithViewData="commentsWithViewData ?? []"
+              :announcementRef="announcementRef"
           />
         </div>
       </div>
@@ -356,6 +372,13 @@ const onChange = (mdEditorsContent: string | null = null) => {
   </div>
 </template>
 <style scoped>
+
+button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+}
+
 .screen-wrapper {
   display: flex;
   justify-content: center;
@@ -393,6 +416,9 @@ const onChange = (mdEditorsContent: string | null = null) => {
   flex-direction: row;
   margin: 1em 0;
   border-bottom: 1px solid var(--text-color);
+  position: sticky;
+  top: 0;
+  background-color: white;
 }
 
 .announcement-title {
@@ -402,11 +428,15 @@ const onChange = (mdEditorsContent: string | null = null) => {
 
 .announcement-wrapper {
   height: fit-content;
+  min-height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .announcement-content {
   /* mavon-editorで使用中 */
-  z-index: 0;
+  z-index: -1;
   padding-top: 1em;
 }
 
@@ -415,16 +445,16 @@ const onChange = (mdEditorsContent: string | null = null) => {
   flex-direction: row;
   justify-content: start;
   align-items: start;
-  gap: 1rem;
+  gap: .8em;
   border-bottom: 1px solid lightgray;
   margin-bottom: 4px;
-  padding-bottom: 1em;
+  padding: 0 .8em;
   height: fit-content;
 }
 
 .announcement-head > img {
   display: inline-block;
-  width: 10%;
+  width: 36px;
   aspect-ratio: 1;
   border-radius: 100%;
   flex-grow: 1;
@@ -433,7 +463,6 @@ const onChange = (mdEditorsContent: string | null = null) => {
 .announcement-head-text {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   align-items: start;
   width: 100%;
   height: 3em;
@@ -441,18 +470,11 @@ const onChange = (mdEditorsContent: string | null = null) => {
   flex-grow: 0;
 }
 
-.kebab {
+.edit-button {
   position: absolute;
   right: 0;
   width: 7.5%;
   aspect-ratio: 1;
-}
-
-.kebab button {
-  width: fit-content;
-  min-width: 100%;
-  display: inline-block;
-  white-space: nowrap;
 }
 
 p {
@@ -461,45 +483,17 @@ p {
 
 .announcement-author {
   font-weight: bold;
+  font-size: .9em;
 }
 
 .announcement-date {
-  font-size: 0.8em;
+  font-size: 0.7em;
+  color: gray;
 }
 
 .scroll-style {
   background-color: white !important;
 }
 
-.comment-wrapper {
-  margin-top: 2em;
-}
 
-.kebab {
-  position: absolute;
-  right: 0;
-  width: 7.5%;
-  aspect-ratio: 1;
-}
-
-.comment-input-field {
-  display: flex;
-  height: fit-content;
-  width: 100%;
-  flex-direction: column;
-}
-
-.comment-input-field-alert {
-  display: flex;
-  justify-content: start;
-  align-items: center;
-  gap: 1em;
-}
-
-.comment-input-field-alert > button {
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
-  color: #0000ee;
-}
 </style>

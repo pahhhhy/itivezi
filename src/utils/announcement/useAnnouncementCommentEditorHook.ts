@@ -5,8 +5,8 @@ import {
     deleteAnnouncementComment, editAnnouncementComment
 } from "@/utils/announcement/announcementComments";
 import type {User} from "firebase/auth";
-import {defineComponent, h, ref, type Ref} from "vue";
-import smallTextInputField from "@/views/components/common/smallTextInputField.vue";
+import {defineComponent, h, ref, type Ref, watch} from "vue";
+import smallTextInputField from "@/views/components/common/SmallTextInputField.vue";
 import type {AnnouncementCommentType} from "@/types/announcement/announcementComments";
 
 export const useAnnouncementCommentEditor = (announcementRef: DatabaseReference, user: User) => {
@@ -66,22 +66,37 @@ export const useAnnouncementCommentEditor = (announcementRef: DatabaseReference,
 
     // ----- 編集関連 -----
     const setEditingMessage = (comment: AnnouncementCommentType | null) => {
+        // menuを閉じる
+
         replyingCommentId.value = null;
         editingCommentId.value = comment ? comment.commentId : null;
         commentContent.value = comment ? comment.content : '';
     }
 
+
+    const isSending = ref(false);
     // ----- 入力欄コンポーネント -----
     const commentEditor = () => h(smallTextInputField, {
-        // modelValueとonUpdate:modelValueを使ってv-modelを実現
-        modelValue: commentContent.value,
-        "onUpdate:modelValue": (val: string) => {
+        isTextMode: true,
+        placeholder: "コメントする",
+        // textModeなのでattachedFileは使用しない
+        // modelはpropとemitに分解
+        message: commentContent.value,
+        // emitは接頭辞にonをつけることで実装可能
+        'onUpdate:message': (val: string) => {
             commentContent.value = val;
         },
-        onSendClicked: sendComment,
+        isSending: isSending.value,
+        'onUpdate:isSending': (val: boolean) => {
+            isSending.value = val;
+        },
+        onSend: sendComment,
     })
     // 仮想ノードをコンポーネントにする
     const commentInputField = defineComponent({render: commentEditor,});
+
+
+    // TODO: スクロール改善, カテゴリごと記事取得, 記事編集, コメント編集ボタンデザイン, !入力時送信ボタン灰色にならない, ヘッダーのチャットの未読数
 
 
     return {
