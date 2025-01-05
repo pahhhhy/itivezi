@@ -5,16 +5,16 @@ import {
     get,
     getDatabase,
     limitToLast,
+    off,
     onChildAdded,
     onChildChanged,
-    off,
     orderByChild,
     push,
     query,
     serverTimestamp,
     update
 } from 'firebase/database'
-import {onMounted, ref} from "vue";
+import {onMounted, onUnmounted, ref} from "vue";
 import type {ChatMessage} from "@/types/chat/chat";
 import {ref as storageRef} from "@firebase/storage";
 import {deleteObject, getStorage} from "firebase/storage";
@@ -34,56 +34,49 @@ export const useChatMessageHook = (roomId: string, user: User, onMessageUpdated?
     const isEnd = ref(false);
     const myLastReadAt = ref<number | null>(null);
 
-    onMounted(() => {
-        // 解除用
-        const updatedHandler = (snapshot: any) => {
-            // dataは{messageId: ChatMessage}の形式
-            // roomIdがroomIdのものだけを取得する
-            const rawData = snapshot.val();
-            const data: Record<string, ChatMessage> = {[rawData.messageId]: rawData}
+    const updatedHandler = (snapshot: any) => {
+        // dataは{messageId: ChatMessage}の形式
+        // roomIdがroomIdのものだけを取得する
+        const rawData = snapshot.val();
+        const data: Record<string, ChatMessage> = {[rawData.messageId]: rawData}
 
-            if (data) {
-                // すでにあるデータと統合
-                messages.value = Object.values(data).reduce((acc: ChatMessage[], message: ChatMessage) => {
-                    const index = acc.findIndex((m) => m.messageId === message.messageId); // すでにあるデータのindexを取得
-                    if (index === -1) { // すでにあるデータから取得できなければ新しいデータ
-                        // もし最終閲覧日時よりも新しいメッセージだった場合はそのまま追加
-                        if (myLastReadAt.value && message.createdAt as number > myLastReadAt.value) {
-                            acc.push(message);
-                        }
-                        // 最終閲覧日時よりも古くてかつ取得できないデータは表示されていないデータとみなせるので無視
-                    } else { // 取得できれば上書き
-                        acc[index] = message;
+        if (data) {
+            // すでにあるデータと統合
+            messages.value = Object.values(data).reduce((acc: ChatMessage[], message: ChatMessage) => {
+                const index = acc.findIndex((m) => m.messageId === message.messageId); // すでにあるデータのindexを取得
+                if (index === -1) { // すでにあるデータから取得できなければ新しいデータ
+                    // もし最終閲覧日時よりも新しいメッセージだった場合はそのまま追加
+                    if (myLastReadAt.value && message.createdAt as number > myLastReadAt.value) {
+                        acc.push(message);
                     }
-                    return acc;
-                }, messages.value); // 初期値はmessages.value
-                messages.value.sort((a, b) => (a.createdAt as number) - (b.createdAt as number)); // 日時順にソート
+                    // 最終閲覧日時よりも古くてかつ取得できないデータは表示されていないデータとみなせるので無視
+                } else { // 取得できれば上書き
+                    acc[index] = message;
+                }
+                return acc;
+            }, messages.value); // 初期値はmessages.value
+            messages.value.sort((a, b) => (a.createdAt as number) - (b.createdAt as number)); // 日時順にソート
 
-                if (onMessageUpdated) onMessageUpdated(data);
-                // checkUpdateLastReadAt();
-            }
+            if (onMessageUpdated) onMessageUpdated(data);
         }
+    }
 
-        (async () => {
-            // 自分の最終閲覧日時をまず取得(更新ではない)
-            myLastReadAt.value = await getMyLastReadAtFromDB();
+    onMounted(async () => {
+        // 自分の最終閲覧日時をまず取得(更新ではない)
+        myLastReadAt.value = await getMyLastReadAtFromDB();
 
-            await readMoreMessages();
+        await readMoreMessages();
 
-            onChildChanged(messagesRef, updatedHandler);
-            // 最新の1件だけはonChildAddedで取得
-            const q = query(messagesRef, orderByChild('createdAt'), limitToLast(1));
-            onChildAdded(q, updatedHandler);
+        onChildChanged(messagesRef, updatedHandler);
+        // 最新の1件だけはonChildAddedで取得
+        const q = query(messagesRef, orderByChild('createdAt'), limitToLast(1));
+        onChildAdded(q, updatedHandler);
+    });
 
-        })();
-
-    //     解除時
-        return () => {
-            if (messagesRef) {
-                off(messagesRef, 'child_added', updatedHandler);
-                off(messagesRef, 'child_changed', updatedHandler);
-
-            }
+    onUnmounted(() => {
+        if (messagesRef) {
+            off(messagesRef, 'child_added', updatedHandler);
+            off(messagesRef, 'child_changed', updatedHandler);
         }
     });
 

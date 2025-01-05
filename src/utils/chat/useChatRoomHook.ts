@@ -70,6 +70,15 @@ export const useChatRoomHook = (user: User) => {
         })
     }
 
+    const removeUserFromChatRoom = async (roomId: string, userId: string) => {
+        await update(child(roomsRef, roomId + '/users'), {
+            [userId]: null
+        })
+        await update(child(usersRef, userId), {
+            [roomId]: null
+        })
+    }
+
     const leaveChatRoom = async (roomId: string) => {
         if (user === null) return
         await update(child(roomsRef, roomId + '/users'), {
@@ -131,7 +140,7 @@ export const useChatRoomHook = (user: User) => {
                     ...room,
                     unreadCount: 0
                 }
-                if (processedRoom.lastUpdateAt && processedRoom.lastReadAt[user.uid] && (processedRoom.lastReadAt[user.uid] as number) < (processedRoom.lastUpdateAt as number)) { // 最終閲覧日時が最終更新日時よりも古い場合
+                if (processedRoom.lastUpdateAt && (processedRoom.lastReadAt[user.uid] as number ?? 0) < (processedRoom.lastUpdateAt as number)) { // 最終閲覧日時が最終更新日時よりも古い場合
                     processedRoom.unreadCount = await getUnreadCount(processedRoom) // 未読数を取得
                 } else {
                     processedRoom.unreadCount = 0
@@ -154,8 +163,7 @@ export const useChatRoomHook = (user: User) => {
 
     // あるルームの未読件数を取得
     const getUnreadCount = async (room: ChatRoomWithUnreadCount) => {
-        const lastReadAt: number = room.lastReadAt[user.uid] as number
-        if (!lastReadAt) return 0
+        const lastReadAt: number = room.lastReadAt[user.uid] as number ?? 0
 
         const messagesRef = fireRef(db, 'testChat/messages/' + room.roomId)
         // 最終閲覧日時より新しいメッセージを取得
@@ -167,14 +175,38 @@ export const useChatRoomHook = (user: User) => {
         return Object.keys(messages).length;
     }
 
+    const updateRoomName = async (roomId: string, roomName: string | null) => {
+        await update(child(roomsRef, roomId), {
+            roomName: roomName
+        })
+    }
+
+    // ある特定の人とのDMルームが存在するかどうかを確認、存在する場合はそのroomIdを返す
+    const checkDMRoomExists = async (targetUserId: string) => {
+        const q = query(roomsRef, orderByChild('users/' + user.uid), equalTo(true))
+        const snapshot = await get(q)
+        if (!snapshot.exists()) return null
+        const data = snapshot.val()
+        const chatRooms: ChatRoom[] = Object.keys(data).map((key) => data[key])
+        for (const room of chatRooms) {
+            if (Object.keys(room.users).length === 2 && room.users[targetUserId]) {
+                return room.roomId
+            }
+        }
+        return null
+    }
+
     return {
         createDMRoom,
         createChatRoom,
         addUserToChatRoom,
+        removeUserFromChatRoom,
         leaveChatRoom,
         deleteChatRoom,
         getJoinedRooms,
         getRooms: getAllRooms,
-        getUnreadCount
+        getUnreadCount,
+        updateRoomName,
+        checkDMRoomExists,
     }
 }

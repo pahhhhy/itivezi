@@ -1,5 +1,5 @@
 import {defineStore} from "pinia";
-import type {ChatRoom, ChatRoomWithUnreadCount} from "@/types/chat/chat";
+import type {ChatRoomWithUnreadCount} from "@/types/chat/chat";
 import {ref} from "vue";
 import router from "@/router";
 
@@ -7,11 +7,11 @@ import router from "@/router";
 // ユーザーidからそのユーザーのユーザー名, アイコン等を保持するストア。もしキャッシュがあればそこから返し, なければ都度取得するようにする.
 export const useChatRoomStore = defineStore('chatRoom', () => {
     const chatRooms = ref<ChatRoomWithUnreadCount[]>([]);
-    const currentRoom = ref<ChatRoom | null>(null);
+    const currentRoom = ref<ChatRoomWithUnreadCount | null>(null);
 
 
     // 現在のチャットルームを設定する
-    const setCurrentRoom = (roomId: string | ChatRoom | null) => {
+    const setCurrentRoom = (roomId: string | ChatRoomWithUnreadCount | null) => {
         if (typeof roomId === "string") {
             const room = getChatRoomData(roomId);
             if (!room) {
@@ -41,13 +41,18 @@ export const useChatRoomStore = defineStore('chatRoom', () => {
             room = [room];
         }
         room.forEach((r: ChatRoomWithUnreadCount) => {
-
             const index = chatRooms.value.findIndex(room => room.roomId === r.roomId); // ルームIDが一致するものを探す
             if (index !== -1) {  // 見つかった場合
                 chatRooms.value.splice(index, 1, r); // ルーム情報を更新
+
+                if (currentRoom.value?.roomId === r.roomId) { // 現在のチャットルームが更新されたなら
+                    currentRoom.value = r; // 適用
+                }
+
             } else {  // 見つからなかった場合
                 chatRooms.value.push(r); // ルーム情報を追加
             }
+
         });
     }
 
