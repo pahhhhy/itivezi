@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type {Category} from "@/types/announcement/categories";
 import {onMounted, onUnmounted, ref} from "vue";
-import CategoriesManager from "@/views/components/announcementPage/categoriesManager.vue";
 
 interface Props {
   title: string
@@ -9,14 +8,16 @@ interface Props {
 
 interface Emits {
   (event: 'close'): void
+
   (event: 'select', category: Category): void
 }
+
 const {title} = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
 const wrapperClass = ref<string>('') // 開閉アニメーションに使う
 
-const isChanged = ref<boolean>(false)
+const isDisableCloseButton = ref<boolean>(false);
 
 
 onMounted(() => {
@@ -28,6 +29,7 @@ onMounted(() => {
       resolve()
     }, 0)
   })
+
 })
 
 onUnmounted(() => {
@@ -45,39 +47,41 @@ const close = () => {
 const onSelect = async (categoryId: string) => {
 
 }
+
+// refを介して外部からcloseを参照できるようにする
+defineExpose({
+  close
+})
 </script>
 
 <template>
-  <div :class="['wrapper', wrapperClass]">
+  <div :class="['slide-wrapper', wrapperClass]">
     <div class="top-bar">
 
       <button
-        @click="close"
-        class="close-button"
-        :disabled="isChanged"
+          @click="close"
+          class="close-button"
+          :disabled="isDisableCloseButton"
       >
         <!--        閉じるアイコン-->
+        <IconCross :color="isDisableCloseButton? 'gray' : 'black'"/>
 
-        <svg width="19" height="18" viewBox="0 0 19 18" xmlns="http://www.w3.org/2000/svg" fill="none">
-          <line x1="1.35355" y1="0.646447" x2="17.8597" y2="17.1525" :stroke="isChanged ? 'gray' : '#000'"/>
-          <line x1="0.646447" y1="17.1526" x2="17.1525" y2="0.646453" :stroke="isChanged ? 'gray' : '#000'"/>
-        </svg>
       </button>
-      <h3>{{title}}</h3>
-      <slot name="header-button">
-
-      </slot>
+      <h3>{{ title }}</h3>
+      <div v-if="$slots['header-button']">
+        <slot name="header-button" class="header-button">
+        </slot>
+      </div>
 
 
     </div>
 
     <div class="content">
-      <slot>
+      <slot @close="close">
 
       </slot>
     </div>
   </div>
-
 </template>
 
 <style scoped>
@@ -86,7 +90,7 @@ button {
   background: none;
 }
 
-.wrapper {
+.slide-wrapper {
   position: fixed;
   height: 100vh;
   width: 100vw;
@@ -115,23 +119,35 @@ button {
 }
 
 .top-bar {
-  display: flex;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
   width: 100%;
   padding: 8px;
   border-bottom: 1px solid var(--text-color);
   margin-bottom: 8px;
 
-  /* 真ん中の要素 */
+  & > *:first-child { /* 左端の要素 */
+    margin-right: auto;
+  }
 
-  & > *:nth-child(2) {
-    margin: 0 auto;
-    text-align: center;
+  & > *:nth-child(2) { /* 中央の要素 */
+    margin: 0;
+  }
+
+  & > *:nth-child(3) { /* 右端の要素 */
+    margin-left: auto;
   }
 }
 
 .content {
-  overflow-y: auto;
+  margin-bottom: 16px;
+  overflow-x: hidden;
+  overflow-y: scroll;
+
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
 }
 
 </style>

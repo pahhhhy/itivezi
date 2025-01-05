@@ -7,7 +7,7 @@ const isOpen = ref<boolean>(false)
 <template>
   <div class="kebab-wrapper">
     <DotsVertical v-if="!isOpen" class="kebab" @click="isOpen=true"/>
-    <div v-if="isOpen" class="menu">
+    <div v-if="isOpen" class="menu" @click="isOpen=false">
       <slot></slot>
     </div>
     <div v-if="isOpen" class="other-area" @click="isOpen=false"></div>
@@ -18,8 +18,9 @@ const isOpen = ref<boolean>(false)
   position: relative;
   display: inline-block;
   aspect-ratio: 1;
-  height: 100%;
+  height: fit-content;
   width: 100%;
+  cursor: pointer;
 }
 
 .kebab > .material-design-icon__svg {
