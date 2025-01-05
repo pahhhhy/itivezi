@@ -1,7 +1,4 @@
-// export const adminUid = 'tj0ekR3hzjaJFqx8YqWC4xho9Si1' // TODO: 完成したときには置き換え
 import type {ServerTimestamp} from "@/types/announcement/announcement";
-
-export const adminUid = 'rxWBnJpWsZflRNJjuOJxW0JY2N82' // TODO: 完成したときには置き換え
 
 export interface ChatRoom {
     roomId: string;
@@ -39,10 +36,4 @@ export interface ChatMessage {
     createdAt: ServerTimestamp;
     updatedAt?: ServerTimestamp;
     undo?: boolean;
-}
-
-export interface ContextMenu {
-    anchorEl: HTMLElement | null;
-    messageId: string;
-    message: ChatMessage;
 }
