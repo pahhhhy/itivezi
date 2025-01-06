@@ -8,7 +8,6 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AppHeader: typeof import('./src/components/AppHeader.vue')['default']
-    'Ic^onAdd': typeof import('~icons/ic/^on-add')['default']
     IconAdd: typeof import('~icons/icon/add')['default']
     IcOnAdd: typeof import('~icons/ic/on-add')['default']
     IconAddUser: typeof import('~icons/icon/add-user')['default']
@@ -19,11 +18,9 @@ declare module 'vue' {
     IconChat: typeof import('~icons/icon/chat')['default']
     IconClip: typeof import('~icons/icon/clip')['default']
     IconClipboard: typeof import('~icons/icon/clipboard')['default']
-    IconClose: typeof import('~icons/icon/close')['default']
     IconCommunity: typeof import('./src/components/icons/IconCommunity.vue')['default']
     IconCross: typeof import('~icons/icon/cross')['default']
     IconCrossWithCircle: typeof import('~icons/icon/cross-with-circle')['default']
-    IconDelet: typeof import('~icons/icon/delet')['default']
     IconDelete: typeof import('~icons/icon/delete')['default']
     IconDocumentation: typeof import('./src/components/icons/IconDocumentation.vue')['default']
     IconEcosystem: typeof import('./src/components/icons/IconEcosystem.vue')['default']
