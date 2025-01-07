@@ -36,6 +36,7 @@ interface OrdertablesElement{
   selectData:string
   state:OrderStete
   totalMoney:number
+place:string
 }
 interface OrdertablesNumElement{
           [num:number]:{

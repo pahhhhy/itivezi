@@ -3,6 +3,7 @@ import { ref,watch } from 'vue'
 import { type User } from 'firebase/auth'
 import { useFireOrderStore } from '@/stores/fireOrder';
 import MyOrderElements from './MyOrderElements.vue';
+import router from '@/router'
 enum VegeState{
   Discontinued="Discontinued",
   Available="Available"
@@ -36,6 +37,7 @@ interface OrdertablesElement{
   selectData:string
   state:OrderStete
   totalMoney:number
+place:string
 }
 
 interface Props {
@@ -44,15 +46,31 @@ interface Props {
 
 const props = defineProps<Props>()
 const FireOrderStore=useFireOrderStore()
-const AllOrderData=ref<Ordertables>(FireOrderStore.OrderAllData)
-const isToggle = ref<boolean>(false)
+const AllOrderData=ref<Ordertables>(reverseOrdertables(FireOrderStore.OrderAllData))
 watch(() => FireOrderStore.OrderAllData, (newUser) => {
   AllOrderData.value = newUser;
+  AllOrderData.value=reverseOrdertables(AllOrderData.value)
 });
-function pushToggle() {
-  isToggle.value = !isToggle.value;
+function reverseOrdertables(data: Ordertables): Ordertables {
+  const reversedData: Ordertables = {};
+  
+  // UIDごとに処理
+  const reversedUids = Object.entries(data).reverse(); // UIDを逆順に
+  for (const [uid, orders] of reversedUids) {
+    reversedData[uid] = {};
+    
+    // uniqueKeyごとに処理
+    const reversedOrders = Object.entries(orders).reverse(); // uniqueKeyを逆順に
+    for (const [uniqueKey, orderElement] of reversedOrders) {
+      reversedData[uid][uniqueKey] = orderElement;
+    }
+  }
+  
+  return reversedData;
 }
-
+function onPushAllview(){
+  router.push("my-allorder")
+}
 </script>
 <template>
   <!-- <h1>{{ nyOrderKeys }}</h1>-->
@@ -60,41 +78,64 @@ function pushToggle() {
   <!-- {{myOrderVegeData}} -->
   <!-- <h3>{{ nyOrderKeysNum }}</h3> -->
   <!-- <h3>{{ OrderTimeList }}</h3> -->
-  <button v-on:click="pushToggle()" class="toggle-button">
-    <i class="bi bi-caret-down-fill" v-show="!isToggle"></i>
-    <i class="bi bi-caret-up-fill" v-show="isToggle"></i>
-    <h2>自分の注文</h2>
-  </button>
-  <article  v-if="props.currentUser!=null&&isToggle">
-    <table>
-      <caption>過去の注文データ</caption>
-      <thead>
-        <tr>
-          <th scope="col">日時</th>
-          <th scope="col">野菜データ</th>
-          <th scope="col">合計金額</th>
-          <th scope="col">希望日</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(element,uniqueKey) in  AllOrderData[props.currentUser.uid]" :key="uniqueKey">
-          <MyOrderElements
+   <article class="myorder_card" v-if="props.currentUser!=null">
+    <div class="title_order">
+      <h2>過去の注文</h2>
+      <p v-on:click="onPushAllview">全て見る</p>
+    </div>
+    
+    <article class="myorder_elementgroup">
+      <div v-for="(element,uniqueKey) in  AllOrderData[props.currentUser.uid]" :key="uniqueKey">
+        <MyOrderElements
           v-bind:data="element"
+          v-bind:unique="uniqueKey"
           ></MyOrderElements>
-        </tr>
-      </tbody>
-    </table>
-  </article>
+      </div>
+    </article>
+   </article>
 </template>
 <style>
-.toggle-button {
+h2{
+  margin-bottom: 0;
+}
+.myorder_card{
+  width: 512px;
+  height: 250px;
   border: none;
   background-color: white;
+  border-radius: 5px;
+  margin :20px auto;
+  padding: 5px 20px;
+}
+.title_order{
   display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--text-color);
   align-items: center;
+  height: 40px;
+}
+.title_order p{
+  color: blue;
+  margin: 0;
 }
 
-.order-item {
-  border: 1px solid gray;
+.myorder_elementgroup{
+  overflow-y: scroll;
+  height: 200px;
 }
+.myorder_elementgroup::-webkit-scrollbar {
+  width:10px;
+}
+.myorder_elementgroup::-webkit-scrollbar-thumb {
+  background: var(--line-color);
+  width: 6px;
+  height: 6px;
+  border-radius: 5px;
+}
+@media (max-width: 575.98px) { 
+  .myorder_card{
+    width: 340px;
+  }
+}
+
 </style>

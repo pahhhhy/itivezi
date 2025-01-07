@@ -4,6 +4,7 @@ import { type User } from 'firebase/auth'
 import { useVegeStore } from '@/stores/vege'
 import MyVegeElement from './MyVegeElement.vue';
 import MyVegePopup from './MyVegePopup.vue';
+import { useUserStore } from '@/stores/userData';
 enum VegeState{
   Discontinued="Discontinued",
   Available="Available"
@@ -44,24 +45,25 @@ interface datatable {
   VegeName:string
 }
   const vegeStore=useVegeStore()
-interface Props {
-  currentUser: User
-}
-const props = defineProps<Props>()
 const isToggle = ref<boolean>(false)
 const MyVegeData=ref<MyVegeTables>({})
 const vegeAllData = ref<Vegetables>(vegeStore.VegeAllData)
 const IsPopup=ref<boolean>(false)
 const changeData=ref<datatable>()
 const Changeunique=ref<string|number>("")
+  const userStore=useUserStore()
+  const currentUser = ref(userStore.currentUser);
 watch(() => vegeStore.VegeAllData, (newUser) => {
   vegeAllData.value = newUser;
   initData()
 });
+watch(() => userStore.currentUser, (newUser) => {
+  currentUser.value = newUser;
+});
 function initData(){
   let fileterData=filterAvailableVegetables(vegeAllData.value)
-  if(props.currentUser.displayName){
-    const filterMyData:Vegetables=getFarmerData(fileterData,props.currentUser.displayName)
+  if(currentUser.value&&currentUser.value.displayName){
+    const filterMyData:Vegetables=getFarmerData(fileterData,currentUser.value.displayName)
     MyVegeData.value=convertToMyVegeTables(filterMyData)
   }
   
@@ -162,39 +164,21 @@ function onPushBack(){
 }
 </script>
 <template>
-  <!-- {{props.vegeAllData}} -->
-  <!-- {{ props.vegeAllData }} -->
-  <!-- <h2>{{ targetList }}</h2> -->
-   <!-- {{ MyVegeData }} -->
-  <button v-on:click="pushToggle()" class="toggle-button">
-    <i class="bi bi-caret-down-fill" v-show="!isToggle"></i>
-    <i class="bi bi-caret-up-fill" v-show="isToggle"></i>
+  <article class="myvege_card">
     <h2>自分の野菜</h2>
-  </button>
-  <table v-show="isToggle">
-    <thead>
-      <tr>
-        <th>画像</th>
-        <th>野菜名</th>
-        <th>販売単位</th>
-        <th>単価</th>
-        <th>卸先</th>
-        <th>編集</th>
-        <th>削除</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr v-for="(elements, unique) in MyVegeData" :key="unique" class="uid">
+    <article class="myvege_elementgroup">
+      <div v-for="(elements, unique) in MyVegeData" :key="unique" >
         <MyVegeElement
         v-bind:-vege-data="elements"
         v-bind:unique="unique"
         v-on:delete-vege-data="deleteVegeData"
         v-on:change-vege-data="changeVegeData"
         ></MyVegeElement>
-      </tr>
-    </tbody>
-  </table>
-  <article v-if="IsPopup&&changeData" class="myvege_popup">
+      </div>
+    </article>
+    
+  </article>
+  <article v-if="IsPopup&&changeData">
     <MyVegePopup
     v-bind:unique-key="Changeunique"
     v-bind:vegedata="changeData"
@@ -203,23 +187,34 @@ function onPushBack(){
   </article>
 </template>
 <style>
-.uid {
-  border: 1px solid black;
-  padding-top: 20px;
-}
-.toggle-button {
+.myvege_card{
+  width: 512px;
+  height: 250px;
   border: none;
   background-color: white;
-  display: flex;
-  align-items: center;
+  border-radius: 5px;
+  margin :20px auto;
+  padding: 5px 20px;
 }
-.myvege_popup{
-  position: fixed;
-  top: 10%;
-  left: 30%;
-  background-color: white;
-  padding: 30px;
-  border-radius: 10px;
-  box-shadow: rgba(0, 0, 0, 0.12) 0px 2px 10px;
+.myvege_elementgroup{
+  overflow-y: scroll;
+  height: 200px;
+}
+.myvege_elementgroup::-webkit-scrollbar {
+  width:10px;
+}
+.myvege_elementgroup::-webkit-scrollbar-thumb {
+  background: var(--line-color);
+  width: 6px;
+  height: 6px;
+  border-radius: 5px;
+}
+.myvege_card h2{
+  border-bottom: 1px solid var(--text-color);
+}
+@media (max-width: 575.98px) { 
+  .myvege_card{
+    width: 340px;
+  }
 }
 </style>

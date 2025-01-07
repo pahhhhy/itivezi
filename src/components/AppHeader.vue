@@ -52,7 +52,9 @@ enum PageMode{
   owner="Onwer",
   None="null",
   login="login",
-  logout="Logout"
+  logout="Logout",
+  chat="Chat",
+  announcements="Announcements"
 }
 
 const userStore=useUserStore()
@@ -68,33 +70,36 @@ const cartData=ref<CartTables>(cartStore.cartData)
 const cartCount=ref<number>(0)
   const route = useRoute();
   const isBurger=ref<boolean>()
-const background=ref(null)
+const blackback=ref(null)
 if(currentUser.value)
 cartCount.value=cartStore.getCountCart(currentUser.value.uid)
-function onClickBurger(mode:PageMode){
-  if(!isBurger.value){
-    gsap.to(sidebar.value,{x:205,duration:0.5})
-  }else{
-    gsap.to(sidebar.value,{x:-205,duration:0.5})
-  }
+//バーガーの押したときにはアニメーションを走らせ、
+//ついでにサイドバーのボタンを押したときに対応したページに飛ぶコードも一緒に書いた。
+async function onClickBurger(mode:PageMode){
   switch (mode){
     case PageMode.home:
-      router.push("/")
+      await router.push("/")
       break;
       case PageMode.order:
-      router.push("/order")
+      await router.push("/order")
       break;
       case PageMode.registration:
-      router.push("/registration")
+      await router.push("/registration")
       break;
       case PageMode.mypage:
-      router.push("/my-page")
+      await router.push("/my-page")
       break;
       case PageMode.owner:
-      router.push("/Owner")
+      await router.push("/Owner")
       break;
       case PageMode.login:
-      router.push("/login")
+      await router.push("/login")
+      break;
+      case PageMode.chat:
+      await router.push("/chat")
+      break;
+      case PageMode.announcements:
+      await router.push("/announcements")
       break;
       case PageMode.logout:
       logout()
@@ -105,7 +110,7 @@ function onClickBurger(mode:PageMode){
   isBurger.value = !isBurger.value
 }
 const auth = getAuth()
-function logout() {
+async function logout() {
   signOut(auth)
     .then(() => {
       // Sign-out successful.
@@ -113,6 +118,7 @@ function logout() {
       router.push("/")
     })
 }
+//今なんのページにいるかを判定する。
 function isActive(page: PageMode): boolean {
   switch (page) {
     case PageMode.home:
@@ -125,18 +131,17 @@ function isActive(page: PageMode): boolean {
       return route.path === '/my-page';
     case PageMode.owner:
       return route.path === '/Owner';
+      case PageMode.announcements:
+      return route.path === '/announcements';
+      case PageMode.chat:
+      return route.path === '/chat';
     case PageMode.login:
       return route.path === '/login';
     default:
       return false;
   }
 }
-function onPushCart(){
-  router.push("/cart")
-}
-function onPuskMyPage(){
-  router.push("/my-page")
-}
+
 watch(() => userStore.currentUser, (newUser) => {
   currentUser.value = newUser;
   if(currentUser.value)
@@ -160,25 +165,42 @@ watch(
     }
   }
 );
+async function onPushComment(){
+  await router.push('/chat')
+}
+async function onPushIcon(){
+  await router.push('/')
+}
+async function onPushMypage(){
+  await router.push('/my-page')
+}
+async function onPushCart(){
+  await router.push('/cart')
+}
 </script>
 
 <template>
-  <div v-bind:class="{black_back:isBurger,active:isBurger}" class="background" ref="background" >
+  <div class="background"></div>
+  <div class="blank"> </div>
+  <div v-bind:class="{black_back:isBurger,active:isBurger}" class="blackback" ref="blackback" v-on:click="onClickBurger(PageMode.None)">
   </div>
   <header>
-    <div class="header-icon">
+    <div class="header-icon" v-on:click="onPushIcon">
       <img src="..\\assets\\itivezilogo.png" alt="" />
     </div>
     
     <nav>
+      <button v-on:click="onPushComment" v-if="currentUser != null"><i class="bi bi-chat-right-text comment"  ></i></button>
         <div class="cart "  v-on:click="onPushCart" v-if="currentUser != null">
-          <div class="cart_icon">
-            <i class="bi bi-cart"></i>
-            <p>{{cartCount}}</p>
+          <div class="cart_icon" v-if="cartCount==0">
+            <img src="../assets/cart.png" alt="">
+          </div>
+          <div v-if="cartCount!=0" class="cart_icon">
+            <img src="../assets/cart!.png" alt="">
           </div>
           <p class="d-none d-sm-block">買い物かご</p>
         </div>
-        <div class="myacount" v-if="currentUser != null" >
+        <div class="myacount" v-if="currentUser != null" v-on:click="onPushMypage">
           <div v-if="iconURL != null&&iconURL != '' "><img v-bind:src="iconURL" alt="" class="aicon-image"></div>
           <p v-if="currentUser != null" class="d-none d-sm-block">{{ currentUser.displayName }}様</p>
         </div>
@@ -186,7 +208,7 @@ watch(
       <i v-if="isBurger" v-on:click="onClickBurger(PageMode.None)" class="bi bi-x-lg burger"></i>
     </nav>
   </header>
-  <aside  ref="sidebar">
+  <aside  ref="sidebar" v-bind:class="{active:isBurger}">
     <ul>
       <li :class="{ 'active': isActive(PageMode.home) }">
         <div v-on:click="onClickBurger(PageMode.home)" class="sidebar_element" >
@@ -205,6 +227,18 @@ watch(
         <button v-on:click="onClickBurger(PageMode.registration)" class="sidebar_element" >
           <i class="bi bi-pencil-square"></i>
           <p>登録</p>
+        </button>
+      </li>
+      <li v-if="currentUser != null" :class="{ 'active': isActive(PageMode.chat) }">
+        <button v-on:click="onClickBurger(PageMode.chat)" class="sidebar_element" >
+          <i class="bi bi-chat-right-text"></i>
+          <p>チャット</p>
+        </button>
+      </li>
+      <li v-if="currentUser != null" :class="{ 'active': isActive(PageMode.announcements) }">
+        <button v-on:click="onClickBurger(PageMode.announcements)" class="sidebar_element" >
+          <i class="bi bi-clipboard2-minus"></i>
+          <p>掲示板</p>
         </button>
       </li>
       <li v-if="currentUser != null" :class="{ 'active': isActive(PageMode.mypage) }">
@@ -246,25 +280,46 @@ ul{
 p{
   margin: 0;
 }
+button{
+  border: none;
+  background-color: white
+}
+.blank{
+  width: 100%;
+  height: 80px;
+}
 header {
   height: 80px;
-  width: 100%;
+  width: 100vw;
   display: flex;
+  top:0;
   justify-content: space-between;
-  position: relative;
+  position: fixed;
   border-bottom: 1px solid rgb(223, 223, 223);
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.26);
   padding: 0 3%;
   overflow-x: hidden;
   overflow-y: hidden;
   z-index: 20;
+  background-color: white;
+}
+header i{
+  color: var(--text-color);
 }
 .header-icon{
-  width: 50%;
+  width: 35%;
+  height: 80px;
+  display: flex;
+  align-items: center;
+}
+.header-icon img{
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 .myacount{
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
   height: 100%;
 }
@@ -274,10 +329,16 @@ header {
   position: relative;
   flex-direction: column;
 }
-.cart_icon i{
-  text-align: center;
-  font-size: 40px;
-  margin: 20%;
+.cart_icon{
+  display: flex;
+  align-items: center;
+}
+.cart_icon img{
+  margin: auto;
+  margin-top: 13px;
+  margin-bottom: 5px;
+  width: 40px;
+  height: 40px;
 }
 .cart_icon p{
   position: absolute;
@@ -288,17 +349,23 @@ header {
   margin: 0;
 }
 nav {
-  width: 50%;
+  width: 62%;
   display: flex;
   align-items: center;
   justify-content: right;
   padding: 5px;
 }
+.comment{
+  width: 35px;
+  height: 40px;
+  text-align: center;
+  font-size: 35px;
+  margin-right: 10px;
+}
 .aicon-image{
   width: 50px;
   height: 50px;
   border-radius: 25px;
-  margin: 0 10px;
 }
 nav >p{
   margin: 0 10px;
@@ -314,10 +381,16 @@ aside {
   left: -205px;
   height: calc(100% - 80px);
   width: 200px;
-  position: absolute;
+  top: 80px;
+  position: fixed;
   background-color: white;
   z-index: 20;
   box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.25);
+  transition: 0.5s all ease ;
+}
+aside.active{
+  left: 0;
+  transition: 0.5s all ease ;
 }
 aside i {
   font-size: 30px;
@@ -357,39 +430,69 @@ li.active .sidebar_element{
   font-size: 24px;
   color: var(--other-color);
 }
+.blackback{
+  position: fixed;
+  display: block;
+  top: 80px;
+  left: 0;
+  background-color:rgba(3,3,3); ;
+  opacity: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 10;
+  transition: all 0.5s ease;
+  pointer-events: none;
+}
+
+.blackback.active{
+  left: 0;
+  background-color:rgba(3,3,3); ;
+  width: 100vw;
+  height: 100vh;
+  opacity: 0.5;
+  z-index: 10;
+  pointer-events: all;
+  transition: all  0.5s ease;
+}
 .background{
   position: fixed;
   display: block;
   top: 80px;
   left: 0;
-  background-color:rgba(255, 255, 255, 0) ;
+  background-color:var(--background-color) ;
   width: 100vw;
   height: 100vh;
-  z-index: -1;
+  z-index: -3;
   transition: all 0.5s ease;
 }
-.background.active{
-  top: 80px;
-  left: 0;
-  background-color:rgba(3,3,3,.5); ;
-  width: 100vw;
-  height: 100vh;
-  z-index: 10;
-  transition: all  0.5s ease;
-}
-.black_back{
-  position: fixed;
-  top: 80px;
-  left: 0;
-  background-color:#f8f8f8 ;
-  width: 100vw;
-  height: 100vh;
-  z-index: -1;
-}
+
 @media (max-width: 575.98px) {
   .cart_icon p{
     top: 21%;
     left: 57%;
+  }
+  .comment{
+    margin-right: 0px;
+  }
+  .header-icon{
+    width: 35%;
+    height: 60px;
+  }
+  header {
+    height: 60px;
+  }
+  .blank{
+    height: 60px;
+  }
+  aside{
+    top: 60px;
+    height:calc(100% - 60px); 
+  }
+  .background{
+    top: 60px;
+  }
+  .blackback{
+    top: 60px;
   }
  }
 </style>

@@ -38,9 +38,6 @@ watch(() => vegeStore.VegeAllData, (newUser) => {
 </script>
 
 <template>
-  <div class="title">
-    <h1>マイページ</h1>
-  </div>
 
   <my-page-update v-bind:current-user="currentUser" v-bind:vege-all-data="vegeAllData" v-if="currentUser != null"></my-page-update>
   <my-page-my-vege

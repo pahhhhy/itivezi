@@ -218,7 +218,6 @@ function onPushChangePass(){
     </div>
     <article class="form_card">
       <login-form v-on:OnInput="onInput"></login-form>
-      <h1 v-if="currentUser != null">{{ currentUser.displayName }}様</h1>
       <h2 v-if="errorMes != ''" style="color: red">{{ errorMes }}</h2>
       <div class="form_link_group">
         <button type="button" class="btn btn-success" @click="signin(email, password)">ログイン</button>

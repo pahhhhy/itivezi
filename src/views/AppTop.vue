@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import {ref,watch} from 'vue'
 import {RouterLink} from 'vue-router'
-import AppTopBuyer from './components/AppTop/AppTopBuyer.vue';
-import AppTopFarmer from './components/AppTop/AppTopFarmer.vue';
 import AppTopOwner from './components/AppTop/AppTopOwner.vue';
 import { useUserStore } from '@/stores/userData';
 import { usefireUserStore } from '@/stores/fireUserdata';
@@ -24,14 +22,9 @@ enum Role{
     None=""
   }
 const userStore=useUserStore()
-const fireUseStore=usefireUserStore()
-const myUserData=ref<Usertables>(fireUseStore.myUserData)
 const currentUser = ref(userStore.currentUser);
 watch(() => userStore.currentUser, (newUser) => {
   currentUser.value = newUser;
-});
-watch(() => fireUseStore.myUserData, (newUser) => {
-  myUserData.value = newUser;
 });
 </script>
 
@@ -46,13 +39,9 @@ watch(() => fireUseStore.myUserData, (newUser) => {
         <RouterLink v-bind:to="{ name: 'login' }">新規登録/ログイン</RouterLink>
       </button>
     </div>
-
-
   </article>
   <article v-if="currentUser != null">
-    <AppTopBuyer v-if="myUserData.role==Role.Buyer&&myUserData.gender!=''"></AppTopBuyer>
-    <AppTopFarmer v-if="myUserData.role==Role.Farmer&&myUserData.gender!=''"></AppTopFarmer>
-    <AppTopOwner v-if="(myUserData.role==Role.Onwer||myUserData.role==Role.Murone||myUserData.role==Role.Kawasaki)&&myUserData.gender!=''"></AppTopOwner>
+    <AppTopOwner ></AppTopOwner>
   </article>
 </template>
 <style>

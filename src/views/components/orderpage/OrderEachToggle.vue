@@ -36,18 +36,23 @@ function onPushCart(){
 }
 </script>
 <template>
-    <button class="Order_title">
-        <h1>{{props.vegeName}}</h1>
-    </button>
-    <article class="vege_group" >
-        <div v-for="(element,unique) in data" :key="unique" >
-            <OrderToggleElement
-            v-bind:data="element"
-            v-bind:unique-key="unique"
-            v-bind:vege-name="vegeName"
-            v-on:on-push-popup="onPushPopup"></OrderToggleElement>
-        </div>
+    <article class="Order_card">
+        <button class="Order_title">
+            <h1>{{props.vegeName}}</h1>
+            <!-- <i class="bi bi-chevron-down"></i> -->
+        </button>
+        <article class="vege_group" >
+            <div v-for="(element,unique) in data" :key="unique" >
+                <OrderToggleElement
+                v-bind:data="element"
+                v-bind:unique-key="unique"
+                v-bind:vege-name="vegeName"
+                v-on:on-push-popup="onPushPopup"></OrderToggleElement>
+            </div>
+        </article>
     </article>
+    
+    
     <article v-if="IsPopup" class="Toggle_popup">
         <h2>カードに入れました</h2>
             <button v-on:click="onPushOk">了解</button>
@@ -56,6 +61,32 @@ function onPushCart(){
     <!-- <h4>{{props.data}}</h4> -->
 </template>
 <style scoped>
+.Order_card{
+    background-color: white;
+    border-radius: 10px;
+    border: none;
+    width: 800px;
+    height: 240px;
+    padding: 25px ;
+    margin: 10px auto;
+}
+.Order_title{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-align: left;
+    border: none;
+    border-bottom:1px  solid  var(--text-color);
+    background-color: white;
+    color: var(--text-color);
+}
+.Order_title h1{
+    font-size: 27px;
+}
+.Order_title i{
+    font-size: 25px;
+}
 .Toggle_popup{
     position: fixed;
     z-index: 1;
@@ -66,14 +97,25 @@ function onPushCart(){
     padding: 20px;
     background-color: white;
 }
-    .Order_title{
-        border: none;
-        background-color: var(--background-color);
-        display: flex;
-        align-items: center;
-        color: var(--text-color);
+.vege_group{
+    display: flex;
+    overflow-x: scroll;
+    overflow-y: hidden;
+}
+.vege_group::-webkit-scrollbar {
+    width:0px;
+}
+.vege_group::-webkit-scrollbar-thumb {
+    background: var(--line-color);
+    width: 6px;
+    height: 1px;
+    border-radius: 5px;
+}
+@media (max-width: 575.98px) { 
+    .Order_card{
+        width: 340px;
+        padding: 10px 15px;
     }
-    .vege_group{
-        display: flex;
-    }
+}
+
 </style>

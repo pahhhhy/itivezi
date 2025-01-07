@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref} from 'vue'
+import { ref,computed} from 'vue'
+import { useRouter } from 'vue-router';
 enum VegeState{
   Discontinued="Discontinued",
   Available="Available"
@@ -38,10 +39,18 @@ interface orderVegeElementTables{
 }
 interface Props {
   data:OrdertablesElement
+  unique:string|number
 }
 
 const props = defineProps<Props>()
   const vegeElementList=ref<orderVegeElementTables>(getNumData(props.data))
+  const images=ref<string[]>(getImg(vegeElementList.value))
+  const titlename=ref<string>(getTitle(vegeElementList.value))
+  const orderDay=ref<string>(formatDate(props.data.orderTime))
+  const router = useRouter();
+  const navigateToDetail = (unique:string|number) => {
+      router.push({ name: 'my-page-order', params: { unique } }); // 'DynamicPage' はルート名
+    };
 function getNumData(orderTable: OrdertablesElement) {
   // 数値キーに対応する部分を取り出す
   const numData = Object.keys(orderTable)
@@ -50,34 +59,142 @@ function getNumData(orderTable: OrdertablesElement) {
 
   return numData;
 }
+function getTitle(data:orderVegeElementTables){
+  let result:string=""
+  for(let i :number=0;i<Object.keys(data).length;i++){
+    result=result+data[i].VegeName
+    if(i!=Object.keys(data).length-1){
+      result=result+"、"
+    }
+  }
+  return result
+}
+function getImg(data:orderVegeElementTables){
+  let resultimages:string[]=[]
+  for(let i :number=0;i<Object.keys(data).length;i++){
+    resultimages[i]=data[i].photo
+    if(i==3)break;
+  }
+  return resultimages
+}
+function formatDate(input:string) {
+  // 入力をスプリットして配列に変換
+  const [year, month, day] = input.split('-');
+  // フォーマットを `YYYY/MM/DD` に変換
+  return `${year}/${month}/${day}`;
+}
+const gridClass = computed(() => {
+  const itemCount = Object.keys(vegeElementList.value).length;
+  console.log("Item Count:", itemCount);
+  switch (itemCount) {
+    case 1:
+      return "grid-one";
+    case 2:
+      return "grid-two";
+    case 3:
+      return "grid-three";
+    case 4:
+      return "grid-four";
+    default:
+      return "grid-four";
+  }
+});
 </script>
 <template>
-  <td>{{props.data.orderTime}}</td>
-  <td> 
-      <table>
-          <thead>
-              <tr>
-                  <th scope="col">野菜名</th>
-                  <th scope="col">農家名</th>
-                  <th scope="col">販売単位</th>
-                  <th scope="col">単価</th>
-                  <th scope="col">購入個数</th>
-              </tr>
-          </thead>
-          <tbody>
-              <tr v-for="(vegeData,index) in vegeElementList" :key="index">
-                  <td>{{vegeData.VegeName}}</td>
-                  <td>{{vegeData.farmer}}</td>
-                  <td>{{vegeData.unit}}</td>
-                  <td>{{vegeData.en}}</td>
-                  <td>{{vegeData.amount}}</td>
-              </tr>
-          </tbody>
-      </table>
-  </td>
-  <td> {{props.data.totalMoney}}円</td>
-  <td>{{props.data.selectData}}</td>
+  <article class="myorder_element" v-on:click="navigateToDetail(props.unique)">
+    <div v-bind:class="gridClass" class="image-container">
+      <div v-for="(image, index) in images" :key="index" class="image-item">
+        <img v-if="image!='none'" :src="image" alt="画像" />
+        <img src="../../../assets/Noimage.jpeg" alt="..." v-if="image=='none'">
+      </div>
+    </div>
+    <div class="name_time">
+      <h4>{{titlename}}</h4>
+      <p>注文日：{{orderDay}}</p>
+    </div>
+    <button ><i class="bi bi-chevron-right"></i></button>
+  </article>
 </template>
 <style scoped>
+.myorder_element{
+  display: flex;
+  height: 70px;
+  border-top:1px solid var(--line-color) ;
+  border-bottom:1px solid var(--line-color) ;
+  width: 100%;
+}
+.myorder_element button{
+  border: none;
+  background-color: white;
+  
+}
+.name_time{
+  width: 100%;
+  height: 100%;
+  margin-left: 20px;
+}
+.name_time h4{
+  white-space: nowrap; /* テキストを1行に制限 */
+  overflow: hidden;    /* はみ出した部分を非表示にする */
+  text-overflow: ellipsis; /* はみ出した部分を「...」にする */
+  font-size: 18px;
+  margin: 0;
+}
+.name_time p{
+  margin: 0;
+  margin-top: 10px;
+  font-size: 14px;
+}
+.image-container {
+  display: grid;
+  width: 80px;
+  height: 100%;
+}
+.image-item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+}
+.image-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.grid-one {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+}
 
+.grid-two {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+.grid-three {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  grid-template-areas:
+    "image1 image2"
+    "image3 image3";
+}
+
+.grid-four {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+@media (max-width: 575.98px) { 
+  .name_time{
+    width: 150px;
+  }
+  .myorder_element{
+    height: 60px;
+  }
+  .name_time{
+    margin: 0;
+  }
+  }
 </style>

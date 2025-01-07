@@ -57,6 +57,7 @@ interface OrdertablesElement{
   selectData:string
   state:OrderStete
   totalMoney:number
+place:string
 }
 
 const fireOrderStore=useFireOrderStore()
