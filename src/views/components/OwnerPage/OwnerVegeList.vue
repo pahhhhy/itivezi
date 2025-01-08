@@ -183,9 +183,9 @@ function pushBack() {
   <div class="owner-popup" v-if="isPopup">
     <h3>{{ deleteVegeName }}は以下の{{
         farmerVegeList[deleteVegeName].length
-      }}人が出品しています。本当に削除しますか？</h3>
-    <div v-for="farmerName in farmerVegeList[deleteVegeName]" :key="farmerName">
-      {{ farmerName }}
+    }}人が出品しています。<br>本当に削除しますか？</h3>
+    <div style="font-size: 18px;" v-for="farmerName in farmerVegeList[deleteVegeName]" :key="farmerName">
+      ・{{ farmerName }}
     </div>
     <button v-on:click="pushDelete()">削除する</button>
     <button v-on:click="pushBack()">戻る</button>
@@ -193,20 +193,28 @@ function pushBack() {
 </template>
 <style>
 .owner-popup {
-  border-radius: 20px;
-  border: 1px gray solid;
-  z-index: 1;
-  background-color: white;
-  position: absolute;
-  top: 30%;
-  left: 30%;
-  padding: 3%;
-}
+  position: fixed;
+  width: 340px;
 
-.owner-popup button {
+  z-index: 10;
+  border: 1px solid gray;
+  border-radius: 20px;
+  top: calc(50% - 150px);
+  left: calc(50% - 170px);
+  padding: 20px;
   background-color: white;
-  padding: 1%;
-  margin: 1%;
+}
+.owner-popup h3{
+  font-size: 24px;
+}
+.owner-popup button {
+  font-size: 1.2rem;
+  padding: 15px 30px;
+  margin: 10px;
+  border-radius: 30px;
+  border:none;
+  color: white;
+  background-color: var(--main-color);
 }
 
 .vege-title {
@@ -219,17 +227,19 @@ function pushBack() {
 }
 
 .vegeList-group-active {
-  margin: 10px;
+  margin: 5px;
   font-size: large;
-  width: 400px;
+  width: 280px;
 }
 
 .vegeList-button {
-  background-color: white;
   font-size: 1.2rem;
-  padding: 5px;
+  padding: 15px 30px;
   margin: 5px;
-  border-radius: 10px;
+  border-radius: 30px;
+  border:none;
+  color: white;
+  background-color: var(--main-color);
 }
 
 .vegeList-unit-icon-active {
@@ -237,13 +247,17 @@ function pushBack() {
   align-items: center;
 
 }
+.vegeList-unit-active p{
+  margin-bottom: 2px;
 
+}
 .vegeList-unit-icon-active button {
   padding: 0;
   height: 100%;
   border: none;
   display: flex;
   background-color: white;
+
 }
 
 .vegeList-unit-active {
