@@ -1,123 +1,110 @@
 <script setup lang="ts">
-import { ref} from 'vue'
-import { useFireOrderStore } from '@/stores/fireOrder';
+import router from '@/router'
+import { ref, watch } from 'vue'
+
 interface Props {
   titleData: titleDataTables
-  vegeData:OrdertablesNumElement
-  OrderData:OrdertablesElement
-  unique:string
-  uid:string
+  unique: string
 }
-enum OrderStete{
-  Completed="取引完了",
-  Uncontacted="未連絡",
-  contacted="連絡済み",
-  cancel="取引取り消し"
+interface titleDataTables {
+  orderTime: string
+  orderName: string
+  state: OrderStete
+  uid: string
+  unique: string
 }
-enum VegeState{
-  Discontinued="Discontinued",
-  Available="Available"
-}
-interface OrdertablesElement{
-  [num:number]:{
-    en:number;
-    farmer:string
-    roadStation:string[]
-    state:VegeState
-    unique:string
-    unit:string
-    photo:string
-    amount:number
-    VegeName:string
-}
-  orderTime:string
-  email:string
-  orderName:string
-  selectData:string
-  state:OrderStete
-  totalMoney:number
-place:string
-}
-interface OrdertablesNumElement{
-          [num:number]:{
-    en:number;
-    farmer:string
-    roadStation:string[]
-    state:VegeState
-    unique:string
-    unit:string
-    photo:string
-    amount:number
-    VegeName:string
-}
-    }
 
-interface titleDataTables{
-  orderTime: string, 
-  orderName: string, 
-  state: string,
-  uid:string,
-  unique:string
+enum OrderStete {
+  Completed = '取引完了',
+  Uncontacted = '未連絡',
+  contacted = '連絡済み',
+  cancel = '取引取り消し'
 }
+
 const props = defineProps<Props>()
-const isActive=ref<boolean>(false)
-const FireOrderStore=useFireOrderStore()
-const orderData=ref<OrdertablesElement>(props.OrderData)
-const state=ref<OrderStete>(props.OrderData.state)
-const totalMoney=ref<number>(props.OrderData.totalMoney)
-function selectOrderData(){
-    isActive.value=!isActive.value
-}
-function changeState(){
-  orderData.value.state=state.value
-  FireOrderStore.updateOrderState(orderData.value,props.uid,props.unique)
-}
-</script>
-<template>
-  <div class="order-table" v-on:click="selectOrderData()">
-    <p>{{ props.titleData["orderTime"] }}</p>
-    <p>{{ props.titleData["orderName"] }}</p>
-    <p>{{ props.titleData["state"] }}</p>
-    <i class="bi bi-chevron-down" v-if="!isActive"></i>
-    <i class="bi bi-chevron-up" v-if="isActive"></i>
-  </div>
-  <div class="order-table-selected" v-if="isActive">
-    <div v-for="(Data,number) in props.vegeData" v-bind:key="number" class="order-table-selected-unit">
-      <h3>{{ Data.VegeName }}</h3>
-      <p>単位：{{ Data.unit }}</p>
-      <p>個数：{{ Data.amount }}組</p>
-      <p>農家名：{{ Data.farmer }}</p>
-      <p>卸先：{{ Data.roadStation }}</p>
-      <p>料金：{{ Data.en }}円</p>
-    </div>
-  </div>
-  <div v-if="isActive">
-    <h3>合計金額：{{totalMoney}}円</h3>
-    <h3>希望日：{{props.OrderData.selectData}}</h3>
-    <h3 style="display: flex;">ステータス:<select class="form-select" aria-label="select-startyear" v-model="state" v-on:change="changeState">
-      <option :value="OrderStete.Uncontacted">{{OrderStete.Uncontacted}}</option>
-      <option :value="OrderStete.contacted">{{OrderStete.contacted}}</option>
-      <option :value="OrderStete.Completed">{{OrderStete.Completed}}</option>
-      <option :value="OrderStete.cancel">{{OrderStete.cancel}}</option>
-    </select></h3>
-    
-  </div>
-</template>
-<style scoped>
-.order-table-unit {
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  cursor: pointer;
-  border-bottom: 1px solid gray;
-  border-top: 1px solid gray
-}
-.order-table-selected-unit {
-  padding: 3%
-}
-.order-table-selected {
-  display: flex;
-  margin: 0% 10%;
+const fontColor = ref<string>('black')
 
+// クエリdataを持ったページに異動する
+const navigateToDetail = (unique: string | number,uid:string) => {
+  console.log(unique)
+  router.push({ name: 'Owner-order',  query: {
+      unique,
+      uid
+    } })
+}
+
+// propsが変わるたびに文字色をチェック
+watch(
+  () => props.titleData.state,
+  () => checkState()
+)
+
+// 状態に応じて文字色を変更
+function checkState() {
+  switch (props.titleData.state) {
+    case OrderStete.Completed:
+      fontColor.value = '#008037'
+      break
+    case OrderStete.Uncontacted:
+      fontColor.value = 'red'
+      break
+    case OrderStete.cancel:
+      fontColor.value = 'black'
+      break
+    case OrderStete.contacted:
+      fontColor.value = 'blue'
+      break
+  }
+}
+
+// 初期化時に文字色を設定
+checkState()
+</script>
+
+<template>
+  <article class="order_element" @click="navigateToDetail(props.unique,props.titleData.uid)">
+    <div class="name_time">
+      <div class="name_state">
+        <h4>{{ props.titleData.orderName }}</h4>
+        <p :style="{ color: fontColor }">{{ props.titleData.state }}</p>
+      </div>
+      <p>注文時間：{{ props.titleData.orderTime }}</p>
+    </div>
+    <button><i class="bi bi-chevron-right"></i></button>
+  </article>
+</template>
+
+<style scoped>
+.name_state {
+  display: flex;
+}
+.name_state h4 {
+  width: 65%;
+  margin: 0;
+}
+.name_state p {
+  width: 35%;
+  margin: 0;
+}
+.order_element {
+  display: flex;
+  height: 60px;
+  border-top: 1px solid var(--line-color);
+  border-bottom: 1px solid var(--line-color);
+  width: 100%;
+}
+.order_element button {
+  border: none;
+  background-color: white;
+  width: 20px;
+  color: black;
+  font-size: 25px;
+  margin: auto;
+  margin-right: 5px;
+}
+.name_time {
+  width: 100%;
+  height: 100%;
+  margin-left: 20px;
 }
 </style>

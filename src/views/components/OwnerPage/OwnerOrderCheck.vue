@@ -1,11 +1,9 @@
 <script setup lang="ts">
-import { ref,watch} from 'vue'
-import { useRoute } from 'vue-router';
+import { ref,watch,onMounted,computed} from 'vue'
+import { useRoute, type LocationQueryValue } from 'vue-router';
 import { useFireOrderStore } from '@/stores/fireOrder';
 import { useUserStore } from '@/stores/userData';
 import { useVegeStore } from '@/stores/vege'
-import { useCartStore } from '@/stores/cart';
-import { useOrderDataStore } from '@/stores/orderData';
 import router from '@/router'
 enum VegeState{
   Discontinued="Discontinued",
@@ -71,42 +69,62 @@ interface orderVegeElementTables{
     VegeName:string
 }
 }
-interface CartElementTables{
-    en:number;
-    farmer:string
-    roadStation:string[]
-    unit:string
-    photo:string
-    unique:string
-    vegeName:string
-    amount:number
-}
 const fireOrderStore=useFireOrderStore()
+fireOrderStore.roadData()
 const orderAllData = ref<Ordertables>(fireOrderStore.OrderAllData)
 const route = useRoute();
-const unique = ref<string|string[]>(route.params.unique);
+const unique = ref<LocationQueryValue | LocationQueryValue[]>(route.query.unique);
+const uid = ref<LocationQueryValue | LocationQueryValue[]>(route.query.uid);
+  const uniqueStr = unique.value ? String(unique.value) : '';
+  const uidStr = uid.value ? String(uid.value) : '';
 const data=ref<OrdertablesElement>()
 const vegeData=ref<orderVegeElementTables>()
 const orderTime=ref<string>("")
 const selectDate=ref<string>("")
+const nowState=ref<OrderStete>(OrderStete.Uncontacted)
 const userStore=useUserStore()
 const currentUser = ref(userStore.currentUser);
 const vegeStore=useVegeStore()
+// 空判定の computed プロパティ
+const isOrderAllDataEmpty = computed(() => {
+  return Object.keys(orderAllData.value).length === 0;
+});
 const vegeAllData = ref<Vegetables>(vegeStore.VegeAllData)
 const canBuy=ref<boolean>(false)
-  const OrderDataStore=useOrderDataStore()
-  const cartStore=useCartStore()
 function initData(){
-    if(typeof(unique.value)=="string"&&currentUser.value){
-    data.value=orderAllData.value[currentUser.value.uid][unique.value]
+  // string に変換
+
+  console.log("uid:"+uidStr+"*unique:"+uniqueStr)
+  console.log(orderAllData.value)
+  if(uidStr&&uniqueStr){
+    data.value=orderAllData.value[uidStr][uniqueStr]
     vegeData.value=getNumData(data.value)
     orderTime.value=formatDate(data.value.orderTime)
     selectDate.value=formatDate(data.value.selectData)
     getCanBuy()
-    }
+    nowState.value=data.value.state
+  }else{
+    console.error("dataが読み取れん")
+  }
+  
+    
     
 }
-initData()
+onMounted(() => {
+  orderAllData.value = fireOrderStore.OrderAllData;
+
+  // データがロードされてから initData を呼ぶ
+  watch(
+    () => fireOrderStore.OrderAllData,
+    (newData) => {
+      if (Object.keys(newData).length > 0) {
+        orderAllData.value = newData;
+        initData();
+      }
+    },
+    { immediate: true }
+  );
+});
 function getNumData(orderTable: OrdertablesElement) {
   // 数値キーに対応する部分を取り出す
   const numData = Object.keys(orderTable)
@@ -140,26 +158,6 @@ function formatDate(input:string) {
   // フォーマットを `YYYY/MM/DD` に変換
   return `${year}年${month}月${day}日`;
 }
-async function onPushCart(){
-  if(vegeData.value)
-  for(let i:number=0;i<Object.keys(vegeData.value).length;i++){
-    let Cartdata:CartElementTables={
-    en:vegeData.value[i].en,
-    farmer:vegeData.value[i].farmer,
-    roadStation:vegeData.value[i].roadStation,
-    unit:vegeData.value[i].unit,
-    photo:vegeData.value[i].photo,
-    vegeName:vegeData.value[i].VegeName,
-    unique:vegeData.value[i].unique,
-    amount:vegeData.value[i].amount,
-  }
-  if(currentUser.value)
-  await cartStore.updateCartData(Cartdata,currentUser.value.uid)
-  }
-cartStore.roadData()
-OrderDataStore.resetData()
-router.push("/cart")
-}
 watch(() => userStore.currentUser, (newUser) => {
   currentUser.value = newUser;
 });
@@ -173,9 +171,21 @@ watch(() => vegeStore.VegeAllData, (newUser) => {
 function onPushBack(){
   router.back();
 }
+function changeState(){
+  
+  if(data.value){
+    data.value.state=nowState.value
+    fireOrderStore.updateOrderState(data.value,uidStr,uniqueStr)
+  }
+
+  
+}
 </script>
 <template>
-    <article class="myorderelement_card">
+  <article class="road" v-if="isOrderAllDataEmpty">
+    <div class="three-quarter-spinner"></div>
+  </article >
+    <article class="orderelement_card" v-if="!isOrderAllDataEmpty">
       <div class="title_order">
         <i class="bi bi-chevron-left" v-on:click="onPushBack"></i>
         <h2>注文内容の確認</h2>
@@ -185,9 +195,13 @@ function onPushBack(){
           <div class="orderinfoelement"><h5>配送希望日</h5><p>{{selectDate}}</p></div>
           <div class="orderinfoelement"><h5>小計</h5><p>￥{{data?.totalMoney}}</p></div>
           <div class="orderinfoelement"><h5>届け先</h5><p>{{data?.place}}</p></div>
+          <div class="orderinfoelement"><h5>ステータス</h5><select class="form-select" v-model="nowState" v-on:click="changeState" style="width: 180px;" aria-label="Default select example">
+            <option :value="OrderStete.Uncontacted">{{OrderStete.Uncontacted}} </option>
+            <option :value="OrderStete.contacted">{{OrderStete.contacted}} </option>
+            <option :value="OrderStete.Completed"> {{OrderStete.Completed}} </option>
+            <option :value="OrderStete.cancel">{{OrderStete.cancel}}</option>
+          </select></div>
         </div>
-        <button v-if="canBuy" v-on:click="onPushCart">再購入</button>
-        <p class="error" v-if="!canBuy">注文した商品が売り切れているため再購入できません。</p>
         <h3>購入物品</h3>
         <div v-for="(Data,index) in vegeData" v-bind:key="index">
           <article class="buyitem_card">
@@ -219,6 +233,26 @@ function onPushBack(){
     </article>
 </template>
 <style scoped>
+@keyframes spin {
+  from {
+    transform: rotate(0);
+  }
+  to{
+    transform: rotate(359deg);
+  }
+}
+.road{
+width: 50px;
+height: 50px;
+margin: auto;}
+.three-quarter-spinner {
+  width: 50px;
+  height: 50px;
+  border: 3px solid #fb5b53;
+  border-top: 3px solid transparent;
+  border-radius: 50%;
+  animation: spin .5s linear 0s infinite;
+}
 p{
   margin: 0;
 }
@@ -230,17 +264,17 @@ p{
   font-size: 24px;
   padding: 0 5px;
 }
-.myorderelement_card{
+.orderelement_card{
   width: 512px;
   background-color: white;
   margin: 0 auto;
   margin-top: 20px;
   border-radius: 5px;
 }
-.myorderelement_card h2{
+.orderelement_card h2{
   margin: 20px;
 }
-.myorderelement_card h3{
+.orderelement_card h3{
   margin: 20px;
 }
 .error{
@@ -249,7 +283,7 @@ p{
   font-size: 18px;
   font-weight: bold;
 }
-.myorderelement_card button{
+.orderelement_card button{
   background-color: var(--main-color);
   color: white;
   padding: 10px 20px;
@@ -356,7 +390,7 @@ p{
     font-weight: bolder;
   }
   @media (max-width: 575.98px) { 
-    .myorderelement_card{
+    .orderelement_card{
       width: 340px;
     }
     .buyitem_card{

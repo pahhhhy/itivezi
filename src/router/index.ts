@@ -15,6 +15,7 @@ import AnnouncementsPage from "@/views/AnnouncementsPage.vue";
 import AnnouncementDetailPage from "@/views/AnnouncementDetailPage.vue";
 import ResetPasswordPage from '@/views/ResetPasswordPage.vue'
 import VerifiPage from '@/views/VerifiPage.vue'
+import OwnerOrderCheck from '@/views/components/OwnerPage/OwnerOrderCheck.vue'
 import {
   getAuth
 } from 'firebase/auth'
@@ -79,6 +80,10 @@ const router = createRouter({
       path: '/Owner',
       name: 'Owner',
       component: Owner
+    },{
+      path: '/Owner-order',
+      name: 'Owner-order',
+      component: OwnerOrderCheck
     },
     {
       path: '/cart',
