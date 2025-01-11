@@ -8,6 +8,7 @@ import router from "@/router";
 export const useChatRoomStore = defineStore('chatRoom', () => {
     const chatRooms = ref<ChatRoomWithUnreadCount[]>([]);
     const currentRoom = ref<ChatRoomWithUnreadCount | null>(null);
+    const totalUnreadCount = ref(0);
 
 
     // 現在のチャットルームを設定する
@@ -52,6 +53,7 @@ export const useChatRoomStore = defineStore('chatRoom', () => {
             } else {  // 見つからなかった場合
                 chatRooms.value.push(r); // ルーム情報を追加
             }
+            updateTotalUnreadCount();
 
         });
     }
@@ -62,6 +64,7 @@ export const useChatRoomStore = defineStore('chatRoom', () => {
         if (index !== -1) {  // 見つかった場合
             chatRooms.value.splice(index, 1); // ルーム情報を削除
         }
+        updateTotalUnreadCount();
     }
 
     // チャットルームの情報を取得する
@@ -75,15 +78,22 @@ export const useChatRoomStore = defineStore('chatRoom', () => {
         chatRooms.value = [];
     }
 
+    // 自分が参加しているルーム全てでの総未読数を更新する
+    const updateTotalUnreadCount = () => {
+        totalUnreadCount.value = chatRooms.value.reduce((acc, room) => acc + room.unreadCount, 0);
+    }
+
+
     return {
         chatRooms,
         currentRoom,
+        totalUnreadCount,
         setCurrentRoom,
         clearCurrentRoom,
         getCurrentRoom,
         updateChatRoomData,
         removeChatRoomData,
         getChatRoomData,
-        clearChatRoomData
+        clearChatRoomData,
     }
 });
