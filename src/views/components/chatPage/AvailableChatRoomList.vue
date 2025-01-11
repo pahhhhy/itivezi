@@ -69,7 +69,7 @@ const isVisibleCreateChatMenu = ref(false)
     <h1>トーク</h1>
 
     <div v-if="chatRooms.length === 0 && roomNames">
-      参加中のチャットルームがありません。作成ボタンを押して新たに会話を始めましょう!
+      参加中のチャットルームがありません。右下の｢+｣ボタンを押して新たに会話を始めましょう!
     </div>
     <div v-else-if="roomNames">
       <router-link v-for="room in chatRooms" :to="'/chat/' + room.roomId" :key="room.roomId"
@@ -100,9 +100,6 @@ const isVisibleCreateChatMenu = ref(false)
         </div>
       </router-link>
 
-
-      <!--      管理者へ連絡ボタン-->
-      <!--      <button @click="async () => hook.checkDMRoomExists(await getAdminUid()!).then((value) => router.push('/chat/'+value))">DM</button>-->
       <FloatingButtonWrapper>
         <FloatingButton @click="isVisibleCreateChatMenu = true">
           <IconAdd/>
