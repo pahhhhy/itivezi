@@ -311,6 +311,7 @@ header i{
   height: 80px;
   display: flex;
   align-items: center;
+  cursor: pointer;
 }
 .header-icon img{
   width: 100%;
