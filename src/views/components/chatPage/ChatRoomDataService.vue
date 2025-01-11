@@ -34,17 +34,12 @@ watch(route, () => { // ページ遷移(ルーム入退出)を検知
 })
 
 onMounted(() => {
-  // ページ遷移時にスクロールを一番下にする
+  // チャットページにいたならページ遷移時にスクロールを一番下にする
   const chat = document.querySelector('.chat')
   chat?.scrollTo(0, chat.scrollHeight)
 })
-
-
-
 
 </script>
 <template>
   <slot></slot>
 </template>
-<style scoped>
-</style>

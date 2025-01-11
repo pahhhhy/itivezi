@@ -4,7 +4,6 @@ import type {User} from "firebase/auth";
 import type {ChatRoom} from "@/types/chat/chat";
 import RoomNameSetting from "@/views/components/chatPage/RoomNameSetting.vue";
 import RoomUserSetting from "@/views/components/chatPage/RoomUserSetting.vue";
-import {useChatRoomHook} from "@/utils/chat/useChatRoomHook";
 import router from "@/router";
 
 interface Props {
@@ -15,14 +14,6 @@ interface Props {
 
 const {user, room, roomName} = defineProps<Props>();
 
-const {deleteChatRoom} = useChatRoomHook(user);
-const deleteRoom = async () => {
-  if (window.confirm('このルームの全てのチャット履歴と添付ファイルが削除されます。本当に削除しますか？')) {
-    await deleteChatRoom(room.roomId);
-    await router.push('/chat');
-    window.location.reload();
-  }
-}
 
 
 </script>
@@ -31,12 +22,6 @@ const deleteRoom = async () => {
   <div class="settings">
     <RoomNameSetting :room :roomName/>
     <RoomUserSetting :room :user/>
-
-
-    <div>
-      <!--      ルーム削除-->
-      <button class="delete-room-button" @click="deleteRoom">ルームを削除</button>
-    </div>
   </div>
 
 </template>

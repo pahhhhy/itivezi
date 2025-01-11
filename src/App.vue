@@ -8,6 +8,7 @@ import { useVegeStore } from './stores/vege';
 import { useCartStore } from '@/stores/cart';
 import { useFireOrderStore } from './stores/fireOrder';
 import { useSortVegeStore } from './stores/sortByVege';
+import ChatRoomDataWrapper from "@/views/components/chatPage/ChatRoomDataService.vue";
 enum SortMode{
     All="all",
     Kawasaki="川崎",
@@ -45,6 +46,7 @@ onMounted(() => {
 <template>
   <AppHeader></AppHeader>
   <RouterView />
+  <ChatRoomDataWrapper v-if="currentUser" :user="currentUser" />
   
   
 </template>

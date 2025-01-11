@@ -344,9 +344,6 @@ const postAnnouncementFormRef = ref<null | InstanceType<typeof PostAnnouncementF
               defaultOpen="preview"
               :boxShadow="false"
               placeholder="ここにテキストを入力..."
-              editor-background="white"
-              preview-background="white"
-              style="background: white"
               :editable="false"
               :toolbars-flag="false"
               :toolbars="toolbarsPropertiesForVisibility(false)"
@@ -410,7 +407,6 @@ button {
   border-bottom: 1px solid var(--text-color);
   position: sticky;
   top: 0;
-  background-color: white;
 }
 
 .announcement-title {
@@ -430,7 +426,11 @@ button {
   /* mavon-editorで使用中 */
   z-index: -1;
   padding-top: 1em;
+  min-height: 0;
+  background: var(--background-color);
+
 }
+
 
 .announcement-head {
   display: flex;
