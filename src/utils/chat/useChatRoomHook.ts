@@ -10,16 +10,24 @@ import {
     ref as fireRef,
     serverTimestamp,
     set,
+    startAt,
     update
-, startAt } from 'firebase/database'
+} from 'firebase/database'
 import type {User} from 'firebase/auth'
-import type {ChatRoom} from '@/types/chat/chat'
+import type {ChatRoom, ChatRoomWithUnreadCount} from '@/types/chat/chat'
+import {useUserDataStore} from "@/stores/userPublicData";
+import {useChatRoomStore} from "@/stores/chatRoom";
 
 export const useChatRoomHook = (user: User) => {
     const db = getDatabase()
     const messagesRootRef = fireRef(db, 'testChat/messages')
     const roomsRef = fireRef(db, 'testChat/rooms') // roomIdをキーにしてルーム名や参加者一覧を保持
     const usersRef = fireRef(db, 'testChat/users') // userIdをキーにして参加しているroom一覧を保持
+
+    // piniaのuseUserStoreから登場ユーザーをすべて取得
+    const {getUserPublicData} = useUserDataStore()
+    const {updateChatRoomData} = useChatRoomStore()
+
 
     // 非正規化しているのでRoom側User側両方を変更することを忘れないように
     const createChatRoom = async (roomName: string | null = null) => {
@@ -62,6 +70,15 @@ export const useChatRoomHook = (user: User) => {
         })
     }
 
+    const removeUserFromChatRoom = async (roomId: string, userId: string) => {
+        await update(child(roomsRef, roomId + '/users'), {
+            [userId]: null
+        })
+        await update(child(usersRef, userId), {
+            [roomId]: null
+        })
+    }
+
     const leaveChatRoom = async (roomId: string) => {
         if (user === null) return
         await update(child(roomsRef, roomId + '/users'), {
@@ -98,18 +115,41 @@ export const useChatRoomHook = (user: User) => {
         })
     }
 
-    const getJoinedRooms = (callback: (chatRooms: ChatRoom[]) => void) => {
+    const getJoinedRooms = (callback: (chatRooms: ChatRoomWithUnreadCount[]) => void) => {
 
         // roomsのうち、/usersの中にuser.uidが含まれているものを取得
         const q = query(roomsRef, orderByChild('users/' + user.uid), equalTo(true))
-        return onValue(q, (snapshot) => {
+        return onValue(q, async (snapshot) => {
             if (!snapshot.exists()) {
                 callback([])
                 return
             }
             const data = snapshot.val()
             const chatRooms: ChatRoom[] = Object.keys(data).map((key) => data[key])
-            callback(chatRooms)
+
+            // 関係のあるユーザー(参加中のルームに参加しているすべての他のユーザー)のIDからユーザー情報を取得しておく
+            const allRelatedUsers = Array.from(new Set(chatRooms.map((room) => Object.keys(room.users)).flat())) // 重複排除
+            allRelatedUsers.forEach((uid: string) => {
+                getUserPublicData(uid);
+            })
+
+            // 未読件数について走査
+            const chatRoomsWithUnreadCount: ChatRoomWithUnreadCount[] = []
+            for (const room of chatRooms) {
+                const processedRoom: ChatRoomWithUnreadCount = {
+                    ...room,
+                    unreadCount: 0
+                }
+                if (processedRoom.lastUpdateAt && (processedRoom.lastReadAt[user.uid] as number ?? 0) < (processedRoom.lastUpdateAt as number)) { // 最終閲覧日時が最終更新日時よりも古い場合
+                    processedRoom.unreadCount = await getUnreadCount(processedRoom) // 未読数を取得
+                } else {
+                    processedRoom.unreadCount = 0
+                }
+                chatRoomsWithUnreadCount.push(processedRoom)
+            }
+
+            callback(chatRoomsWithUnreadCount)
+            updateChatRoomData(chatRoomsWithUnreadCount)
         })
 
 
@@ -122,39 +162,51 @@ export const useChatRoomHook = (user: User) => {
     }
 
     // あるルームの未読件数を取得
-    const getUnreadCount = async (roomId: string) => {
-        if (user === null) return 0
+    const getUnreadCount = async (room: ChatRoomWithUnreadCount) => {
+        const lastReadAt: number = room.lastReadAt[user.uid] as number ?? 0
 
-        const room = await get(child(roomsRef, roomId))
-        if (!room.exists()) return 0
-
-        const lastReadAt = room.val().lastReadAt[user.uid]
-        if (!lastReadAt) return 0
-
-        const messagesRef = fireRef(db, 'testChat/messages/' + roomId)
+        const messagesRef = fireRef(db, 'testChat/messages/' + room.roomId)
         // 最終閲覧日時より新しいメッセージを取得
         const q = query(messagesRef, orderByChild('createdAt'), startAt(lastReadAt))
         const snapshot = await get(q)
         const messages = snapshot.val()
         if (!messages) return 0
 
-        let count = 0
-        Object.keys(messages).forEach((key) => {
-            if (messages[key].createdAt > lastReadAt) {
-                count++
-            }
+        return Object.keys(messages).length;
+    }
+
+    const updateRoomName = async (roomId: string, roomName: string | null) => {
+        await update(child(roomsRef, roomId), {
+            roomName: roomName
         })
-        return count
+    }
+
+    // ある特定の人とのDMルームが存在するかどうかを確認、存在する場合はそのroomIdを返す
+    const checkDMRoomExists = async (targetUserId: string) => {
+        const q = query(roomsRef, orderByChild('users/' + user.uid), equalTo(true))
+        const snapshot = await get(q)
+        if (!snapshot.exists()) return null
+        const data = snapshot.val()
+        const chatRooms: ChatRoom[] = Object.keys(data).map((key) => data[key])
+        for (const room of chatRooms) {
+            if (Object.keys(room.users).length === 2 && room.users[targetUserId]) {
+                return room.roomId
+            }
+        }
+        return null
     }
 
     return {
         createDMRoom,
         createChatRoom,
         addUserToChatRoom,
+        removeUserFromChatRoom,
         leaveChatRoom,
         deleteChatRoom,
         getJoinedRooms,
         getRooms: getAllRooms,
-        getUnreadCount
+        getUnreadCount,
+        updateRoomName,
+        checkDMRoomExists,
     }
 }

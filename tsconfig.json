@@ -8,7 +8,6 @@
       "path": "./tsconfig.app.json"
     }
   ],
-
   "compileroptions": {
     // 他のオプション
     "strict": true,
@@ -23,9 +22,18 @@
     "moduleresolution": "node",
     "baseurl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": [
+        "src/*"
+      ]
     },
-    "types": ["vite/client", "@vue/vue3","node"],
-    "vuedraggable": ["src/types/vuedraggable"]
+    "types": [
+      "vite/client",
+      "@vue/vue3",
+      "node",
+      "unplugin-icons/types/vue"
+    ],
+    "vuedraggable": [
+      "src/types/vuedraggable"
+    ]
   }
 }

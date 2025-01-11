@@ -11,8 +11,7 @@ import Addinfo from '../views/AddInfo.vue'
 import Owner from '../views/OwnerPage.vue'
 import Cart from '../views/CartPage.vue'
 import Chat from '../views/ChatPage.vue'
-import AnnouncementsPage from "@/views/AnnouncementsPage.vue";
-import AnnouncementDetailPage from "@/views/AnnouncementDetailPage.vue";
+import Announcements from "@/views/AnnouncementsPage.vue";
 import {
   getAuth
 } from 'firebase/auth'
@@ -94,18 +93,22 @@ const router = createRouter({
       component: Chat,
     },
     {
-      path: '/announcements',
-      name: 'announcements',
-      component: AnnouncementsPage,
+      path: '/announce',
+      redirect: '/announcements',
     },
     {
       path: '/announcement',
       redirect: '/announcements',
     },
     {
+      path: '/announcements',
+      name: 'announcements',
+      component: Announcements,
+    },
+    {
       path: '/announcements/:announceId',
       name: 'announcement',
-      component: AnnouncementDetailPage,
+      component: Announcements,
     },
   ]
 })

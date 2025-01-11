@@ -1,20 +1,29 @@
 <script setup lang="ts">
-import AnnouncementsList from '@/views/components/announcementPage/announcementsList/AnnouncementsList.vue'
-import { useAuthData } from '@/utils/auth'
-import PostAnnouncementForm from '@/views/components/announcementPage/postAnnouncementForm.vue'
-import CategoriesManager from '@/views/components/announcementPage/categoriesManager.vue'
-import { getDatabase, onValue, ref as fireRef } from 'firebase/database'
-import { onMounted, ref } from 'vue'
-import type { Category } from '@/types/announcement/categories'
 
-const { role } = useAuthData()
+import AnnouncementsListPage from "@/views/AnnouncementsListPage.vue";
+import {useAuthData} from "@/utils/auth";
+import {useRoute} from "vue-router";
+import {onMounted, ref, watch} from "vue";
+import AnnouncementDetailPage from "@/views/AnnouncementDetailPage.vue";
+import {getDatabase, onValue, ref as fireRef} from "firebase/database";
+import type {Category} from "@/types/announcement/categories";
+import LoadingSpinner from "@/views/components/common/LoadingSpinner.vue";
+import AnnouncementsDataWrapper from "@/views/components/announcementPage/AnnouncementsDataWrapper.vue";
+import {useAnnouncementsStore} from "@/stores/announcements";
+
+const {user, role} = useAuthData()
+const route = useRoute();
+const currentAnnounceId = ref<string | null>(route.params["announceId"]?.toString() ?? null)
+watch(() => route.params, (params) => { // ページ遷移時にannounceIdを取得
+  currentAnnounceId.value = params["announceId"]?.toString() ?? null
+})
+
 
 // カテゴリーのリファレンス
-const categoriesRef = fireRef(getDatabase(), 'testAnnouncements/categories')
-const categories = ref()
+const categoriesRef = fireRef(getDatabase(), 'testAnnouncements/categories');
+const announcementsStore = useAnnouncementsStore();
 
-onMounted(() => {
-  // カテゴリー一覧を非同期で取得する処理
+onMounted(() => { // カテゴリー一覧を他の子コンポーネントに先んじて取得
   onValue(categoriesRef, (snapshot) => {
     if (!snapshot.exists()) {
       const defaultData: Category = {
@@ -23,20 +32,29 @@ onMounted(() => {
         announcementCount: 0,
         announces: {}
       }
-      categories.value = [defaultData]
+      announcementsStore.categories = [defaultData]
     } else {
-      categories.value = snapshot.val()
+      announcementsStore.categories = Object.values(snapshot.val())
     }
   })
 })
+
+
 </script>
 
 <template>
-  <h1>掲示板</h1>
-  <div class="announcements" v-if="categories !== undefined">
-    {{ categories }}
-    <CategoriesManager :categories="categories" v-if="role === '管理者'" />
-    <PostAnnouncementForm :categories="categories" v-if="role === '管理者'" />
-    <AnnouncementsList :categories="categories" />
+  <div class="announcement-page" v-if="user && role">
+    <div v-if="announcementsStore.categories"> <!-- カテゴリーが取得できたら表示 -->
+      <AnnouncementsDataWrapper>
+        <AnnouncementsListPage v-if="!currentAnnounceId" :role="role"/>
+        <AnnouncementDetailPage v-else :announceId="currentAnnounceId"/>
+      </AnnouncementsDataWrapper>
+    </div>
+    <div v-else>
+      <LoadingSpinner/>
+    </div>
+  </div>
+  <div v-else-if="user === null">
+    <p>ログインしてください</p>
   </div>
 </template>

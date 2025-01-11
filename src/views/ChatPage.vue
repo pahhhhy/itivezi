@@ -1,39 +1,40 @@
 <script setup lang="ts">
 import AvailableChatRoomList from '@/views/components/chatPage/AvailableChatRoomList.vue'
 import {useAuthData} from '@/utils/auth'
-import {useRoute} from 'vue-router'
-import ChatDetailPage from '@/views/ChatDetailPage.vue'
-import {ref, watch} from 'vue'
+import ChatDetailPage from '@/views/components/chatPage/ChatDetailPage.vue'
+import {useChatRoomStore} from "@/stores/chatRoom";
+import ChatRoomDataWrapper from "@/views/components/chatPage/ChatRoomDataWrapper.vue";
+import {ref, watch} from "vue";
 
-const getRoomId = (): undefined | string => {
-  const roomId: undefined | string | string[] = route.params.roomId
-  console.log('roomId: ', roomId)
-
-  if (typeof roomId === 'object') return roomId[0]
-  else return roomId
-}
 
 const {user} = useAuthData()
-const route = useRoute()
-// URLの末尾からこのページのroomIdを取得して保管
-const roomId = ref<string | undefined>(getRoomId())
-
-watch(route, () => {
-  // ページ遷移(ルーム入退出)を検知
-  roomId.value = getRoomId()
+const chatRoomStore = useChatRoomStore()
+const currentRoomId = ref<string | null>(null)
+watch(() => chatRoomStore.currentRoom, (value) => {
+  currentRoomId.value = value?.roomId ?? null
 })
+
 
 
 </script>
 
 <template>
-  <h1>chat</h1>
-
   <div class="chat" v-if="user">
-    <p>{{ roomId }}</p>
-    <AvailableChatRoomList v-if="!roomId" :user="user"/>
-    <div v-else>
-      <ChatDetailPage :roomId="roomId" :user="user"/>
-    </div>
+    <ChatRoomDataWrapper :user="user">
+      <AvailableChatRoomList v-if="!currentRoomId" :user="user"/>
+      <ChatDetailPage v-else :user="user"/>
+    </ChatRoomDataWrapper>
   </div>
 </template>
+
+
+<style scoped>
+.chat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: min(var(--breakpoint),100vw);
+  margin: 0 auto;
+}
+
+</style>
