@@ -5,6 +5,7 @@ import type {ChatRoom} from "@/types/chat/chat";
 import {useUserDataStore} from "@/stores/userPublicData";
 import {useChatRoomHook} from "@/utils/chat/useChatRoomHook";
 import {ref, toRef, toRefs, watch} from "vue";
+import router from "@/router";
 
 interface Props {
   room: ChatRoom
@@ -17,11 +18,21 @@ const {usersPublicData} = useUserDataStore()
 const {removeUserFromChatRoom} = useChatRoomHook(user);
 const roomUsersId = ref<string[]>(Object.keys(room.value.users));
 
+const {deleteChatRoom} = useChatRoomHook(user);
+
 const deleteUser = async (userId: string) => {
-  const message = userId === user.uid ? 'このルームから脱退しますか？' : `${usersPublicData[userId].userName}さんをこのルームから削除しますか？`;
+  const message = roomUsersId.value.length <= 1 ? '参加者が存在しなくなるため、自動的にこのルームが削除されます。このルームから脱退しますか?' : 'このルームから脱退しますか？';
   if (window.confirm(message)) {
     // ユーザー削除処理
     await removeUserFromChatRoom(room.value.roomId, userId);
+
+    // もし脱退前のユーザーが1人だった場合、脱退によって0人になるのでルーム自体を削除する
+    if (roomUsersId.value.length === 1) {
+      await deleteChatRoom(room.value.roomId);
+    }
+
+    await router.push('/chat');
+    window.location.reload();
   }
 }
 
@@ -39,7 +50,7 @@ watch(() => room, (newRoom) => {
       <li v-for="roomUserId in roomUsersId" :key="roomUserId" class="user">
         <img :src="usersPublicData[roomUserId].iconURL" alt="icon">
         <p>{{ usersPublicData[roomUserId].userName }}</p>
-        <button @click="deleteUser(roomUserId)">{{roomUserId === user.uid? '脱退' : '削除'}}</button>
+        <button v-if="roomUserId === user.uid" @click="deleteUser(roomUserId)">脱退</button>
       </li>
     </ul>
   </div>

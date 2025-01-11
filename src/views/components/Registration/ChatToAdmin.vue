@@ -40,7 +40,7 @@ const openDMWithAdmin = computed(() => {
 })
 </script>
 <template>
-  <div v-if="chatRoomHook && adminUid" class="open_dm_with_admin">
+  <div v-if="chatRoomHook && adminUid && user.uid !== adminUid" class="open_dm_with_admin">
     <p>登録したい野菜が一覧に無い場合は管理者までご連絡ください。</p>
     <button @click="openDMWithAdmin">管理者とのチャット画面を開く</button>
   </div>
