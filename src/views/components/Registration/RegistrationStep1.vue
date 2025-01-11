@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref,watch } from 'vue'
 import { useUserStore } from '@/stores/userData';
+import ChatToAdmin from "@/views/components/Registration/ChatToAdmin.vue";
 enum VegeState{
   Discontinued="Discontinued",
   Available="Available"
@@ -130,6 +131,7 @@ function onPushX(element:string){
       野菜を選択してください
     </h1>
     <button v-on:click="onStep(true)" >次へ</button>
+    <ChatToAdmin v-if="currentUser"  :user="currentUser"/>
   </section>
 </template>
 <style>

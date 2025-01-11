@@ -51,6 +51,12 @@ export const useChatRoomHook = (user: User) => {
         await update(child(usersRef, user.uid), {
             [roomId]: true
         })
+
+        updateChatRoomData({
+            ...roomData,
+            unreadCount: 0
+        })
+
         return roomId
     }
 
@@ -183,17 +189,23 @@ export const useChatRoomHook = (user: User) => {
 
     // ある特定の人とのDMルームが存在するかどうかを確認、存在する場合はそのroomIdを返す
     const checkDMRoomExists = async (targetUserId: string) => {
-        const q = query(roomsRef, orderByChild('users/' + user.uid), equalTo(true))
-        const snapshot = await get(q)
-        if (!snapshot.exists()) return null
-        const data = snapshot.val()
-        const chatRooms: ChatRoom[] = Object.keys(data).map((key) => data[key])
-        for (const room of chatRooms) {
-            if (Object.keys(room.users).length === 2 && room.users[targetUserId]) {
-                return room.roomId
+
+        // 自分が参加している全てのルームidを取得
+        const joinedRooms = await get(child(usersRef, user.uid))
+        if (!joinedRooms.exists()) return null
+        const roomIds = Object.keys(joinedRooms.val())
+
+        // それらのルーム情報を取得
+        for (const roomId of roomIds) {
+            const roomUsers = await get(child(roomsRef, roomId + '/users'))
+            if (!roomUsers.exists()) continue
+            const users = Object.keys(roomUsers.val())
+            if (users.length !== 2) continue
+            if (users.includes(targetUserId)) {
+                return roomId
             }
         }
-        return null
+
     }
 
     return {

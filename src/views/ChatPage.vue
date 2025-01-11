@@ -3,7 +3,7 @@ import AvailableChatRoomList from '@/views/components/chatPage/AvailableChatRoom
 import {useAuthData} from '@/utils/auth'
 import ChatDetailPage from '@/views/components/chatPage/ChatDetailPage.vue'
 import {useChatRoomStore} from "@/stores/chatRoom";
-import ChatRoomDataWrapper from "@/views/components/chatPage/ChatRoomDataWrapper.vue";
+import ChatRoomDataWrapper from "@/views/components/chatPage/ChatRoomDataService.vue";
 import {ref, watch} from "vue";
 
 
