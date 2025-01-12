@@ -8,6 +8,7 @@ export const collectRoomName = async (room: ChatRoom, ownUid: string) => {
 
     const users = Object.keys(room.users) // ルームに参加しているユーザーを取得
     const otherUsers = users.filter((u) => u !== ownUid) // 自分以外のユーザーを取得
+    if (otherUsers.length === 0) return "(無人のルーム)"
     return await( Promise.all(
         [...otherUsers.map(async (uid: string) => {// それらの表示名を取得
             const usersPublicData = await getUserPublicData(uid)
