@@ -17,12 +17,15 @@ import type {User} from 'firebase/auth'
 import type {ChatRoom, ChatRoomWithUnreadCount} from '@/types/chat/chat'
 import {useUserDataStore} from "@/stores/userPublicData";
 import {useChatRoomStore} from "@/stores/chatRoom";
+import {deleteObject, getStorage, listAll, ref as storageRef} from "firebase/storage";
 
 export const useChatRoomHook = (user: User) => {
     const db = getDatabase()
+    const storage = getStorage()
     const messagesRootRef = fireRef(db, 'testChat/messages')
     const roomsRef = fireRef(db, 'testChat/rooms') // roomIdをキーにしてルーム名や参加者一覧を保持
     const usersRef = fireRef(db, 'testChat/users') // userIdをキーにして参加しているroom一覧を保持
+    const filesRef = fireRef(db, 'testChat/files') // roomIdをキーにしてファイル一覧を保持
 
     // piniaのuseUserStoreから登場ユーザーをすべて取得
     const {getUserPublicData} = useUserDataStore()
@@ -100,15 +103,14 @@ export const useChatRoomHook = (user: User) => {
 
         // そのルームに属しているユーザーを取得
         const users = await get(child(roomsRef, roomId + '/users'))
-        if (!users.exists()) return
-
-        // そのルームに属しているユーザーのroom一覧からそのルームを削除
-        users.forEach((user) => {
-            update(child(usersRef, user.key), {
-                [roomId]: null
+        if (users.exists()) {
+            // そのルームに属しているユーザーのroom一覧からそのルームを削除
+            users.forEach((user) => {
+                update(child(usersRef, user.key), {
+                    [roomId]: null
+                })
             })
-        })
-
+        }
         // そのルーム自体のデータを削除
         await update(roomsRef, {
             [roomId]: null
@@ -119,6 +121,21 @@ export const useChatRoomHook = (user: User) => {
         await update(messagesRootRef, {
             [roomId]: null
         })
+
+        // filesの画像も削除
+        // testChat/files/roomIdにあるので、roomIdごと削除
+        await update(filesRef, {
+            [roomId]: null
+        })
+
+
+        // storageの画像も削除
+        const roomImagesRef = storageRef(storage, 'chat/' + roomId)
+        const res = await listAll(roomImagesRef)
+        res.items.forEach((itemRef) => {
+            deleteObject(itemRef)
+        })
+
     }
 
     const getJoinedRooms = (callback: (chatRooms: ChatRoomWithUnreadCount[]) => void) => {
