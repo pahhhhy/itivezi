@@ -20,7 +20,7 @@ const {user} = defineProps<{
 }>()
 
 const {usersPublicData} = useUserDataStore()
-const roomNames = ref<{ [key: string]: string } | null>(null)
+const roomNames = ref<{ [key: string]: string } | undefined | null>(undefined)
 
 const {chatRooms} = useChatRoomStore()
 const router = useRouter()
@@ -37,6 +37,8 @@ onMounted(async () => {
 
   if (chatRooms.length !== 0) {
     loadRoomName(chatRooms)
+  }else {
+    roomNames.value = null
   }
 })
 watch(chatRooms, () => {
@@ -51,7 +53,12 @@ const loadRoomName = (rooms: ChatRoom[]): void => {
       const gotRoomName = await collectRoomName(room, user.uid);
       if (gotRoomName) roomNamesTmp[room.roomId] = gotRoomName;
     }
-    roomNames.value = roomNamesTmp;
+
+    if (Object.keys(roomNamesTmp).length === rooms.length) {
+      roomNames.value = roomNamesTmp;
+    } else {
+      roomNames.value = null;
+    }
   })();
 }
 
@@ -68,7 +75,7 @@ const isVisibleCreateChatMenu = ref(false)
   <div class="wrapper" v-if="chatRooms">
     <h1>トーク</h1>
 
-    <div v-if="chatRooms.length === 0 && roomNames">
+    <div v-if="chatRooms.length === 0 && roomNames !== undefined">
       参加中のチャットルームがありません。右下の｢+｣ボタンを押して新たに会話を始めましょう!
     </div>
     <div v-else-if="roomNames">
@@ -93,13 +100,15 @@ const isVisibleCreateChatMenu = ref(false)
           <!--          未読数-->
           <p v-if="room.unreadCount !== 0" class="unread">
             {{ room.unreadCount <= 99 ? room.unreadCount : "99+" }}</p>
-
         </div>
         <div class="right-wrapper">
           <IconRightArrow/>
         </div>
       </router-link>
+    </div>
+    <LoadingSpinner v-else/>
 
+    <div v-if="roomNames !== undefined">
       <FloatingButtonWrapper>
         <FloatingButton @click="isVisibleCreateChatMenu = true">
           <IconAdd/>
@@ -109,8 +118,6 @@ const isVisibleCreateChatMenu = ref(false)
         </FloatingButton>
       </FloatingButtonWrapper>
     </div>
-
-    <LoadingSpinner v-else/>
   </div>
 
 

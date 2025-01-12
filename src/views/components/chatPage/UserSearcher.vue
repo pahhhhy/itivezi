@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 import {ref} from "vue";
-import {child, endAt, get, getDatabase, orderByChild, query, ref as fireRef, startAt} from 'firebase/database'
+import {endAt, get, getDatabase, orderByChild, query, ref as fireRef, startAt} from 'firebase/database'
 import {useUserDataStore} from "@/stores/userPublicData";
 
 interface searchResultUsers {
@@ -36,43 +36,22 @@ const searchUser = async () => {
   // firebaseのデータベースから検索
   // /testUser/<uid>/nameにユーザー名がある
   // /testUser/<uid>にユーザーidがある
+  // 技術的に前方一致検索 uf8ffはUnicodeの最後の方の文字
+  const q = query(usersRef, orderByChild('name'), startAt(searchWord), endAt(searchWord + '\uf8ff'));
+  const snapshot = await get(q);
 
-  if (searchType.value === "userName") {
-    // ユーザー名で検索
-
-    // 技術的に前方一致検索 uf8ffはUnicodeの最後の方の文字
-    const q = query(usersRef, orderByChild('name'), startAt(searchWord), endAt(searchWord + '\uf8ff'));
-    const snapshot = await get(q);
-
-    if (snapshot.exists()) {
-      const users = snapshot.val();
-      searchResult.value = Object.keys(users).map((uid) => {
-        getUserPublicData(uid);
-        return {
-          name: users[uid].name,
-          id: uid,
-          iconURL: users[uid].iconURL
-        }
-      });
-    } else {
-      searchResult.value = [];
-    }
-
-
+  if (snapshot.exists()) {
+    const users = snapshot.val();
+    searchResult.value = Object.keys(users).map((uid) => {
+      getUserPublicData(uid);
+      return {
+        name: users[uid].name,
+        id: uid,
+        iconURL: users[uid].iconURL
+      }
+    });
   } else {
-    // ユーザーidで検索
-    const snapshot = await get(child(usersRef, searchWord));
-    if (snapshot.exists()) {
-      const user = snapshot.val();
-      searchResult.value = [{
-        name: user.name,
-        id: searchWord,
-        iconURL: user.iconURL
-      }];
-      await getUserPublicData(searchWord);
-    } else {
-      searchResult.value = [];
-    }
+    searchResult.value = [];
   }
 }
 
@@ -87,12 +66,7 @@ const selectUser = async (userId: string) => {
   <div class="input-field">
     <p><small>※大文字小文字を区別</small></p>
     <div>
-      <!--  ラジオボタンでユーザー名かユーザーidでの検索を切り替え-->
-      <label><input type="radio" name="searchType" value="userName" checked>ユーザー名
-      </label>
-      <label>
-        <input type="radio" name="searchType" value="userId">ユーザーID
-      </label>
+      <label>ユーザー名</label>
     </div>
     <div>
       <input ref="input"/>
