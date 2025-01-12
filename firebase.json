@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "site": "itivege-test-1234",
+    "site": "itivege",
     "public": "dist",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [

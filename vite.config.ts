@@ -34,7 +34,7 @@ export default defineConfig({
     }),
   ],
 
-  base: './',
+  base: '/',
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
@@ -43,5 +43,15 @@ export default defineConfig({
   server: {
     host: '0.0.0.0', // すべてのネットワークインターフェースで待機
     port: 5173,      // 任意のポート番号に変更可能
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // 分割されたチャンクを定義します
+          vendor: ['vue'],
+        },
+      },
+    },
   },
 })
