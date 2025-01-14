@@ -13,7 +13,7 @@ enum Role{
 }
 interface Usertables{
     affiliation:String[]
-    gender:string
+   
     name:string
     phoneNumber:number
     place:string
@@ -36,15 +36,20 @@ async function onPushDelete(){
 </script>
 <template>
 <th>{{props.UserData.name}}</th>
-<th>{{props.UserData.gender}}</th>
-<th>{{props.uid}}</th>
-<th>{{props.UserData.phoneNumber}}</th>
-<th> {{props.UserData.email}}</th>
 <th>{{props.UserData.role}}</th>
+<th>{{props.UserData.phoneNumber}}</th>
+<th class="email"> {{props.UserData.email}}</th>
 <th>{{props.UserData.affiliation}}</th>
 <th>{{props.UserData.place}}</th>
-<th><button v-on:click="onPushDelete">削除</button></th>
+<th>{{props.uid}}</th>
+<th><button v-on:click="onPushDelete" class="deletebutton"><i class="bi bi-trash3"></i></button></th>
 </template>
 <style scoped>
-
+.deletebutton{
+  border: none;
+  margin: 0 10px;
+}
+th, td{
+  overflow: scroll;
+}
 </style>

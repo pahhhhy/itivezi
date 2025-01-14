@@ -8,7 +8,7 @@ interface AllUserTables{
 }
 interface Usertables{
     affiliation:String[]
-    gender:string
+   
     name:string
     phoneNumber:number
     place:string

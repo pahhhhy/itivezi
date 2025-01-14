@@ -5,7 +5,7 @@ interface AllUserTables{
 }
 interface Usertables{
     affiliation:String[]
-    gender:string
+   
     name:string
     phoneNumber:number
     place:string
@@ -22,8 +22,7 @@ export const usefireUserStore = defineStore({
     id:"myUserData",
     state:(): { myUserData: Usertables } =>{
         return{
-            myUserData:{affiliation: [],  
-                gender: "",       
+            myUserData:{affiliation: [],    
                 name: "",         
                 phoneNumber: 0,   
                 place: "",        

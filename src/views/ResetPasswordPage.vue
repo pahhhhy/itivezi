@@ -2,9 +2,7 @@
 import {
   getAuth,
   onAuthStateChanged,
-  createUserWithEmailAndPassword,
-  sendEmailVerification,
-  updateProfile,
+  confirmPasswordReset,
   type User
 } from 'firebase/auth'
 import {  computed, watch } from 'vue'
@@ -13,35 +11,18 @@ import '../assets/main.css'
 import router from '../router'
 // ログインしているユーザーデータ
 const currentUser = ref<User | null>(null)
-const email = ref<string>('')
 const password = ref<string>('')
 const isPopup = ref<boolean>(false)
 const errorMes = ref<string>('')
-const name = ref<string>('')
 const onemorePas=ref<string>("")
-const isName=ref<boolean>(true)
 const isPassword=ref<boolean>(true)
-const isEmail=ref<boolean>(true)
 const isOnemore=ref<boolean>(true)
 const errorPassword=ref<string>('')
-//確認メールの送信
-function sendEmailVerifi(user: User) {
-  sendEmailVerification(user)
-    .then(() => {
-      // Email verification sent!
-      
-    })
-    
-}
-
-watch(email, (): void => {
-  if(email.value!='')isEmail.value=true
-})
+ // URLパラメータからoobCodeを取得
+ const urlParams = new URLSearchParams(window.location.search);
+ const oobCode = ref(urlParams.get("oobCode")||"");
 watch(password, (): void => {
   if(password.value!='')isPassword.value=true
-})
-watch(name, (): void => {
-  if(name.value!='')isName.value=true
 })
 watch(onemorePas, (): void => {
   if(onemorePas.value!='')isOnemore.value=true
@@ -52,10 +33,9 @@ function isValidPassword(password:string) {
   const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z0-9]{8,20}$/;
   return passwordRegex.test(password);
 }
-async function createAccount(email: string, password: string, name: string) {
-  const auth = getAuth()
-  if (email == '' || password == ''||name ==''||!isValidPassword(password)||onemorePas.value!=password) {
-    if(name=='')isName.value=false
+//パスワードのリセットを行ってポップアップを表示する
+async function ResetPassWord(password: string) {
+  if ( password == ''||!isValidPassword(password)||onemorePas.value!=password) {
     if(!isValidPassword(password)) {
       isPassword.value=false
     errorPassword.value="パスワードは英数字を使用した8~20文字にしてください"
@@ -64,56 +44,16 @@ async function createAccount(email: string, password: string, name: string) {
       isPassword.value=false
       errorPassword.value="パスワードを入力してください"
     }
-    if(email=='')isEmail.value=false
     if(onemorePas.value!=password) isOnemore.value=false
     return
   }
-  await createUserWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
-      // 成功時処理
-      const user = userCredential.user
-      
-      isPopup.value = true
-      sendEmailVerifi(user)
-      const auth = getAuth()
-  onAuthStateChanged(auth, (user) => {
-    if (user != null ) {
-      currentUser.value = user
-      
-    } else {
-      currentUser.value = null
-    }
-  })
-      return updateProfile(user, { displayName: name })
-    })
-    .then(() => {
-      // プロファイル更新成功
-      
-    })
+  try {
+        await confirmPasswordReset(getAuth(), oobCode.value, password);
+        isPopup.value=true
+      } catch (err) {
+        console.error("失敗しました:"+err)
+      }
 
-    .catch((error) => {
-      // エラー処理
-      
-      const errorMessage = error.message
-      
-      setErrorMsg(errorMessage)
-    })
-}
-function setErrorMsg(element: string) {
-  switch (element) {
-    case 'Firebase: Error (auth/invalid-email).':
-      errorMes.value = '正しいメールアドレスをいれてください'
-      break
-    case ' Firebase: Password should be at least 6 characters (auth/weak-password).':
-      errorMes.value = 'パスワードは英数字を使用した8~20文字にしてください'
-      break
-    case 'Firebase: Error (auth/email-already-in-use).':
-      errorMes.value = 'メールアドレスはもうつかわれています'
-      break
-    default:
-      errorMes.value = ''
-      break
-  }
 }
 onMounted(() => {
   const auth = getAuth()
@@ -127,44 +67,21 @@ onMounted(() => {
   })
 })
 function OnPushBack(){
-  router.back()
+  router.push("/login")
 }
 </script>
 
 <template>
  
   
-  <article class="signup_page">
+  <article class="reset_page">
     
     <div class="title">
-      <i class="bi bi-chevron-left" v-on:click="OnPushBack"></i>
-      <h1>アカウントの新規作成</h1>
+      <h1>パスワードの再設定</h1>
     </div>
     <article class="form_card">
-      <div class="mb-3">
-        <label for="exampleFormControlInput1" class="form-label">アカウント名</label>
-        <input
-          type="text"
-          class="form-control"
-          id="exampleFormControlInput1"
-          placeholder="name"
-          v-model="name"
-        />
-      </div>
-      <p v-if="!isName" class="errorMessage">アカウント名を入力してください</p>
-      <div class="mb-3">
-        <label for="exampleFormControlInput1" class="form-label">メールアドレス</label>
-        <input
-          type="email"
-          class="form-control"
-          id="exampleFormControlInput1"
-          placeholder="name@example.com"
-          v-model="email"
-        />
-      </div>
-      <p v-if="!isEmail" class="errorMessage">メールアドレスを入力してください</p>
       <p v-if="errorMes != ''" class="errorMessage">{{ errorMes }}</p>
-      <label for="inputPassword5" class="form-label">パスワード</label>
+      <label for="inputPassword5" class="form-label">新しいパスワード</label>
       <input
         type="password"
         id="inputPassword5"
@@ -188,18 +105,18 @@ function OnPushBack(){
       />
       <p v-if="!isOnemore" class="errorMessage">パスワードが一致しません</p>
       <div class="d-flex justify-content-center my-3 ">
-        <button type="button" class="btn btn-success form_button" @click="createAccount(email, password, name)">
-          登録する
+        <button type="button" class="btn btn-success form_button" @click="ResetPassWord( password)">
+          変更する
         </button>
       </div>
       
       
     </article>
-    <section class="popup_signup" v-show="isPopup">
+    <section class="popup_reset" v-show="isPopup">
       <h2>
-        メールアドレスの確認メールをおくりました<br />メールの認証を行うと自動で次のページに移ります
+        パスワードの再設定を行いました<br />ログインページでログインしてください。
       </h2>
-      <!-- <button class="btn btn-success form_button " v-on:click="OnPushBack"> 戻る</button> -->
+      <button class="btn btn-success form_button " v-on:click="OnPushBack"> 戻る</button>
     </section>
   </article>
   
@@ -225,7 +142,7 @@ body {
   font-size: 24px;
   padding: 2px;
 }
-.signup_page{
+.reset_page{
   width: 512px!important;
   margin: auto;
 }
@@ -243,7 +160,7 @@ body {
   padding: 30px 0;
   color: var(--text-color)!important;
 }
-.popup_signup {
+.popup_reset {
   position: absolute;
   top: 40%;
   left: 25%;
@@ -257,7 +174,7 @@ body {
 .errorMessage{
   color: red;
 }
-.popup_signup >button{
+.popup_reset>button{
   margin-top: 30px;
 }
 .link {
@@ -277,7 +194,7 @@ body {
     transition-timing-function: ease-in-out;
 }
 @media (max-width: 575.98px) {
-  .signup_page{
+  .reset_page{
     width: 340px!important;
     margin: auto;
   }
