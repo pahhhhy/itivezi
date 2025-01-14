@@ -4,7 +4,7 @@
 import { ref,watch} from 'vue'
 import RegistrationStep2 from '../Registration/RegistrationStep2.vue'
 import RegistrationStep3 from '../Registration/RegistrationStep3.vue'
-import { useVegeStore } from '@/stores/vege'
+import { useVegeStore } from "@/stores/vege"
 import { useUserStore } from '@/stores/userData';
 enum VegeState{
   Discontinued="Discontinued",

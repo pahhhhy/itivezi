@@ -8,7 +8,7 @@ import router from '@/router'
 import { usefireUserStore } from '@/stores/fireUserdata';
 interface Usertables{
     affiliation:String[]
-    gender:string
+   
     name:string
     phoneNumber:number
     place:string
@@ -261,6 +261,7 @@ function isday(){
         />
       </div>
       <button v-on:click="onPushBuy" v-bind:class="{disable:!isDay}">購入する</button>
+      <button v-on:click="onPushOrder" >注文に戻る</button>
     </article>
 
     
@@ -369,6 +370,7 @@ p{
   font-weight: bolder;
   border: none;
   margin-top: 10px;
+  margin: 10px 10px 0 0;
 }
 .blackback{
   position: fixed ;

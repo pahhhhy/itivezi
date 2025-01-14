@@ -11,11 +11,16 @@ import Addinfo from '../views/AddInfo.vue'
 import Owner from '../views/OwnerPage.vue'
 import Cart from '../views/CartPage.vue'
 import Chat from '../views/ChatPage.vue'
-import Announcements from "@/views/AnnouncementsPage.vue";
+import AnnouncementsPage from "@/views/AnnouncementsPage.vue";
+import AnnouncementDetailPage from "@/views/AnnouncementDetailPage.vue";
+import ResetPasswordPage from '@/views/ResetPasswordPage.vue'
+import VerifiPage from '@/views/VerifiPage.vue'
+import OwnerOrderCheck from '@/views/components/OwnerPage/OwnerOrderCheck.vue'
 import {
   getAuth
 } from 'firebase/auth'
 import {getCurrentRole} from "../utils/auth"
+import AnnouncementsListPage from '@/views/AnnouncementsListPage.vue'
 enum Role{
   Onwer="管理者",
   Buyer="飲食店",
@@ -76,6 +81,10 @@ const router = createRouter({
       path: '/Owner',
       name: 'Owner',
       component: Owner
+    },{
+      path: '/Owner-order',
+      name: 'Owner-order',
+      component: OwnerOrderCheck
     },
     {
       path: '/cart',
@@ -103,12 +112,22 @@ const router = createRouter({
     {
       path: '/announcements',
       name: 'announcements',
-      component: Announcements,
+      component: AnnouncementsPage,
     },
     {
       path: '/announcements/:announceId',
       name: 'announcement',
-      component: Announcements,
+      component: AnnouncementsListPage,
+    },
+    {
+      path: '/reset',
+      name: 'reset',
+      component: ResetPasswordPage,
+    },
+    {
+      path: '/verifi',
+      name: 'verifi',
+      component: VerifiPage,
     },
   ]
 })

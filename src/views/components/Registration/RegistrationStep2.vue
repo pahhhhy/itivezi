@@ -34,19 +34,22 @@ interface Emits {
 }
 const emit = defineEmits<Emits>()
 const props = defineProps<Props>()
-
+//dataの数に応じて初期化
+const Checklist=ref<boolean[]>([])
+  const regStep2Element = ref<InstanceType<typeof RegStep2Element>[]>([]);
+for(let i:number=0;i<props.vegeList.length;i++){
+  Checklist.value[0]=false
+}
 const uproadData=ref<Vegetables>(props.uproadData)
 function errorFind() {
-  let error=false
-  Object.keys(uproadData.value).forEach((vegeName) => {
-    Object.keys(uproadData.value[vegeName]).forEach((unique) => {
-      const Data=uproadData.value[vegeName][unique]
-      if(Data.en==-1)error=true
-      if(Data.roadStation.length==0)error=true
-      if(Data.unit=="")error=true
-    })
-  })
-  return error
+  let result=true
+  for (const element of regStep2Element.value) {
+    if (element?.CheckError) { // 安全にメソッドを確認して呼び出し
+      const results = element.CheckError();
+      if(!results){result=false}
+    }
+  }
+  return !result
 }
 const step2Error = ref<boolean>(false)
 function onStep(next: boolean) {
@@ -71,12 +74,12 @@ function onStep(next: boolean) {
       v-bind:uproad-data="props.uproadData"
       v-bind:vege-keys="props.vegeKeys"
       v-bind:vege-list="props.vegeList"
+      ref="regStep2Element"
       v-bind:vege-name="vegeName"></RegStep2Element>
     </div>
   </article>
     
     <div class="greenbutton_group">
-      <h2 class="errortext" style="color: red" v-show="errorFind() && step2Error">全ての価格を設定してください</h2>
       <button v-on:click="onStep(false)" class="greenbutton">戻る</button>
       <button v-on:click="onStep(true)" class="greenbutton">次へ</button>
     </div>

@@ -263,5 +263,8 @@ function onpushfilter(){
   .filter_button_group{
     width: 340px;
   }
+  .filter_group{
+    width: 340px;
+  }
 }
 </style>

@@ -38,13 +38,14 @@ interface Emits {
 const emit = defineEmits<Emits>()
 const OrderDataStore=useOrderDataStore()
 const props = defineProps<Props>()
-const vegeCount=ref<number>(0)
+const vegeCount=ref<number>(1)
 const totalMoney=ref<number>(0)
 const error=ref<boolean>(false)
 const userStore=useUserStore()
 const currentUser = ref(userStore.currentUser);
 const CartStore=ref(useCartStore())
 const isPopup=ref<boolean>(false)
+  
 watch(() => userStore.currentUser, (newUser) => {
   currentUser.value = newUser;
 });
@@ -72,18 +73,20 @@ watch(() => userStore.currentUser, (newUser) => {
         isPopup.value=false
     }
 }
-function changeMoney(money: number) {
-  // マイナスの値になることを防ぐ
-  if (vegeCount.value< 0) {
-      vegeCount.value = 0
-    } 
-  totalMoney.value = vegeCount.value* money
-}
 function OnpushElement(){
   isPopup.value=!isPopup.value
+  totalMoney.value = vegeCount.value* props.data.en
 }
 function onPushBuck(){
   isPopup.value=false
+}
+function changeNumber(isplus:boolean,money: number){
+  if(isplus){
+    vegeCount.value=vegeCount.value+1
+  }else{
+    vegeCount.value=vegeCount.value-1
+  }
+  totalMoney.value = vegeCount.value* money
 }
 </script>
 <template>
@@ -110,16 +113,16 @@ function onPushBuck(){
   </p>
   <h4>{{props.data.unit}}     {{props.data.en}}円</h4>
   <label>個数選択</label>
-   <input
-        class="form-control"
-        type="number"
-        placeholder="何組買いますか？"
-        aria-label="default input example"
-        v-model="vegeCount"
-        @change="
-          changeMoney(props.data.en)
-        "
-        />
+  <div class="selectnumber">
+    <button class="backbutton" v-if="vegeCount!=1" >
+
+      <i class="bi bi-dash-lg"  v-on:click="changeNumber(false,props.data.en)"></i>
+    </button>
+    <p class="Quantity">{{vegeCount}}</p>
+    <button class="plusbutton" v-on:click="changeNumber(true,props.data.en)">
+      <i class="bi bi-plus-lg"></i>
+    </button>
+  </div>
     <p>小計      ￥{{totalMoney}}</p>
     <button class="btn btn-success" v-on:click="onPushBuck()">戻る</button>
     <button class="btn btn-success" v-on:click="onPushCart()" v-bind:class="{disable:totalMoney==0}">カートに入れる</button>
@@ -134,6 +137,29 @@ p{
 .disable{
     pointer-events: none;
     opacity: 0.5;
+}
+.selectnumber{
+  display: flex;
+  width: 100px;
+    justify-content: end;
+  height: 30px;
+}
+.backbutton{
+  background-color: var(--line-color);
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  border:none;
+}
+.plusbutton{
+  background-color: var(--line-color);
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+  border:none;
+}
+.Quantity{
+  padding: 0 5px;
+  margin: 0!important;
+  width: 30px;
 }
 .card-body{
   text-align: left;
@@ -168,6 +194,7 @@ p{
   border-radius: 10px;
   display: inline-block;
   text-align: center;
+  padding: 2px;
   border: 2px solid var(--main-color);
 }
 .card{

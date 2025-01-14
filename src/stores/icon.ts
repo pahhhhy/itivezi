@@ -21,7 +21,7 @@ export const useIconStore = defineStore('iconURL', {
     async uploadImage(selectedImage: File | null, user: User) {
       if (!selectedImage) return;  // 画像が選択されていない場合は終了
       if (!user) return;  // ユーザーが存在しない場合は終了
-
+      console.log("iconstore")
       const storage = getStorage();
       const imageRef = storageRef(storage, `profile_pictures/${user.uid}`);
 
@@ -37,7 +37,6 @@ export const useIconStore = defineStore('iconURL', {
 
         // 表示するプロフィール画像を更新
         this.iconURL = downloadURL;
-        alert('画像がアップロードされました');
       } catch (error) {
         console.error('画像アップロードエラー: ', error);
       }

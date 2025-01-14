@@ -46,6 +46,9 @@ enum Mode{
 interface Emits {
   (event: 'updateUproadData', uproadData: Vegetables,index:number): void
 }
+defineExpose({
+  CheckError
+})
 const roadStationUnitTempList = ref<string[]>(useRoadStationStore().roadStationTemp)
 const emit = defineEmits<Emits>()
 const props = defineProps<Props>()
@@ -58,6 +61,21 @@ const vegeUnitTempList = ref<string[]>(Object.values(vegeUnitTemp))
 const vegeMoney=ref<number>(0)
 const roadStationList=ref<string[]>([])
 const uproadData=ref<Vegetables>(props.uproadData)
+  const Checklist = ref(
+  Object.values(Mode).reduce((acc, key) => {
+    acc[key] = false; // 初期値を false に設定
+    return acc;
+  }, {} as Record<string, boolean>)
+);
+function CheckError(){
+  let isTure=true
+  if(uniqueKeys.value){
+    if(uproadData.value[props.vegeList[props.index]][uniqueKeys.value].unit==""){Checklist.value[Mode.Unit]=true;isTure=false}
+    if(uproadData.value[props.vegeList[props.index]][uniqueKeys.value].en==-1){Checklist.value[Mode.Money]=true;isTure=false}
+    if(uproadData.value[props.vegeList[props.index]][uniqueKeys.value].roadStation.length==0){Checklist.value[Mode.RoadStation]=true;isTure=false}
+    }else{console.log("えらー")}
+    return isTure
+}
 function updateVegeMoney(value: number, index: number,mode:string) {
   
   if(mode==Mode.Money){
@@ -87,6 +105,8 @@ function updateStep2List(action:string,index:number) {
     console.log(unit)
     if(props.uniqueKey)
     uproadData.value[props.vegeList[index]][props.uniqueKey].unit=unit
+    if(uniqueKeys.value){
+    if(uproadData.value[props.vegeList[props.index]][uniqueKeys.value].unit!=""){Checklist.value[Mode.Unit]=false}}
     emit("updateUproadData",uproadData.value,index)
   }
  }
@@ -95,8 +115,9 @@ function updateStep2List(action:string,index:number) {
     unit=vegeAmount.value+vegeUnit.value
     console.log(unit)
     if(props.uniqueKey){
-      console.log(props.vegeList[index])
     uproadData.value[props.vegeList[index]][props.uniqueKey].unit=unit
+    if(uniqueKeys.value){
+      if(uproadData.value[props.vegeList[props.index]][uniqueKeys.value].unit!=""){Checklist.value[Mode.Unit]=false}}
     emit("updateUproadData",uproadData.value,index)
   }
     }
@@ -105,11 +126,15 @@ function updateStep2List(action:string,index:number) {
  if(action==Mode.Money){
   if(props.uniqueKey)
   uproadData.value[props.vegeList[index]][props.uniqueKey].en=vegeMoney.value
+  if(uniqueKeys.value){
+    if(uproadData.value[props.vegeList[props.index]][uniqueKeys.value].en!=0){Checklist.value[Mode.Money]=false}}
   emit("updateUproadData",uproadData.value,index)
  }
  if(action==Mode.RoadStation){
   if(props.uniqueKey)
   uproadData.value[props.vegeList[index]][props.uniqueKey].roadStation=roadStationList.value
+  if(uniqueKeys.value){
+    if(uproadData.value[props.vegeList[props.index]][uniqueKeys.value].roadStation.length!=0){Checklist.value[Mode.RoadStation]=false}}
   emit("updateUproadData",uproadData.value,index)
  }
 }
@@ -155,6 +180,7 @@ watch(roadStationList, (newValue) => {
         </select>
       </div>
     </div>
+    <p class="errorMes" v-if="Checklist[Mode.Unit]">単位を選択してください</p>
     <div class="form">
       <p>値段</p>
       <input
@@ -166,6 +192,7 @@ watch(roadStationList, (newValue) => {
         @input="updateVegeMoney(vegeMoney,props.index, Mode.Money)"
       />
     </div>
+    <p class="errorMes" v-if="Checklist[Mode.Money]">金額を入力してください</p>
     <div class="form">
       <p>画像</p>
       <RegStep2image
@@ -194,6 +221,7 @@ watch(roadStationList, (newValue) => {
         </div>
       </article>
       </div>
+      <p class="errorMes" v-if="Checklist[Mode.RoadStation]">卸先を選択してください</p>
   </article>
 </template>
 <style scoped>

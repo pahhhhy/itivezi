@@ -40,7 +40,7 @@ place:string
 interface titleDataTables{
   orderTime: string, 
   orderName: string, 
-  state: string,
+  state: OrderStete,
   uid:string,
   unique:string
 }
@@ -65,13 +65,14 @@ const FireOrderStore=useFireOrderStore()
 const AllOrderData=ref<Ordertables>(FireOrderStore.OrderAllData)
 const AllOrderDataNum=ref<OrdertablesNum>(convertOrdertablesToNum(AllOrderData.value))
 const titleData=ref<titleDataTables[]>(extractOrderInfo(AllOrderData.value))
+const isfliter=ref<boolean>(false)
+const selectfliter=ref<string>("全て")
+const labels = [ "全て",OrderStete.Uncontacted, OrderStete.contacted, OrderStete.Completed, OrderStete.cancel];
   watch(() => FireOrderStore.OrderAllData, (newUser) => {
   AllOrderData.value = newUser;
   titleData.value=extractOrderInfo(AllOrderData.value)
 });
-function pushActive() {
-  isActive.value = !isActive.value
-}
+
 function getCompletedOrders(ordertables: Ordertables,filter:OrderStete): Ordertables {
     const completedOrders: Ordertables = {};
 
@@ -170,142 +171,115 @@ function convertOrdertablesToNum(orderTables: Ordertables): OrdertablesNum {
   return orderTablesNum;
 }
 
-// 選択されたインデックスを保存するための状態
-const isActive = ref<boolean>(false)
-const selectedTableList = ref<boolean[]>([])
 
-const labels = ['全て', OrderStete.Uncontacted, OrderStete.contacted, OrderStete.Completed, OrderStete.cancel];
-const selectedClass = ref<number>(0);
-
-function toggleClass(index: number) {
-  selectedClass.value = index;
-  for (let i: number = 0; i < selectedTableList.value.length; i++) {
-    selectedTableList.value[i] = false
-  }
-
+function toggleClass(mode: OrderStete|string) {
   let filterData:Ordertables={}
-  switch (index){
-    case 0:
-      filterData=AllOrderData.value
-      break;
-      case 1:
-      filterData=getCompletedOrders(AllOrderData.value,OrderStete.Uncontacted)
-      break;
-      case 2:
+  switch (mode){
+    case OrderStete.contacted:
+      
       filterData=getCompletedOrders(AllOrderData.value,OrderStete.contacted)
       break;
-      case 3:
+      case OrderStete.Uncontacted:
+      filterData=getCompletedOrders(AllOrderData.value,OrderStete.Uncontacted)
+      break;
+      case OrderStete.Completed:
       filterData=getCompletedOrders(AllOrderData.value,OrderStete.Completed)
       break;
-      case 4:
+      case OrderStete.cancel:
       filterData=getCompletedOrders(AllOrderData.value,OrderStete.cancel)
       break;
+      default:
+        filterData=AllOrderData.value
+        break;
   }
   titleData.value=extractOrderInfo(filterData)
   AllOrderDataNum.value=convertOrdertablesToNum(filterData)
 }
+function onpushfilter(){
+  isfliter.value=!isfliter.value
+}
 </script>
 <template>
-  <!-- {{ titleData }}
-  <p></p>
-  {{ AllOrderDataNum }} -->
-  <h1>注文履歴</h1>
-  <!-- {{props.vegeAllOrder}} -->
-  <!-- {{ sortedOrderData["全て"] }} -->
-  <!-- {{selectedTableUnitList["2024-8-22-11-22-0"]}} -->
-   <!-- {{ AllOrderData }} -->
-  <div class="filter-nav">
-    <h2>フィルター</h2>
-    <div class="filter-unit">
-      <button v-for="(label, index) in labels" :key="index" @click="toggleClass(index)"
-              :class="{ 'active': selectedClass === index }">
-        {{ label }}
-      </button>
-    </div>
-  </div>
-  <article v-if="!isActive">
-    <div class="orderList-group">
-      <div class="order-table">
-        <p>注文時間</p>
-        <p>名前</p>
-        <p>連絡</p>
+  <article class="orderList-card">
+    <h1>注文履歴</h1>
+    <button v-on:click="onpushfilter">
+      フィルター
+      <i class="bi bi-chevron-down" v-if="!isfliter"></i>
+      <i class="bi bi-chevron-up" v-if="isfliter"></i>
+    </button>
+    <article class="filter-tab" v-if="isfliter">
+      <h3>ステータス</h3>
+      <div class="fliter-button-group">
+        <div v-for="(element,index) in labels" v-bind:key="index" class="filter_button">
+          <input
+            class="form-check-input"
+            type="radio"
+            :value="element"
+            v-model="selectfliter"
+            v-on:click="toggleClass(element)"
+            :id="'flexCheckIndeterminate' + index"
+          />
+          <label class="form-check-label" :for="'flexCheckIndeterminate' + index">
+            {{ element }}
+          </label>
       </div>
-      <div v-for="(element,index) in titleData" :key="index" class="order-table">
-        <p>{{ element["orderTime"] }}</p>
-        <p>{{ element["orderName"] }}</p>
-        <p>{{ element["state"] }}</p>
+      
       </div>
-    </div>
-    <button v-on:click="pushActive" class="orderList-button">確認する</button>
-  </article>
-  <article v-if="isActive">
-
-    <div class="orderList-group-active">
-      <div class="order-table">
-        <p>注文時間</p>
-        <p>名前</p>
-        <p>状態</p>
-        <p></p>
-      </div>
-      <template v-for="(element,index) in titleData" :key="index" >
+    </article>
+    <article class="dataList">
+      <div v-for="(element,index) in titleData" :key="index" >
         <OwnerOrderListElements
         v-bind:title-data="element"
-        v-bind:vege-data="AllOrderDataNum[element.uid][element.unique]"
-        v-bind:-order-data="AllOrderData[element.uid][element.unique]"
-        v-bind:uid="element.uid"
         v-bind:unique="element.unique"></OwnerOrderListElements>
-      </template>
-      <div class="order-table-selected" v-if="isActive">
-
       </div>
-    </div>
-    <button v-on:click="pushActive" class="orderList-button">更新する</button>
+    </article>
   </article>
+  
 </template>
 <style>
-.form-select {
-  width: 30% !important;
-}
-
-.order-table {
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  border-bottom: 1px solid gray;
-  border-top: 1px solid gray
-}
-
-
-
-
-
-
-
-.orderList-group {
-  margin: 10px;
-  font-size: large
-}
-
-.orderList-group-active {
-  margin: 10px;
-  font-size: large
-}
-
-.orderList-button {
-  background-color: white;
-  font-size: 1.2rem;
-  padding: 5px;
-  margin: 5px;
-  border-radius: 10px;
-}
-
-.filter-unit button {
-  background-color: white;
+.orderList-card{
+  width: 340px;
   padding: 10px;
-  margin: 5px 5px;
+  border-radius: 10px;
+  background-color: white;
+  margin: 0 auto;
+  margin-top: 20px;
+}
+.orderList-card h1{
+  border-bottom: 1px solid black;
+}
+.orderList-card button{
+  height: 40px;
+  width: 100px;
+  border-radius: 5px;
+  color: white;
+  text-align: center;
+  background-color: var(--other-color);
+  border: none;
+  margin: 0 10px;
+}
+.filter-tab{
+  border-radius: 10px;
+  border: 1px solid var(--line-color);
+  padding: 10px;
+  margin-top: 10px;
+}
+.filter-tab h3{
+  border-bottom: 1px solid black;
+}
+.fliter-button-group{
+  display: flex;
+  flex-wrap: wrap;
+  
+}
+.filter_button{
+  width: 120px;
+}
+.form-check-label{
+  margin-left: 5px;
+}
+.dataList{
+  margin-top: 10px;
 }
 
-.filter-unit button.active {
-  background-color: rgb(175, 175, 175);
-}
 </style>

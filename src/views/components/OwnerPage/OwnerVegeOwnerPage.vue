@@ -2,7 +2,7 @@
 import { ref} from 'vue'
 import { type User} from 'firebase/auth'
 import { useSortVegeStore } from '@/stores/sortByVege';
-
+import router from '@/router'
 import draggable from 'vuedraggable'
 enum VegeState{
   Discontinued="Discontinued",
@@ -47,6 +47,7 @@ interface Emits {
 const emit = defineEmits<Emits>()
 const props = defineProps<Props>()
 const isActive = ref<boolean>(false)
+  const isnone = ref<boolean>(false)
 const vegeKeys=ref<string[]>(Object.keys(props.data))
 const sortVegeStore=useSortVegeStore()
 const sortMode=ref<SortMode>(SortMode.All)
@@ -61,13 +62,9 @@ function initData(){
 }
 }
 initData()
-async function pushActive() {
-  if(isActive.value){
+async function pushupdate() {
     await sortVegeStore.update(vegeKeys.value,sortMode.value)
-  }
-  isActive.value = !isActive.value
-  
-
+    isActive.value=true
 }
 
 function pushDeleteIcon(vegeName: string) {
@@ -125,22 +122,26 @@ function exportToCSV(data: string[][], fileName: string) {
   a.click();
   document.body.removeChild(a);
 }
+function onpushHeader(bool:boolean){
+  isnone.value=bool
+}
+function pushOrder(){
+  router.push("/order")
+}
 </script>
 <template>
   <!-- {{ VegeData }} -->
-      <h1 class="vege-title" v-if="props.role==Role.Onwer">現在全ての注文可能な野菜のリスト</h1>
-      <h1 class="vege-title" v-if="props.role!=Role.Onwer">現在{{props.role}}の注文可能な野菜のリスト</h1>
-      <article v-if="!isActive">
-        <div class="vegeList-group">
-          <div v-for="(element,vegeName) in props.data" :key="vegeName">
-            {{ vegeName }}
-          </div>
+    <article class="ownerVege_card">
+      <h1 class="ownerVege_title" v-if="props.role==Role.Onwer">全ての野菜リスト</h1>
+      <h1 class="ownerVege_title" v-if="props.role!=Role.Onwer">{{props.role}}の野菜のリスト</h1>
+
+      <article class="Tab_menu">
+        <div class="Tab_menu_header">
+          <button class="Tab_menu_Vege" v-bind:class="{active:!isnone}" v-on:click="onpushHeader(false)">野菜リスト</button>
+          <button class="Tab_menu_none" v-bind:class="{active:isnone}" v-on:click="onpushHeader(true)">在庫なし</button>
         </div>
-        <p>※これは初期配置です。本当の並び順とは違うことがあります</p>
-        <button v-on:click="pushActive" class="vegeList-button">編集する</button>
-      </article>
-      <article v-if="isActive">
-        <p>ドラック＆ドロップで並べ替えができます</p>
+        <div class="TAB_Body_Vege" v-if="!isnone">
+          <p>ドラック＆ドロップで並べ替えができます</p>
         <div class="vegeList-group-active">
           <draggable v-model="vegeKeys" draggable=".vegeList-unit-active" item-key="id">
             <template #item="{ element }">
@@ -152,20 +153,91 @@ function exportToCSV(data: string[][], fileName: string) {
               </div>
             </template>
           </draggable>
-          
         </div>
-        <button v-on:click="pushActive" class="vegeList-button">更新する</button>
-        <button v-on:click="pushExport" class="vegeList-button">出力する</button>
-        <p>※出力するを押すと、現在注文可能な野菜の[名前、単位、値段]のリストが出力されます</p>
-      </article>
-      <div v-if="props.unavailableVegeList.length!=0">
-        <h1 class="vege-title" v-if="props.role==Role.Onwer">現在全体で在庫切れの野菜</h1>
-        <h1 class="vege-title" v-if="props.role!=Role.Onwer">現在{{props.role}}で在庫切れの野菜</h1>
+        </div>
+        <div class="TAB_Body_none" v-if="isnone">
+        <div v-if="props.unavailableVegeList.length==0">在庫切れの商品はありません</div>
+        <h3 class="vege-title" v-if="props.role==Role.Onwer&&props.unavailableVegeList.length!=0">現在全体で在庫切れの野菜</h3>
+        <h3 class="vege-title" v-if="props.role!=Role.Onwer&&props.unavailableVegeList.length!=0">現在{{props.role}}で在庫切れの野菜</h3>
         <div v-for="(vegeName) in props.unavailableVegeList" :key="vegeName">
           {{ vegeName }}
         </div>
       </div>
+      </article>
+      <div v-if="isnone==false">
+        <p>※これは初期配置です。本当の並び順とは違うことがあります</p>
+        <button v-on:click="pushupdate" class="vegeList-button">更新する</button>
+          <button v-on:click="pushExport" class="vegeList-button">出力する</button>
+      </div>
+      
+      </article>  
+      <article class="Update_popup" v-if="isActive">
+        <h3>更新しました。</h3>
+        <button v-on:click="pushOrder" class="vegeList-button">注文画面へ</button>
+          <button v-on:click="isActive=false" class="vegeList-button">戻る</button>
+      </article>
 </template>
 <style scoped>
-
+.ownerVege_card{
+  width: 340px;
+  height: 740px;
+  border-radius: 10px;
+  background-color: white;
+  margin: 0 auto;
+  padding: 15px;
+  margin-top: 20px;
+}
+.ownerVege_title{
+  text-align: center;
+  border-bottom: 1px solid black;
+  padding-bottom: 5px;
+}
+.Tab_menu{
+  width: 100%;
+  height: 500px;
+  margin-top: 20px;
+  border: 1px solid var(--line-color);
+}
+.Tab_menu_header{
+  width: 100%;
+  height: 40px;
+  display: flex;
+  background-color: var(--background-color);
+}
+.Tab_menu_Vege{
+  width: 50%;
+  border-color: var(--line-color);
+}
+.Tab_menu_Vege.active{
+  border-radius: 20px 20px 0 0;
+  background-color: white;
+  border-bottom: none;
+}
+.Tab_menu_none{
+  width: 50%;
+  border-color: var(--line-color);
+}
+.Tab_menu_none.active{
+  border-radius: 20px 20px 0 0;
+  background-color: white;
+  border-bottom: none;
+}
+.TAB_Body_none{
+  font-size: 20px;
+  margin: 10px;
+}
+.Update_popup{
+  position: fixed;
+  width: 340px;
+  z-index: 10;
+  border: 1px solid gray;
+  border-radius: 20px;
+  top: calc(50% - 150px);
+  left: calc(50% - 170px);
+  padding: 20px;
+  background-color: white;
+}
+.Update_popup p{
+  font-size: 20px;
+}
 </style>

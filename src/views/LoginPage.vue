@@ -24,7 +24,7 @@ interface AllUserTables{
 }
 interface Usertables{
     affiliation:String[]
-    gender:string
+   
     name:string
     phoneNumber:number
     place:string
@@ -57,6 +57,8 @@ const vegeStore=useVegeStore()
 const sortVegeStore=useSortVegeStore()
 const FireOrderStore=useFireOrderStore()
 const CartStore=useCartStore()
+const auth = getAuth();
+const isPopup=ref<Boolean>(false)
   async function roadData(){
   await userStore.roadUserData()
   await vegeStore.roadData()
@@ -85,9 +87,6 @@ async function checkMyData() {
     if (userData.value[currentUser.value.uid] == null) {
       isOk = false
     } else {
-      if (userData.value[currentUser.value.uid].gender == null) {
-        isOk = false
-      }
       if (
         userData.value[currentUser.value.uid].place == null ||
         userData.value[currentUser.value.uid].place == ''
@@ -192,12 +191,13 @@ async function checkImageExistsInFirebase(path: string): Promise<boolean> {
     return false;
   }
 }
-const auth = getAuth();
+
 
 function resetPassword() {
   sendPasswordResetEmail(auth, changeemail.value)
     .then(() => {
-      console.log('パスワードリセットメールが送信されました');
+      isPopup.value=true
+      console.log('パスワードリセットメールが送信されました:'+isPopup.value);
     })
     .catch((error) => {
       if (error.code === 'auth/user-not-found') {
@@ -241,6 +241,10 @@ function onPushChangePass(){
       </div>
       
     </article>
+    <article class="forget_popup" v-if="isPopup">
+      <p>パスワードの再設定メールを送りました。<br>メールを開き、確認してください。</p>
+    </article>
+    <div class="blackback" v-if="isPopup"></div>
   </article>
   
   
@@ -248,7 +252,7 @@ function onPushChangePass(){
 <style scoped>
 
 .login_page{
-  width: 536px;
+  width: 512px;
   margin: auto;
 }
 
@@ -300,7 +304,35 @@ function onPushChangePass(){
   display: flex;
   align-items: center;
   padding: 30px 0;
+  border: none;
 }
+.forget_popup{
+  width: 512px;
+  position: fixed;
+  top: 300px;
+  left: calc(50% - 256px);
+  background-color: white;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: rgba(60, 69, 50, 0.2) 0px 6px 20px;
+  z-index: 20;
+}
+.forget_popup p{
+  font-size: 24px;
+}
+.blackback{
+  position: fixed;
+  display: block;
+  top: 80px;
+  left: 0;
+  background-color:rgba(3,3,3); ;
+  opacity: 0.5;
+  width: 100vw;
+  height: 100vh;
+  z-index: 10;
+
+}
+
 @media (max-width: 536px) { 
   .title{
     display: flex;
@@ -313,6 +345,7 @@ function onPushChangePass(){
   }
   .form_card{
     padding: 36px;
+    width: 340px;
   }
   .form_link_group >button{
     height: 48px;
