@@ -32,9 +32,13 @@ interface FarmerList{
 const vegeStore=useVegeStore()
 const vegeAllData = ref<Vegetables>(vegeStore.VegeAllData)
 const roadStationUnitTempList = ref<string[]>(useRoadStationStore().roadStationTemp)
-  roadStationUnitTempList.value.unshift("全て");
+  if (!roadStationUnitTempList.value.includes("全て")) {
+    roadStationUnitTempList.value.unshift("全て");
+}
+  
 const selectedRoadStation = ref<string>(roadStationUnitTempList.value[0])
 const groupByFarmerList = ref<FarmerList>({})
+const isfliter=ref<boolean>(false)
   watch(() => vegeStore.VegeAllData, (newUser) => {
   vegeAllData.value = newUser;
   initData()
@@ -172,24 +176,87 @@ const downloadCSV = (csv: string, filename: string) => {
   link.click();
   document.body.removeChild(link);
 };
+function onpushfilter(){
+  isfliter.value=!isfliter.value
+}
 </script>
 <template>
-  <h1>出品者リスト</h1>
-  <!-- {{ groupByFarmerList }} -->
-  <!-- {{ vegeAllData }} -->
-  <select class="form-select" aria-label="roadsideStationSelect" v-model="selectedRoadStation" @change="initData">
-    <option selected v-bind:value="roadStation" v-for="roadStation in roadStationUnitTempList" :key=roadStation>
-      {{ roadStation }}
-    </option>
-  </select>
-  <div v-for="(element,farmer) in groupByFarmerList" :key="farmer">
+  <article class="farmerList-card">
+    <h1>出品者リスト</h1>
+    <button v-on:click="onpushfilter">
+      フィルター
+      <i class="bi bi-chevron-down" v-if="!isfliter"></i>
+      <i class="bi bi-chevron-up" v-if="isfliter"></i>
+    </button>
+    <article class="filter-tab" v-if="isfliter">
+      <h3>ステータス</h3>
+      <div class="fliter-button-group">
+        <div v-for="(element,index) in roadStationUnitTempList" v-bind:key="index" class="filter_button">
+          <input
+            class="form-check-input"
+            type="radio"
+            :value="element"
+            v-model="selectedRoadStation"
+            v-on:click="initData()"
+            :id="'flexCheckIndeterminate' + index"
+          />
+          <label class="form-check-label" :for="'flexCheckIndeterminate' + index">
+            {{ element }}
+          </label>
+      </div>
+      
+      </div>
+    </article>
+    <div v-for="(element,farmer) in groupByFarmerList" :key="farmer">
     <OwnerFarmerListElement
     v-bind:-farmer-name="farmer"
+    v-bind:road-station="selectedRoadStation"
     v-bind:-vege-data="element"></OwnerFarmerListElement>
   </div>
-  <button class="export-button" v-on:click="pushExport()">出力する</button>
+    <button class="export-button" v-on:click="pushExport()">出力する</button>
+  </article>
+  
 </template>
 <style>
+.farmerList-card{
+  width: 340px;
+  padding: 10px;
+  border-radius: 10px;
+  background-color: white;
+  margin: 0 auto;
+  margin-top: 20px;
+}
+.farmerList-card h1{
+  border-bottom: 1px solid black;
+}
+.farmerList-card button{
+  height: 40px;
+  width: 100px;
+  border-radius: 5px;
+  color: white;
+  text-align: center;
+  background-color: var(--other-color);
+  border: none;
+  margin: 10px 10px;
+
+}
+.filter-tab{
+  border-radius: 10px;
+  border: 1px solid var(--line-color);
+  padding: 10px;
+  margin: 10px 0;;
+}
+.filter-tab h3{
+  border-bottom: 1px solid black;
+}
+.fliter-button-group{
+  display: flex;
+  flex-wrap: wrap;
+  
+}
+.filter_button{
+  width: 120px;
+}
 .export-button {
   background-color: white;
   margin-top: 20px;
