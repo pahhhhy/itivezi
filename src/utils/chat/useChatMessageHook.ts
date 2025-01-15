@@ -27,8 +27,8 @@ const MESSAGE_LIMIT = 20;
 
 export const useChatMessageHook = (roomId: string, user: User, onMessageUpdated?: (data: Record<string, ChatMessage>) => void) => {
     const db = getDatabase();
-    const messagesRef = fireRef(db, `testChat/messages/${roomId}`);// roomIdをキーにしてさらにmessageIdをキーにしたメッセージ情報を保持
-    const roomsRef = fireRef(db, 'testChat/rooms');
+    const messagesRef = fireRef(db, `Chat/messages/${roomId}`);// roomIdをキーにしてさらにmessageIdをキーにしたメッセージ情報を保持
+    const roomsRef = fireRef(db, 'Chat/rooms');
 
     const messages = ref<ChatMessage[]>([]);
     const isEnd = ref(false);
@@ -108,7 +108,7 @@ export const useChatMessageHook = (roomId: string, user: User, onMessageUpdated?
             // ファイルをアップロードする処理
             Object.keys(message.attachedFiles).forEach((fileId) => {
                 const file = message.attachedFiles![fileId];
-                const fileRef = fireRef(db, `testChat/files/${roomId}/${newMessageRef.key}/${fileId}`);
+                const fileRef = fireRef(db, `Chat/files/${roomId}/${newMessageRef.key}/${fileId}`);
                 if (!newMessageRef.key) return;
                 file.messageId = newMessageRef.key; // 空文字列だったmessageIdを更新
                 update(fileRef, file);
@@ -138,8 +138,8 @@ export const useChatMessageHook = (roomId: string, user: User, onMessageUpdated?
                         throw e;
                     }
                 }
-                // dbから削除 (testChat/files/roomId/messageId/fileIdとtestChat/messages/messageId/fileUrlsの両方を削除)
-                const chatRef = fireRef(db, 'testChat');
+                // dbから削除 (Chat/files/roomId/messageId/fileIdとChat/messages/messageId/fileUrlsの両方を削除)
+                const chatRef = fireRef(db, 'Chat');
                 await update(chatRef, {
                     [`files/${roomId}/${message.messageId}/${fileId}`]: null,
                     [`messages/${message.messageId}/attachedFiles/${fileId}`]: null,
