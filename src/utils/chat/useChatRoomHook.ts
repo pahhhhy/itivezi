@@ -130,7 +130,7 @@ export const useChatRoomHook = (user: User) => {
 
 
         // storageの画像も削除
-        const roomImagesRef = storageRef(storage, 'chat/' + roomId)
+        const roomImagesRef = storageRef(storage, 'Chat/' + roomId)
         const res = await listAll(roomImagesRef)
         res.items.forEach((itemRef) => {
             deleteObject(itemRef)

@@ -130,7 +130,7 @@ export const useChatMessageHook = (roomId: string, user: User, onMessageUpdated?
             // ファイルを削除する処理
             for (const fileId of Object.keys(message.attachedFiles)) {
                 // storageから削除
-                const storageFileRef = storageRef(getStorage(), `chat/${roomId}/${fileId}`);
+                const storageFileRef = storageRef(getStorage(), `Chat/${roomId}/${fileId}`);
                 try {
                     await deleteObject(storageFileRef);
                 } catch (e) {
