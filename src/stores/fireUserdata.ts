@@ -13,11 +13,13 @@ interface Usertables{
     email:string
 }
 enum Role{
-    Onwer="管理者",
-    Buyer="飲食店",
-    Farmer="農家",
-    None=""
-  }
+  Onwer="管理者",
+  Buyer="飲食店",
+  Farmer="農家",
+  Murone="室根",
+  Kawasaki="川崎",
+  None=""
+}
 export const usefireUserStore = defineStore({
     id:"myUserData",
     state:(): { myUserData: Usertables } =>{
@@ -33,7 +35,7 @@ export const usefireUserStore = defineStore({
     actions:{
         async roadFireUseData(uid:string) {
             return new Promise((resolve, reject) => {
-              const countRef = fireRef(getDatabase(), 'testUser/'+uid)
+              const countRef = fireRef(getDatabase(), 'UserData/'+uid)
               onValue(countRef, (snapshot) => {
                 const data = snapshot.val()
                 if (data) {
@@ -48,7 +50,7 @@ export const usefireUserStore = defineStore({
             });
           },async AllroadFireUseData():Promise<AllUserTables> {
             return new Promise((resolve, reject) => {
-              const countRef = fireRef(getDatabase(), 'testUser/')
+              const countRef = fireRef(getDatabase(), 'UserData/')
               onValue(countRef, (snapshot) => {
                 const data:AllUserTables = snapshot.val()
                 if (data) {
@@ -63,7 +65,7 @@ export const usefireUserStore = defineStore({
           },async update(data: Usertables,uid:string): Promise<void> {
             const db = getDatabase();
             return new Promise((resolve, reject) => {
-              set(fireRef(db, `testUser/${uid}`), data)
+              set(fireRef(db, `testUserData/${uid}`), data)
                 .then(() => {
                   resolve(); // 成功した場合に resolve を呼び出す
                 })
@@ -75,7 +77,7 @@ export const usefireUserStore = defineStore({
           },async delete(uid:string|number): Promise<void> {
             const db = getDatabase();
             return new Promise((resolve, reject) => {
-              remove(fireRef(db, `testUser/${uid}`))
+              remove(fireRef(db, `testUserData/${uid}`))
                 .then(() => {
                   resolve(); // 成功した場合に resolve を呼び出す
                 })

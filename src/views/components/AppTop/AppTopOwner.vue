@@ -6,7 +6,7 @@ import {
 } from 'firebase/auth'
 import {useIconStore}from "@/stores/icon"
 import { usefireUserStore } from '@/stores/fireUserdata';
-import { ref,watch } from 'vue'
+import { ref,watch ,onMounted} from 'vue'
 enum PageMode{
   home="Home",
   order="Order",
@@ -38,9 +38,10 @@ enum Role{
   }
 const iconStore = (useIconStore())
 const auth = getAuth()
-const myRole = ref<string>("")
+
 const fireUseStore=usefireUserStore()
 const myUserData=ref<Usertables>(fireUseStore.myUserData)
+  const myRole = ref<string>(myUserData.value.role)
 function logout() {
   signOut(auth)
     .then(() => {
@@ -82,9 +83,18 @@ async function onClickCard(mode: PageMode) {
       break;
   }
 }
-watch(() => fireUseStore.myUserData, (newUser) => {
-  myUserData.value = newUser;
-  myRole.value=myUserData.value.role
+onMounted(() => {
+  myUserData.value = fireUseStore.myUserData;
+
+  // データがロードされてから initData を呼ぶ
+  watch(
+    () => fireUseStore.myUserData,
+    (newData) => {
+      myUserData.value = newData
+        myRole.value=myUserData.value.role
+    },
+    { immediate: true }
+  );
 });
 </script>
 <template>

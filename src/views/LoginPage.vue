@@ -232,7 +232,7 @@ function onPushChangePass(){
       <h1>パスワードの変更</h1>
     </div>
     <article class="form_card">
-      <h2 v-if="errorMes != ''" style="color: red">{{ errorMes }}</h2>
+
       <label for="exampleFormControlInput1" class="form-label">メールアドレス</label>
       <input type="email" id="email" placeholder="name@example.com" required v-model="changeemail" class="form-control">
       <div class="form_link_group">
@@ -350,6 +350,10 @@ function onPushChangePass(){
   .form_link_group >button{
     height: 48px;
     margin-bottom: 18px;
+  }
+  .forget_popup{
+    width: 340px;
+    left: calc(50% - 170px);
   }
   }
 </style>

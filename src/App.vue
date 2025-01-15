@@ -34,9 +34,10 @@ async function initData(){
   if(currentUser.value){
     await fireUseStore.roadFireUseData(currentUser.value.uid)
   }
+  else{
+    console.log("error")
+  }
   
-else
-console.log("error")
 }
 onMounted(() => {
   initData()
