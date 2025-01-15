@@ -47,8 +47,8 @@ const announcementsStore = useAnnouncementsStore();
 
 // このページで表示する投稿のリファレンス
 const db = getDatabase();
-const announcementRef = fireRef(db, 'testAnnouncements/announcements/' + announceId)
-const announcementRootRef = fireRef(db, 'testAnnouncements')
+const announcementRef = fireRef(db, 'Announcements/announcements/' + announceId)
+const announcementRootRef = fireRef(db, 'Announcements')
 
 onMounted(async () => {
   // storeにキャッシュされていた場合は最初にそれを表示して高速化
