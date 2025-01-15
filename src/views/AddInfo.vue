@@ -15,11 +15,13 @@ interface Usertables{
     email:string
 }
 enum Role{
-    Onwer="管理者",
-    Buyer="飲食店",
-    Farmer="農家",
-    None=""
-  }
+  Onwer="管理者",
+  Buyer="飲食店",
+  Farmer="農家",
+  Murone="室根",
+  Kawasaki="川崎",
+  None=""
+}
   enum CheckList{
     Name="name",
     Role="role",

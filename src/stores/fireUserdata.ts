@@ -65,7 +65,7 @@ export const usefireUserStore = defineStore({
           },async update(data: Usertables,uid:string): Promise<void> {
             const db = getDatabase();
             return new Promise((resolve, reject) => {
-              set(fireRef(db, `testUserData/${uid}`), data)
+              set(fireRef(db, `UserData/${uid}`), data)
                 .then(() => {
                   resolve(); // 成功した場合に resolve を呼び出す
                 })
@@ -77,7 +77,7 @@ export const usefireUserStore = defineStore({
           },async delete(uid:string|number): Promise<void> {
             const db = getDatabase();
             return new Promise((resolve, reject) => {
-              remove(fireRef(db, `testUserData/${uid}`))
+              remove(fireRef(db, `UserData/${uid}`))
                 .then(() => {
                   resolve(); // 成功した場合に resolve を呼び出す
                 })

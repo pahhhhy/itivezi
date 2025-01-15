@@ -13,7 +13,7 @@ import Cart from '../views/CartPage.vue'
 import Chat from '../views/ChatPage.vue'
 import Announcements from "@/views/AnnouncementsPage.vue";
 import ResetPasswordPage from '@/views/ResetPasswordPage.vue'
-import VerifiPage from '@/views/VerifiPage.vue'
+import verifyPage from '@/views/VerifyPage.vue'
 import OwnerOrderCheck from '@/views/components/OwnerPage/OwnerOrderCheck.vue'
 import {
   getAuth
@@ -123,9 +123,9 @@ const router = createRouter({
       component: ResetPasswordPage,
     },
     {
-      path: '/verifi',
-      name: 'verifi',
-      component: VerifiPage,
+      path: '/verify',
+      name: 'verify',
+      component: verifyPage,
     },
   ]
 })
