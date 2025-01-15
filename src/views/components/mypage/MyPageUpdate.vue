@@ -175,7 +175,7 @@ async function writeVege(
 ) {
   const db = getDatabase();
   try {
-    await update(fireRef(db, 'testVege2/' + vege + "/" + unique), {
+    await update(fireRef(db, 'Vegetable/' + vege + "/" + unique), {
       farmer: farmerVege,
     });
     console.log(`${vege} (${unique}) のfarmerを ${farmerVege} に更新しました`);

@@ -28,7 +28,7 @@ export const useVegeStore = defineStore({
     actions:{
         async roadData() {
             return new Promise((resolve, reject) => {
-              const countRef = fireRef(getDatabase(), 'testVege2/')
+              const countRef = fireRef(getDatabase(), 'Vegetable/')
               onValue(countRef, (snapshot) => {
                 const data = snapshot.val()
                 if (data) {
@@ -47,7 +47,7 @@ export const useVegeStore = defineStore({
           },
           getUniqueKey(){
             const db = getDatabase();
-            const newRef = fireRef(db, 'testVege2/');
+            const newRef = fireRef(db, 'Vegetable/');
             const uniqueKey = push(newRef).key;
             return uniqueKey
           },
@@ -63,7 +63,7 @@ export const useVegeStore = defineStore({
           
               uniqueKeys.forEach((uniqueKey) => {
                 const updatePromise = set(
-                  fireRef(db, `testVege2/${vegeKey}/${uniqueKey}`), 
+                  fireRef(db, `Vegetable/${vegeKey}/${uniqueKey}`),
                   data[vegeKey][uniqueKey]
                 );
                 updatePromises.push(updatePromise);
@@ -77,7 +77,7 @@ export const useVegeStore = defineStore({
           },
           async deleteVegeData(vegeName:string,unique:string|number){
             const db = getDatabase();
-            const path = `testVege2/${vegeName}/${unique}`
+            const path = `Vegetable/${vegeName}/${unique}`
             // 更新するデータを指定
             const updates = {
               state: "Discontinued"
@@ -92,7 +92,7 @@ export const useVegeStore = defineStore({
           },
           async deleteAllVegeData(vegeName: string) {
             const db = getDatabase();
-            const path = `testVege2/${vegeName}`;
+            const path = `Vegetable/${vegeName}`;
             
             try {
               // まず、指定された vegeName に対応するすべての uniqueKey を取得する
