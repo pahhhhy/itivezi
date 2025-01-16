@@ -151,7 +151,7 @@ watch(roadStationList, (newValue) => {
 <template>
   <article  class="myvege_popup">
     <h1>{{ vegename}}</h1>
-    <div class="form">
+    <div class="myvege_form">
       <p>単位</p>
       <div class="unit">
         <input
@@ -181,7 +181,7 @@ watch(roadStationList, (newValue) => {
       </div>
     </div>
     <p class="errorMes" v-if="Checklist[Mode.Unit]">単位を選択してください</p>
-    <div class="form">
+    <div class="myvege_form">
       <p>値段</p>
       <input
         class="form-control"
@@ -193,7 +193,7 @@ watch(roadStationList, (newValue) => {
       />
     </div>
     <p class="errorMes" v-if="Checklist[Mode.Money]">金額を入力してください</p>
-    <div class="form">
+    <div class="myvege_form">
       <p>画像</p>
       <RegStep2image
       v-if="uniqueKey"
@@ -203,7 +203,7 @@ watch(roadStationList, (newValue) => {
       v-bind:photo=uproadData[vegename][uniqueKey].photo
       v-on:uproad-image="uproadImage"></RegStep2image>
     </div>
-    <div class="form">
+    <div class="myvege_form">
       <p>卸先</p>
       <article class="form_check">
         <div  v-for="(element, index) in roadStationUnitTempList" :key="element" class="form_check_element">
@@ -253,7 +253,7 @@ p{
   z-index: 5;
   background-color: rgba(3,3,3,0.5);;
 }
-.form{
+.myvege_form{
   display: flex;
   margin-top: 10px;
 }
@@ -267,7 +267,7 @@ p{
 .form_check_element{
   width: 80px;
 }
-.form p{
+.myvege_form p{
   font-size: 20px;
   width: 80px;
   margin: auto 0;
@@ -287,7 +287,7 @@ p{
     width: 340px;
     margin: 20px auto;
   }
-  .form p{
+  .myvege_form p{
     font-size: 16px;
     width: 50px;
   }

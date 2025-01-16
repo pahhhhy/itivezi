@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref,watch} from 'vue'
-import { type User } from 'firebase/auth'
 import { useVegeStore } from '@/stores/vege'
 import MyVegeElement from './MyVegeElement.vue';
 import MyVegePopup from './MyVegePopup.vue';
@@ -45,7 +44,6 @@ interface datatable {
   VegeName:string
 }
   const vegeStore=useVegeStore()
-const isToggle = ref<boolean>(false)
 const MyVegeData=ref<MyVegeTables>({})
 const vegeAllData = ref<Vegetables>(vegeStore.VegeAllData)
 const IsPopup=ref<boolean>(false)
@@ -74,10 +72,6 @@ function initData(){
 async function deleteVegeData( unique: string|number,vege: string ): Promise<void>  {
   await vegeStore.deleteVegeData(vege,unique)
   initData()
-}
-
-function pushToggle() {
-  isToggle.value = !isToggle.value;
 }
 function filterAvailableVegetables(data: Vegetables): Vegetables {
     const result: Vegetables = {};

@@ -95,9 +95,6 @@ function filterAvailableVegetables(data: Vegetables): Vegetables {
     }
     return result;
 }
-function onPushCart(){
-  router.push("/cart")
-}
 async function onPushfilter(mode:SortMode){
   selectedFilter.value=mode
   switch(selectedFilter.value){

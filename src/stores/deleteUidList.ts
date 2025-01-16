@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { getDatabase, ref as fireRef,  onValue,push ,update,set} from 'firebase/database'
+import { getDatabase, ref as fireRef,  onValue,push } from 'firebase/database'
 interface deletedata{
     uid:string|number,
     email:string

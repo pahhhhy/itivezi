@@ -93,9 +93,6 @@ const vegeAllData = ref<Vegetables>(vegeStore.VegeAllData)
 const canBuy=ref<boolean>(false)
 function initData(){
   // string に変換
-
-  console.log("uid:"+uidStr+"*unique:"+uniqueStr)
-  console.log(orderAllData.value)
   if(uidStr&&uniqueStr){
     data.value=orderAllData.value[uidStr][uniqueStr]
     vegeData.value=getNumData(data.value)

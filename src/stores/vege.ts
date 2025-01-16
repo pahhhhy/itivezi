@@ -51,6 +51,12 @@ export const useVegeStore = defineStore({
             const uniqueKey = push(newRef).key;
             return uniqueKey
           },
+          async updateNewVegeData(name: string) {
+            const db = getDatabase();
+            const path =`Vegetable/`
+            const updateData = { [name]: ""};  // オブジェクト形式に変換
+            await update(fireRef(db, path), updateData);
+          },
           updateVegeData(data: Vegetables): Promise<boolean> {
             const db = getDatabase();
             const vegeKeys = Object.keys(data);

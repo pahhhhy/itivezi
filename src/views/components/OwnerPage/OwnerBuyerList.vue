@@ -76,22 +76,6 @@ async function initData() {
   //抽出したデータからBuyerListの作成
   orderNumList.value = generateBuyerListTable(fliterOrderData.value)
 }
-//取引完了のものの総額を計算する
-function getTotalMoney(data: Ordertables) {
-  let totalCompletedMoney = 0;
-  let countConplateOrder=0
-  for (const orderId in data) {
-    const orderDetails = data[orderId];
-    for (const orderDate in orderDetails) {
-      const order = orderDetails[orderDate];
-      if (order.state === OrderStete.Completed) {
-        totalCompletedMoney += order.totalMoney;
-        countConplateOrder += 1
-      }
-    }
-  }
-  return totalCompletedMoney
-}
 function filterRoadStationByRoomne(orderTables: Ordertables, roadStation: string): Ordertables {
   // Create a deep copy of orderTables
   const filteredOrderTables: Ordertables = JSON.parse(JSON.stringify(orderTables));

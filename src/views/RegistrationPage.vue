@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 //Vueとfirebaseで同じrefという関数があって競合しているのでfirebaseの方をfireRefにしている
-import { ref,watch} from 'vue'
+import { ref,watch,onMounted} from 'vue'
 import RegistrationStep1 from './components/Registration/RegistrationStep1.vue'
 import RegistrationStep2 from './components/Registration/RegistrationStep2.vue'
 import RegistrationStep3 from './components/Registration/RegistrationStep3.vue'
@@ -31,10 +31,18 @@ const vegeKeys = ref<string[]>(vegeStore.getKeys())
 const uproadVegeData=ref<Vegetables>({})
   const vegeList = ref<string[]>([])
 const uniqueKey=ref<string|null>(vegeStore.getUniqueKey())
-watch(() => vegeStore.VegeAllData, (newUser) => {
-  vegeAllData.value = newUser;
+onMounted(() => {
+  vegeAllData.value = vegeStore.VegeAllData;
   vegeKeys.value= vegeStore.getKeys()
-});
+  // データがロードされてから initData を呼ぶ
+  watch(
+    () => vegeStore.VegeAllData,
+    (newData) => {
+      vegeAllData.value = newData;
+      vegeKeys.value= vegeStore.getKeys()
+    },
+    { immediate: true }
+  );})
 const currentUser = ref(userStore.currentUser);
 watch(() => userStore.currentUser, (newUser) => {
   currentUser.value = newUser;
@@ -57,10 +65,12 @@ function updateUproadData(Data:Vegetables){
 <template>
   <!-- {{ roadStationUnitList }}
   {{ vegeUnitList }} -->
-   <!-- {{ vegeKeys }} -->
      <!-- {{ vegeList }} -->
   <!-- {{ uniqueKey }}
   {{ uproadVegeData }} -->
+  <article class="road" v-if="stepNum == 0 && Object.keys(vegeKeys).length == 0 ">
+    <div class="three-quarter-spinner"></div>
+  </article >
   <RegistrationStep1
       v-bind:vegeList="vegeList"
       v-bind:vegeKeys="vegeKeys"
@@ -69,7 +79,7 @@ function updateUproadData(Data:Vegetables){
       v-on:-on-step="onStep"
       v-on:update-uproad-data="updateUproadData"
       v-on:change-select-list="changeSelect"
-      v-if="stepNum == 0 && vegeKeys != null"
+      v-if="stepNum == 0 && Object.keys(vegeKeys).length != 0 "
   ></RegistrationStep1>
   <!-- {{ VegeMoneyList }}
   {{ vegeAmountList }}
@@ -94,7 +104,27 @@ function updateUproadData(Data:Vegetables){
   ></RegistrationStep3>
 </template>
 <style>
+@keyframes spin {
+  from {
+    transform: rotate(0);
+  }
+  to{
+    transform: rotate(359deg);
+  }
+}
 .title {
   text-align: center;
 }
+.road{
+  width: 50px;
+  height: 50px;
+  margin: auto;}
+  .three-quarter-spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid var(--main-color);
+    border-top: 3px solid transparent;
+    border-radius: 50%;
+    animation: spin .5s linear 0s infinite;
+  }
 </style>

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref} from 'vue'
 import router from '@/router'
 // クエリdataを持ったページに異動する
 const navigateToDetail = (name: string |number,roadStation:string) => {
@@ -20,10 +19,6 @@ interface Props {
   roadStation:string
 }
 const props = defineProps<Props>()
-const isActive=ref<boolean>(false)
-function pushFarmer() {
-    isActive.value = !isActive.value
-}
 </script>
 <template>
     <div class="farmerList-group" @click="navigateToDetail(props.FarmerName,props.roadStation)">

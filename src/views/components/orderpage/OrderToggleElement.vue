@@ -32,10 +32,6 @@ interface CartElementTables{
     amount:number
 }
 
-interface Emits {
-  (event: 'onPushPopup'): void
-}
-const emit = defineEmits<Emits>()
 const OrderDataStore=useOrderDataStore()
 const props = defineProps<Props>()
 const vegeCount=ref<number>(1)

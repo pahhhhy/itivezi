@@ -2,7 +2,6 @@
 import { ref,  watchEffect,watch } from 'vue'
 import {  updateProfile, type User,getAuth } from 'firebase/auth'
 import { getDatabase, ref as fireRef,  onValue, update } from 'firebase/database'
-import {useRoadStationStore}from "../../../stores/roadStation"
 import {useIconStore}from "../../../stores/icon"
 import { useVegeStore } from '@/stores/vege'
 import { useFireOrderStore } from '@/stores/fireOrder';
@@ -332,14 +331,6 @@ function filterOrdersByOrderName(orders: Ordertables, orderName: string): Ordert
     }
 
     return result;
-}
-
-
-
-async function resetIcon(){
-  if(currentUser.value)
-  await iconStore.resetPhotoURL(currentUser.value)
-  userProfileImage.value=""
 }
 </script>
 <template>

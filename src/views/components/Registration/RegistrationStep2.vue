@@ -40,7 +40,6 @@ const Checklist=ref<boolean[]>([])
 for(let i:number=0;i<props.vegeList.length;i++){
   Checklist.value[0]=false
 }
-const uproadData=ref<Vegetables>(props.uproadData)
 function errorFind() {
   let result=true
   for (const element of regStep2Element.value) {

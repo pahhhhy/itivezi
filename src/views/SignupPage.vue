@@ -7,7 +7,7 @@ import {
   updateProfile,
   type User
 } from 'firebase/auth'
-import {  computed, watch } from 'vue'
+import {   watch } from 'vue'
 import { ref, onMounted } from 'vue'
 import '../assets/main.css'
 import router from '../router'

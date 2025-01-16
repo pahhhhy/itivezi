@@ -37,13 +37,14 @@ function changeNavBarNumber(number:number){
 </script>
 
 <template>
-  
   <!-- 全員の注文履歴をみる
   現在の注文可能なリストをみる
   出品者のリストをみる
   購入者のリストをみる
   各データをみる（総利用者、注文数、生産者数、掲示板利用数、総購入金額、購入者数） -->
-  
+  <article class="road" v-if="myUserData.role==''">
+    <div class="three-quarter-spinner"></div>
+  </article >
     <section v-if="[Role.Kawasaki, Role.Murone, Role.Onwer].includes(myUserData.role)">
       <div class="nav-bar">
         <button v-on:click="changeNavBarNumber(1)" v-bind:class="{active:navBarNumber==1}">野菜</button>
@@ -63,7 +64,7 @@ function changeNavBarNumber(number:number){
   <OwnerNewVegeAdd v-if="navBarNumber==6"></OwnerNewVegeAdd>
   <OwnerData v-if="navBarNumber==7"></OwnerData>
   </section>
-  <section v-else>
+  <section v-if="myUserData.role!=''&&![Role.Kawasaki, Role.Murone, Role.Onwer].includes(myUserData.role)">
     エラーが発生しました。管理者ではない人が閲覧しました。
   </section>
   
@@ -71,6 +72,14 @@ function changeNavBarNumber(number:number){
 </template>
 
 <style>
+@keyframes spin {
+  from {
+    transform: rotate(0);
+  }
+  to{
+    transform: rotate(359deg);
+  }
+}
 .nav-bar{
   width: 100vw;
   display: grid;
@@ -85,4 +94,16 @@ function changeNavBarNumber(number:number){
 .nav-bar button.active{
   background-color: var(--background-color);
 }
+.road{
+  width: 50px;
+  height: 50px;
+  margin: auto;}
+  .three-quarter-spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid var(--main-color);
+    border-top: 3px solid transparent;
+    border-radius: 50%;
+    animation: spin .5s linear 0s infinite;
+  }
 </style>

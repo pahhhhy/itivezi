@@ -53,21 +53,21 @@ const refreshPage = () => {
     <div v-for="(element, vegeName) in props.uproadData" :key="vegeName" class="confirm" >
       <article  class="myvege_popup">
         <h1>{{ vegeName}}</h1>
-        <div class="form">
+        <div class="myvege_form">
           <p>単位</p>
           <p>{{element[props.uniqueKey].unit }}</p>
           
         </div>
-        <div class="form">
+        <div class="myvege_form">
           <p>値段</p>
           <p>￥{{ element[props.uniqueKey].en }}</p>
         </div>
-        <div class="form">
+        <div class="myvege_form">
           <p>画像</p>
           <img :src="element[props.uniqueKey].photo" alt="" v-if="element[props.uniqueKey].photo!='none'">
       <img v-if="element[props.uniqueKey].photo=='none'" src="../../../assets/Noimage.jpeg"> 
         </div>
-        <div class="form">
+        <div class="myvege_form">
           <p>卸先</p>
           <p v-for="(roadStation) in element[props.uniqueKey].roadStation" :key="roadStation">
             {{ roadStation }}
@@ -151,14 +151,14 @@ p{
   z-index: 5;
   background-color: rgba(3,3,3,0.5);;
 }
-.form{
+.myvege_form{
   display: flex;
   margin-top: 10px;
 }
 .form_check{
   display: flex;
 }
-.form p{
+.myvege_form p{
   font-size: 20px;
   width: 80px;
   margin: auto 0;
@@ -188,7 +188,7 @@ p{
     width: 340px;
     margin: 20px auto;
   }
-  .form p{
+  .myvege_form p{
     font-size: 16px;
     width: 50px;
   }

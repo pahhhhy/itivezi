@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import AppHeader from './components/AppHeader.vue'
 import { ref,onMounted} from 'vue'
-import gsap from 'gsap';
 import { useUserStore } from './stores/userData';
 import { usefireUserStore } from './stores/fireUserdata';
 import { useVegeStore } from './stores/vege';

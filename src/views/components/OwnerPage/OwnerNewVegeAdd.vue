@@ -1,11 +1,9 @@
 <script setup lang="ts">
-
 //Vueとfirebaseで同じrefという関数があって競合しているのでfirebaseの方をfireRefにしている
 import { ref,watch} from 'vue'
-import RegistrationStep2 from '../Registration/RegistrationStep2.vue'
-import RegistrationStep3 from '../Registration/RegistrationStep3.vue'
 import { useVegeStore } from "@/stores/vege"
 import { useUserStore } from '@/stores/userData';
+import router from '@/router';
 enum VegeState{
   Discontinued="Discontinued",
   Available="Available"
@@ -28,10 +26,9 @@ const vegeStore=useVegeStore()
 const vegeAllData = ref<Vegetables>(vegeStore.VegeAllData)
 const vegeKeys = ref<string[]>(vegeStore.getKeys())
 const uproadVegeData=ref<Vegetables>({})
-const uniqueKey=ref<string|null>(vegeStore.getUniqueKey())
 const vegeName=ref<string>("")
+  const uproadName=ref<string>("")
 const stepNum = ref<number>(0)
-const vegeList = ref<string[]>([])
 const step1Error=ref<boolean>(false)
 watch(() => vegeStore.VegeAllData, (newUser) => {
   vegeAllData.value = newUser;
@@ -41,36 +38,23 @@ const currentUser = ref(userStore.currentUser);
 watch(() => userStore.currentUser, (newUser) => {
   currentUser.value = newUser;
 });
-
-function onStep(next: boolean) {
-  if (next) stepNum.value = stepNum.value + 1
-  else stepNum.value = stepNum.value - 1
+function pushReg(){
+router.push("/registration")
 }
-function step1onStep1(){
-    if(Object.keys(uproadVegeData.value).length==0){
-        step1Error.value=true
-    }else{
-        onStep(true)
-    }
-}
-function changeVege() {
-  if(uniqueKey.value&&currentUser.value?.displayName&&currentUser.value?.uid){
-    uproadVegeData.value[vegeName.value]={
-    [uniqueKey.value]:{
-      en: -1,
-      farmer: currentUser.value.displayName,
-      roadStation: [],
-      state: VegeState.Available,
-      uid: currentUser.value?.uid,
-      unit: "",
-      photo: "none"
-    }
+async function changeVege() {
+  if(vegeName.value!=""){
+    await vegeStore.updateNewVegeData(vegeName.value)
+  uproadName.value=vegeName.value
+  vegeName.value=""
+  }else{
+    step1Error.value=true
   }
   
-  }else{
-    console.error("myUidnaizo")
+}
+function inputVege(){
+  if(vegeName.value!=""){
+    step1Error.value=false
   }
-  vegeList.value.push(vegeName.value)
 }
 </script>
 
@@ -82,39 +66,18 @@ function changeVege() {
   <article v-if="stepNum==0">
     <div class="mb-3">
         <label for="VegeNameInput" class="form-label">新しい野菜名</label>
-        <input type="text" class="form-control" id="VegeNameInput" placeholder="野菜名" v-model="vegeName">
+        <input type="text" class="form-control" id="VegeNameInput" placeholder="野菜名" v-model="vegeName" v-on:change="inputVege">
       </div>
       <div v-for="(element,vegeName) in uproadVegeData" :key="vegeName">
         <p>{{vegeName}}</p>
       </div>
-      <h1 style="color: red" v-show="step1Error && Object.keys(uproadVegeData).length==0">
+      <h1 style="color: red" v-show="step1Error">
         野菜を入力してください
       </h1>
+      <h1 style="color:green" v-if="uproadName!=''">{{uproadName}}を追加しました</h1>
       <button v-on:click="changeVege" class="btn btn-primary">追加</button>
-      <button v-on:click="step1onStep1()" class="btn btn-primary" >次へ</button>
+      <button v-on:click="pushReg()" class="btn btn-primary" >登録画面へ</button>
   </article>
-  
-  <!-- {{ VegeMoneyList }}
-  {{ vegeAmountList }}
-  {{ vegeUnitList }} -->
-  <RegistrationStep2
-      v-bind:vege-list="vegeList"
-      v-bind:vege-keys="vegeKeys"
-      v-bind:unique-key="uniqueKey"
-      v-bind:uproad-data="uproadVegeData"
-      v-on:on-step="onStep"
-      v-if="stepNum == 1 && vegeKeys != null"
-  ></RegistrationStep2>
-  <!-- 送信と確認画面 -->
-  <RegistrationStep3
-      v-bind:vege-list="vegeList"
-      v-bind:vege-keys="vegeKeys"
-      v-bind:current-user="currentUser"
-      v-bind:uproad-data="uproadVegeData"
-      v-bind:unique-key="uniqueKey"
-      v-on:on-step="onStep"
-      v-if="stepNum == 2 && vegeKeys != null"
-  ></RegistrationStep3>
 </template>
 <style>
 .title {
