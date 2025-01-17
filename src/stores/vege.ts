@@ -69,7 +69,7 @@ export const useVegeStore = defineStore({
           
               uniqueKeys.forEach((uniqueKey) => {
                 const updatePromise = set(
-                  fireRef(db, `Vegetable/${vegeKey}/${uniqueKey}`), 
+                  fireRef(db, `Vegetable/${vegeKey}/${uniqueKey}`),
                   data[vegeKey][uniqueKey]
                 );
                 updatePromises.push(updatePromise);

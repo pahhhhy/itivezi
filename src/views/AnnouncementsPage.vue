@@ -20,7 +20,7 @@ watch(() => route.params, (params) => { // ページ遷移時にannounceIdを取
 
 
 // カテゴリーのリファレンス
-const categoriesRef = fireRef(getDatabase(), 'testAnnouncements/categories');
+const categoriesRef = fireRef(getDatabase(), 'Announcements/categories');
 const announcementsStore = useAnnouncementsStore();
 
 onMounted(() => { // カテゴリー一覧を他の子コンポーネントに先んじて取得

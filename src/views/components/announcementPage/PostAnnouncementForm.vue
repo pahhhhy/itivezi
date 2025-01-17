@@ -67,7 +67,7 @@ const isOpenCategorySelector = ref<boolean>(false)
 
 const announcementsStore = useAnnouncementsStore()
 const isValid = ref<boolean>(false);
-const announcementRootRef = fireRef(getDatabase(), 'testAnnouncements') // 投稿のリファレンス
+const announcementRootRef = fireRef(getDatabase(), 'Announcements') // 投稿のリファレンス
 
 // 投稿を投稿する処理
 async function post() {

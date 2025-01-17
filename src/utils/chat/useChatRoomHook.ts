@@ -22,10 +22,10 @@ import {deleteObject, getStorage, listAll, ref as storageRef} from "firebase/sto
 export const useChatRoomHook = (user: User) => {
     const db = getDatabase()
     const storage = getStorage()
-    const messagesRootRef = fireRef(db, 'testChat/messages')
-    const roomsRef = fireRef(db, 'testChat/rooms') // roomIdをキーにしてルーム名や参加者一覧を保持
-    const usersRef = fireRef(db, 'testChat/users') // userIdをキーにして参加しているroom一覧を保持
-    const filesRef = fireRef(db, 'testChat/files') // roomIdをキーにしてファイル一覧を保持
+    const messagesRootRef = fireRef(db, 'Chat/messages')
+    const roomsRef = fireRef(db, 'Chat/rooms') // roomIdをキーにしてルーム名や参加者一覧を保持
+    const usersRef = fireRef(db, 'Chat/users') // userIdをキーにして参加しているroom一覧を保持
+    const filesRef = fireRef(db, 'Chat/files') // roomIdをキーにしてファイル一覧を保持
 
     // piniaのuseUserStoreから登場ユーザーをすべて取得
     const {getUserPublicData} = useUserDataStore()
@@ -123,14 +123,14 @@ export const useChatRoomHook = (user: User) => {
         })
 
         // filesの画像も削除
-        // testChat/files/roomIdにあるので、roomIdごと削除
+        // Chat/files/roomIdにあるので、roomIdごと削除
         await update(filesRef, {
             [roomId]: null
         })
 
 
         // storageの画像も削除
-        const roomImagesRef = storageRef(storage, 'chat/' + roomId)
+        const roomImagesRef = storageRef(storage, 'Chat/' + roomId)
         const res = await listAll(roomImagesRef)
         res.items.forEach((itemRef) => {
             deleteObject(itemRef)
@@ -188,7 +188,7 @@ export const useChatRoomHook = (user: User) => {
     const getUnreadCount = async (room: ChatRoomWithUnreadCount) => {
         const lastReadAt: number = room.lastReadAt[user.uid] as number ?? 0
 
-        const messagesRef = fireRef(db, 'testChat/messages/' + room.roomId)
+        const messagesRef = fireRef(db, 'Chat/messages/' + room.roomId)
         // 最終閲覧日時より新しいメッセージを取得
         const q = query(messagesRef, orderByChild('createdAt'), startAt(lastReadAt))
         const snapshot = await get(q)

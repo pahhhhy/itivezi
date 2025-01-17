@@ -35,7 +35,7 @@ const recentAnnounceCount = 2
 const categoryAnnounceCount = 5
 
 const db = getDatabase()
-const announcementRootRef = fireRef(db, 'testAnnouncements')
+const announcementRootRef = fireRef(db, 'Announcements')
 const announcementsRef = child(announcementRootRef, 'announcements')
 
 // 投稿の最新一件(q1)は監視をしておき、それ以外(q2)については最初に1度だけrecentAnnounceCount件取得しておく。加えて、categoriesの中身をカテゴリごとにcategoryAnnounceCount件ずつ、timestampの降順で取得する。

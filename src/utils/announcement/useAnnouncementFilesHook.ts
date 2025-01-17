@@ -18,7 +18,7 @@ export const useAnnouncementFiles = () => {
 
     const uploadImg = async (fileData: FileData, files: FileInfo[]) => {
         const id = cuid();
-        const imageStorageRef = storageRef(storage, `testImages/${id}`);
+        const imageStorageRef = storageRef(storage, `Images/${id}`);
         const uploadTask = await uploadBytesResumable(imageStorageRef, fileData.file);
 
         const url = await getDownloadURL(uploadTask.ref);
@@ -30,7 +30,7 @@ export const useAnnouncementFiles = () => {
 
     const deleteImgFromStorage = (deletedFiles: FileInfo[]) => {
         deletedFiles.forEach(async (file) => {
-        const deleteImgStorageRef = storageRef(storage, `testImages/${file.id}`);
+        const deleteImgStorageRef = storageRef(storage, `Images/${file.id}`);
             deleteObject(deleteImgStorageRef).then(() => {
             }).catch((error) => {
                 console.log("delete error");
