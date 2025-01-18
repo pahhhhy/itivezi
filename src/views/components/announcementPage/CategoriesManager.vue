@@ -2,7 +2,7 @@
 
 import {useAnnouncementCategories} from "@/utils/announcement/useAnnouncementCategoriesHook";
 import type {Category} from "@/types/announcement/categories";
-import {computed, ref} from "vue";
+import {ref} from "vue";
 import {useAnnouncementsStore} from "@/stores/announcements";
 
 
@@ -80,7 +80,7 @@ const commitNewCategory = () => {
 
 const onDeleteCategory = (categoryId: string) => {
   if (window.confirm(getCategoryNameById(categoryId) + 'を削除しますか？'))
-  deleteCategory(categoryId)
+    deleteCategory(categoryId)
 }
 
 const cancelEdit = () => {
@@ -105,30 +105,35 @@ const saveEdit = () => {
   isEditingNewCategory.value = false
 }
 
-const getCategoryNameById =(categoryId: string) => {
+const getCategoryNameById = (categoryId: string) => {
   return announcementsStore.categories.find((category) => category.categoryId === categoryId)?.categoryName ?? ''
 }
 </script>
 <template>
   <div class="categories-manager">
     <div class="categories">
-      <div v-for="category in announcementsStore.categories" :key="category.categoryId">
-        <button v-if="category.categoryId !== editingCategoryOriginal?.categoryId"
-                @click="onSelect(category.categoryId)"
-                :disabled="isChanged"
-        >
-          <IconPen/>
-          {{ category.categoryName }}
-        </button>
-        <div v-else class="editing-category">
-          <div>
+      <div v-if="announcementsStore.categories.length > 0 && announcementsStore.categories[0].categoryId"> <!-- 何もカテゴリがない状態では「未分類」という、idが""の内部用カテゴリがある -->
+        <div v-for="category in announcementsStore.categories" :key="category.categoryId">
+          <button v-if="category.categoryId !== editingCategoryOriginal?.categoryId"
+                  @click="onSelect(category.categoryId)"
+                  :disabled="isChanged"
+          >
             <IconPen/>
-          </div>
-          <input type="text" v-model="categoryNameInputText" @input="onInput" ref="categoryNameInputRef">
-          <button @click="onDeleteCategory(editingCategoryOriginal?.categoryId)">
-            <IconDelete/>
+            {{ category.categoryName }}
           </button>
+          <div v-else class="editing-category">
+            <div>
+              <IconPen/>
+            </div>
+            <input type="text" v-model="categoryNameInputText" @input="onInput" ref="categoryNameInputRef">
+            <button @click="onDeleteCategory(editingCategoryOriginal?.categoryId)">
+              <IconDelete/>
+            </button>
+          </div>
         </div>
+      </div>
+      <div v-else>
+        <p>カテゴリがありません</p>
       </div>
       <div style="margin-top: 16px;" v-if="isEditingNewCategory || !isChanged">
         <button @click="addNewCategory" v-if="!isEditingNewCategory">
@@ -218,6 +223,7 @@ button {
     width: fit-content;
 
   }
+
   & input {
     flex-grow: 1;
     width: 100%;
