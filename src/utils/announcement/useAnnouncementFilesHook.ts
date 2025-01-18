@@ -14,6 +14,7 @@ export const useAnnouncementFiles = () => {
         content.value = afterContent;
         files.value = afterFiles;
         console.log("Added")
+        console.log(content.value);
     };
 
     const uploadImg = async (fileData: FileData, files: FileInfo[]) => {
@@ -22,8 +23,11 @@ export const useAnnouncementFiles = () => {
         const uploadTask = await uploadBytesResumable(imageStorageRef, fileData.file);
 
         const url = await getDownloadURL(uploadTask.ref);
-        const reg = new RegExp(`!\\[.*]\\(\\d*\\)`, 'g');
+        const reg = /!\[.*]\(\d*\)/g;
+
         const afterContent = fileData.content.replace(reg, `![${id}](${url})`);
+        console.log("AfterContent");
+        console.log(afterContent);
         const afterFiles = [...files, {id, url}];
         return {afterContent, afterFiles};
     }
@@ -33,8 +37,10 @@ export const useAnnouncementFiles = () => {
         const deleteImgStorageRef = storageRef(storage, `Images/${file.id}`);
             deleteObject(deleteImgStorageRef).then(() => {
             }).catch((error) => {
-                console.log("delete error");
-                console.log(error);
+                if (error.code !== 'storage/object-not-found') {
+                    console.log("delete error");
+                    console.log(error);
+                }
             });
         });
     }
