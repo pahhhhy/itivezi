@@ -75,7 +75,7 @@ const canGetMoreAnnouncementByCategory = computed(() => {
           @click="getMoreAnnouncementByCat(selectedCategory  ? selectedCategory.categoryId : '')"
       >さらに取得</button>
     </SlideMenu>
-    <div class="category-wrapper">
+    <div class="category-wrapper" v-if="announcementsStore.announcements.length > 0">
       <h6 @click="selectedCategory = true">
         <span>最近の投稿</span>
         <span><span style="font-size: .8em">もっと見る</span><IconRightArrow/></span>
@@ -88,6 +88,9 @@ const canGetMoreAnnouncementByCategory = computed(() => {
           :category-name="getCategoryNameById(announce.categoryId)"
           :author-display-name="userDataStore.usersPublicData[announce.userId]?.userName ?? '不明なユーザー'"
       />
+    </div>
+    <div v-else>
+      <p style="text-align: center">投稿がありません。</p>
     </div>
 
     <!--      属している投稿が一つもないカテゴリは表示しない-->

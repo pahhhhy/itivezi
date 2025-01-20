@@ -28,13 +28,8 @@ const router = useRouter()
 
 // ユーザー一覧
 const db = getDatabase()
-const usersRef = fireRef(db, 'testUser/')
 
-const users = ref<string[]>([])
 onMounted(async () => {
-  const snapshot = await get(usersRef)
-  users.value = snapshot.val() ? Object.keys(snapshot.val()) : []
-
   if (chatRooms.length !== 0) {
     loadRoomName(chatRooms)
   }else {

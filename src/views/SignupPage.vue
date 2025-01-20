@@ -62,7 +62,7 @@ async function createAccount(email: string, password: string, name: string) {
   }
     if(password==''){
       isPassword.value=false
-      errorPassword.value="パスワードを入力してください"
+      errorPassword.value="パスワードを入力してください。"
     }
     if(email=='')isEmail.value=false
     if(onemorePas.value!=password) isOnemore.value=false
@@ -102,13 +102,13 @@ async function createAccount(email: string, password: string, name: string) {
 function setErrorMsg(element: string) {
   switch (element) {
     case 'Firebase: Error (auth/invalid-email).':
-      errorMes.value = '正しいメールアドレスをいれてください'
+      errorMes.value = 'メールアドレスの形式が正しくありません。'
       break
     case ' Firebase: Password should be at least 6 characters (auth/weak-password).':
-      errorMes.value = 'パスワードは英数字を使用した8~20文字にしてください'
+      errorMes.value = 'パスワードの条件を満たしていません。'
       break
     case 'Firebase: Error (auth/email-already-in-use).':
-      errorMes.value = 'メールアドレスはもうつかわれています'
+      errorMes.value = 'このメールアドレスは既に使用されています。'
       break
     default:
       errorMes.value = ''
@@ -151,7 +151,7 @@ function OnPushBack(){
           v-model="name"
         />
       </div>
-      <p v-if="!isName" class="errorMessage">アカウント名を入力してください</p>
+      <p v-if="!isName" class="errorMessage">アカウント名を入力してください。</p>
       <div class="mb-3">
         <label for="exampleFormControlInput1" class="form-label">メールアドレス</label>
         <input
@@ -162,7 +162,7 @@ function OnPushBack(){
           v-model="email"
         />
       </div>
-      <p v-if="!isEmail" class="errorMessage">メールアドレスを入力してください</p>
+      <p v-if="!isEmail" class="errorMessage">メールアドレスを入力してください。</p>
       <p v-if="errorMes != ''" class="errorMessage">{{ errorMes }}</p>
       <label for="inputPassword5" class="form-label">パスワード</label>
       <input
@@ -174,8 +174,7 @@ function OnPushBack(){
       />
       
       <div id="passwordHelpBlock" class="form-text">
-        パスワードは 8 ～ 20
-        文字で、文字と数字を含める必要があります。スペース、特殊文字、絵文字を含めることはできません。
+        パスワードは8文字以上20文字以下で、アルファベットと数字を含める必要があります。スペース、記号、絵文字を含めることはできません。
       </div>
       <p v-if="!isPassword" class="errorMessage">{{errorPassword}}</p>
       <label for="inputPassword5" class="form-label">パスワードの再入力</label>
@@ -186,7 +185,7 @@ function OnPushBack(){
         aria-labelledby="passwordHelpBlock"
         v-model="onemorePas"
       />
-      <p v-if="!isOnemore" class="errorMessage">パスワードが一致しません</p>
+      <p v-if="!isOnemore" class="errorMessage">パスワードが一致しません。</p>
       <div class="d-flex justify-content-center my-3 ">
         <button type="button" class="btn btn-success form_button" @click="createAccount(email, password, name)">
           登録する
@@ -197,9 +196,9 @@ function OnPushBack(){
     </article>
     <section class="popup_signup" v-show="isPopup">
       <h2>
-        メールアドレスの確認メールをおくりました<br />メールの認証を行うと自動で次のページに移ります
+        入力されたアドレスに確認メールを送信しました。<br />メールに記載のURLをクリックした後、再度ログインしてください。
       </h2>
-      <!-- <button class="btn btn-success form_button " v-on:click="OnPushBack"> 戻る</button> -->
+       <button class="btn btn-success form_button " v-on:click="router.push('/login')">戻る</button>
     </section>
   </article>
   

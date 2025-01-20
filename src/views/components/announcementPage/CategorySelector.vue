@@ -83,19 +83,23 @@ const onSelect = async (categoryId: string) => {
       </button>
     </div>
     <div class="content">
-      <div class="categories" v-if="!isEditing">
-        <button v-for="category in announcementsStore.categories" :key="category.categoryId"
-                @click="onSelect(category.categoryId)">
-          <IconClipboard color="black"/>
-          {{ category.categoryName }}
-        </button>
+      <div class="categories" v-if="!isEditing && announcementsStore.categories.length > 0 && announcementsStore.categories[0].categoryId">
+          <button v-for="category in announcementsStore.categories" :key="category.categoryId"
+                  @click="onSelect(category.categoryId)">
+            <IconClipboard color="black"/>
+            {{ category.categoryName }}
+          </button>
+
       </div>
-      <div v-else>
+      <div v-else-if="isEditing">
         <p style="text-align: center; margin-bottom: 4px;">編集モード</p>
         <CategoriesManager
             @edit="isEditing = true"
             @isChanged="isChanged = $event"
         ></CategoriesManager>
+      </div>
+      <div v-else>
+        <p>カテゴリがありません</p>
       </div>
     </div>
   </div>

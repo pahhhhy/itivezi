@@ -16,6 +16,7 @@ interface PropsWithEditMode {
   modelValueTitle: string;
   modelValueContent: string;
   modelValueCategoryId: string;
+  imgAdd: (_: string, file: File) => void;
 }
 
 interface PropsWithoutEditMode {
@@ -23,6 +24,7 @@ interface PropsWithoutEditMode {
   modelValueTitle?: undefined;
   modelValueContent?: undefined;
   modelValueCategoryId?: undefined;
+  imgAdd?: undefined;
 }
 
 type Props = PropsWithEditMode | PropsWithoutEditMode;
@@ -34,6 +36,7 @@ interface Emits {
   (event: "update:modelValueContent", value: string): void;
 
   (event: "update:modelValueCategoryId", value: string): void;
+
 }
 
 const emit = defineEmits<Emits>();
@@ -41,6 +44,7 @@ const emit = defineEmits<Emits>();
 const title = ref(props.editMode ? props.modelValueTitle : "");
 const content = ref(props.editMode ? props.modelValueContent : "");
 const categoryId = ref(props.editMode ? props.modelValueCategoryId : "");
+
 
 
 onMounted(() => {
@@ -54,7 +58,14 @@ onMounted(() => {
       emit("update:modelValueTitle", title.value);
       emit("update:modelValueContent", content.value);
       emit("update:modelValueCategoryId", categoryId.value);
-
+    });
+    validate()
+  }else {
+    watch([announcementFilesHook.content], () => {
+      content.value = announcementFilesHook.content.value;
+    });
+    watch([content], () => {
+      announcementFilesHook.content.value = content.value;
     });
     validate()
   }
@@ -67,7 +78,7 @@ const isOpenCategorySelector = ref<boolean>(false)
 
 const announcementsStore = useAnnouncementsStore()
 const isValid = ref<boolean>(false);
-const announcementRootRef = fireRef(getDatabase(), 'testAnnouncements') // 投稿のリファレンス
+const announcementRootRef = fireRef(getDatabase(), 'Announcements') // 投稿のリファレンス
 
 // 投稿を投稿する処理
 async function post() {
@@ -124,7 +135,7 @@ defineExpose({ // 外部から参照できるようにする
       <mavon-editor
           ref="mavonEditorRef"
           language="ja" placeholder="ここにテキストを入力..." v-model="content"
-          @imgAdd="announcementFilesHook.imgAdd"
+          :onImgAdd="editMode ? imgAdd : announcementFilesHook.imgAdd"
           :box-shadow="false"
       />
 

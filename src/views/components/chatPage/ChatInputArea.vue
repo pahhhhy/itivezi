@@ -165,7 +165,7 @@ const fileUpload = async (files: File[]): Promise<{ [fileId: string]: ChatFile }
     }
 
     const fileId = `${uuidv4()}`
-    const chatStorageRef = storageRef(storage, `chat/${roomId}/${fileId}`)
+    const chatStorageRef = storageRef(storage, `Chat/${roomId}/${fileId}`)
 
     const metadata = {
       contentType: file.type

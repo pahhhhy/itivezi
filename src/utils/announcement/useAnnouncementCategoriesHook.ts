@@ -4,7 +4,7 @@ import type {Category} from "@/types/announcement/categories";
 
 export const useAnnouncementCategories = () => {
     const db = getDatabase();
-    const categoriesRef = fireRef(db, 'testAnnouncements/categories');
+    const categoriesRef = fireRef(db, 'Announcements/categories');
 
     const addCategory = (categoryName: string) => {
         const newCategoryRef = push(categoriesRef)

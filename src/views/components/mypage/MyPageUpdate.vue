@@ -115,7 +115,7 @@ watch(() => fireOrderStore.OrderAllData, (newUser) => {
 watchEffect(() => {
   // currentUserがnullでない場合のみデータを読み込む
   if (currentUser.value) {
-    const countRef = fireRef(getDatabase(), `testUser/${currentUser.value.uid}`)
+    const countRef = fireRef(getDatabase(), `UserData/${currentUser.value.uid}`)
     onValue(countRef, (snapshot) => {
       myData.value = snapshot.val()
       myRole.value = myData.value.role
@@ -286,7 +286,7 @@ function writeUserdata(
 
   // いずれかのデータがあればデータベースに書き込む
   if (Object.keys(updates).length > 0) {
-    update(fireRef(db, 'testUser/' + uid), updates)
+    update(fireRef(db, 'UserData/' + uid), updates)
   }
 }
 function filterByFarmerName(vegetables: Vegetables, farmerName: string): Vegetables {

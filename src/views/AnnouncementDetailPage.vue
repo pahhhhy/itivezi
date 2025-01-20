@@ -47,8 +47,8 @@ const announcementsStore = useAnnouncementsStore();
 
 // このページで表示する投稿のリファレンス
 const db = getDatabase();
-const announcementRef = fireRef(db, 'testAnnouncements/announcements/' + announceId)
-const announcementRootRef = fireRef(db, 'testAnnouncements')
+const announcementRef = fireRef(db, 'Announcements/announcements/' + announceId)
+const announcementRootRef = fireRef(db, 'Announcements')
 
 onMounted(async () => {
   // storeにキャッシュされていた場合は最初にそれを表示して高速化
@@ -170,6 +170,7 @@ const updateFilesFromContent = () => {
       `!\\[(.*)]\\((${storageURLPattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}.*)\\)`,
       'g'
   )
+
   // contentの中身から画像ファイルを検知してfilesに追加
   for (const match of content.value.matchAll(regex)) {
     const id = match[1]
@@ -220,8 +221,6 @@ const saveAnnounce = async () => {
   if (originalAnnouncement.value) {
     originalAnnouncement.value.title = title.value
     originalAnnouncement.value.content = content.value
-    console.log(originalAnnouncement.value.categoryId)
-    console.log(categoryId.value)
     if (originalAnnouncement.value.categoryId !== categoryId.value) { // カテゴリが変更された場合はannouncementCountも変更しなければならない
       await changeAnnouncementCategory(announcementRootRef, originalAnnouncement.value.announceId, originalAnnouncement.value.categoryId, categoryId.value, originalAnnouncement.value.createdAt);
       originalAnnouncement.value.categoryId = categoryId.value
@@ -294,6 +293,7 @@ const postAnnouncementFormRef = ref<null | InstanceType<typeof PostAnnouncementF
           v-model:modelValueTitle="title"
           v-model:modelValueContent="content"
           v-model:modelValueCategoryId="categoryId"
+          :imgAdd="imgAdd"
           ref="postAnnouncementFormRef"
       />
     </template>
@@ -335,6 +335,7 @@ const postAnnouncementFormRef = ref<null | InstanceType<typeof PostAnnouncementF
 
 
           </div>
+<!--          表示用-->
           <mavon-editor
               :key="editMode"
               v-model="originalAnnouncement.content"

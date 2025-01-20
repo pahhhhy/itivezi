@@ -45,7 +45,7 @@ const auth = getAuth()
       // oobCodeを使用してメールアドレスを確認
       await applyActionCode(auth,oobCode)
 
-      message.value = 'メールアドレスの確認が完了しました！ログインページに移動してください！';
+      message.value = 'メールアドレスの確認が完了しました。再度ログインしてください。';
     } catch (error) {
       console.error('メールアドレス確認中にエラーが発生:', error);
       message.value = 'メールアドレスの確認に失敗しました。';
@@ -62,7 +62,7 @@ async function ResetPassWord(password: string) {
   if ( password == ''||!isValidPassword(password)||onemorePas.value!=password) {
     if(!isValidPassword(password)) {
       isPassword.value=false
-    errorPassword.value="パスワードは英数字を使用した8~20文字にしてください"
+    errorPassword.value="パスワードの条件を満たしていません。"
   }
     if(password==''){
       isPassword.value=false
@@ -135,8 +135,7 @@ function OnPushBack(){
         />
         
         <div id="passwordHelpBlock" class="form-text">
-          パスワードは 8 ～ 20
-          文字で、文字と数字を含める必要があります。スペース、特殊文字、絵文字を含めることはできません。
+          パスワードは8文字以上20文字以下で、アルファベットと数字を含める必要があります。スペース、記号、絵文字を含めることはできません。
         </div>
         <p v-if="!isPassword" class="errorMessage">{{errorPassword}}</p>
         <label for="inputPassword5" class="form-label">パスワードの再入力</label>
@@ -147,7 +146,7 @@ function OnPushBack(){
           aria-labelledby="passwordHelpBlock"
           v-model="onemorePas"
         />
-        <p v-if="!isOnemore" class="errorMessage">パスワードが一致しません</p>
+        <p v-if="!isOnemore" class="errorMessage">パスワードが一致しません。</p>
         <div class="d-flex justify-content-center my-3 ">
           <button type="button" class="btn btn-success form_button" @click="ResetPassWord( password)">
             変更する
@@ -156,7 +155,7 @@ function OnPushBack(){
         
         <section class="popup_reset" v-show="isPopup">
           <h2>
-            パスワードの再設定を行いました<br />ログインページでログインしてください。
+            パスワードの再設定を行いました。<br/>再度ログインしてください。
           </h2>
           <button class="btn btn-success form_button " v-on:click="OnPushBack"> 戻る</button>
         </section>
