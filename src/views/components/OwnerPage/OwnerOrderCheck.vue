@@ -23,209 +23,109 @@ interface vegeElementTables{
   unit:string
   photo:string
 }
-
-
-enum OrderStete{
-  Completed="取引完了",
-  Uncontacted="未連絡",
-  contacted="連絡済み",
-  cancel="取引取り消し"
-}
-interface Ordertables{
-    [uid:string]:{
-        [uniqueKey:string]:OrdertablesElement
-    }
-}
-interface OrdertablesElement{
-  [num:number]:{
-    en:number;
-    farmer:string
-    roadStation:string[]
-    state:VegeState
-    unique:string
-    unit:string
-    photo:string
-    amount:number
-    VegeName:string
-}
-  orderTime:string
-  email:string
-  orderName:string
-  selectData:string
-  state:OrderStete
-  totalMoney:number
-place:string
-}
-interface orderVegeElementTables{
-    [num:number]:{
-    en:number;
-    farmer:string
-    roadStation:string[]
-    state:VegeState
-    unique:string
-    unit:string
-    photo:string
-    amount:number
-    VegeName:string
-}
-}
-const fireOrderStore=useFireOrderStore()
-fireOrderStore.roadData()
-const orderAllData = ref<Ordertables>(fireOrderStore.OrderAllData)
 const route = useRoute();
-const unique = ref<LocationQueryValue | LocationQueryValue[]>(route.query.unique);
-const uid = ref<LocationQueryValue | LocationQueryValue[]>(route.query.uid);
-  const uniqueStr = unique.value ? String(unique.value) : '';
-  const uidStr = uid.value ? String(uid.value) : '';
-const data=ref<OrdertablesElement>()
-const vegeData=ref<orderVegeElementTables>()
-const orderTime=ref<string>("")
-const selectDate=ref<string>("")
-const nowState=ref<OrderStete>(OrderStete.Uncontacted)
-const userStore=useUserStore()
-const currentUser = ref(userStore.currentUser);
+const name = ref<LocationQueryValue | LocationQueryValue[]>(route.query.name);
+  const nameString = ref<string>(name.value ? String(name.value) : "")
+const RoadStation = ref<LocationQueryValue | LocationQueryValue[]>(route.query.roadStation);
+const RoadStationString =ref<string>(RoadStation.value ? String(RoadStation.value ) : "")
 const vegeStore=useVegeStore()
-// 空判定の computed プロパティ
-const isOrderAllDataEmpty = computed(() => {
-  return Object.keys(orderAllData.value).length === 0;
-});
 const vegeAllData = ref<Vegetables>(vegeStore.VegeAllData)
-const canBuy=ref<boolean>(false)
+const filteredData=ref<Vegetables>({})
 function initData(){
-  // string に変換
-  if(uidStr&&uniqueStr){
-    data.value=orderAllData.value[uidStr][uniqueStr]
-    vegeData.value=getNumData(data.value)
-    orderTime.value=formatDate(data.value.orderTime)
-    selectDate.value=formatDate(data.value.selectData)
-    getCanBuy()
-    nowState.value=data.value.state
-  }else{
-    console.error("dataが読み取れん")
-  }
-  
+   filteredData.value= filterVegetablesByFarmerAndRoadStation(vegeAllData.value,nameString.value,RoadStationString.value)
     
     
 }
 onMounted(() => {
-  orderAllData.value = fireOrderStore.OrderAllData;
 
   // データがロードされてから initData を呼ぶ
   watch(
-    () => fireOrderStore.OrderAllData,
+    () => vegeStore.VegeAllData,
     (newData) => {
-      if (Object.keys(newData).length > 0) {
-        orderAllData.value = newData;
+      vegeAllData.value=newData
         initData();
-      }
+      
     },
     { immediate: true }
   );
 });
-function getNumData(orderTable: OrdertablesElement) {
-  // 数値キーに対応する部分を取り出す
-  const numData = Object.keys(orderTable)
-    .filter((key) => !isNaN(Number(key))) // 数値のキーのみを抽出
-    .map((key) => orderTable[Number(key)]); // 数値のキーに対応するデータを取得
 
-  return numData;
-}
-//StateがDiscontinuedが無いことを確認
-function getCanBuy(){
-    canBuy.value=true
-    if(vegeData.value)
-    for(let i:number=0;i<Object.keys(vegeData.value).length;i++){
-        if(!isAvailableState(vegeAllData.value,vegeData.value[i].VegeName,vegeData.value[i].unique)){
-            canBuy.value=false
+function filterVegetablesByFarmerAndRoadStation(
+  vegetables: Vegetables,
+  farmerName: string,
+  roadStation: string
+): Vegetables {
+  const filteredVegetables: Vegetables = {};
+
+  for (const vegeName in vegetables) {
+    const uniqueKeys = vegetables[vegeName];
+
+    for (const uniqueKey in uniqueKeys) {
+      const element = uniqueKeys[uniqueKey];
+
+      // roadStationが「全て」の場合、一致しなくても追加
+      if (element.farmer === farmerName && 
+          (roadStation === "全て" || element.roadStation.includes(roadStation))) {
+        if (!filteredVegetables[vegeName]) {
+          filteredVegetables[vegeName] = {};
         }
+        filteredVegetables[vegeName][uniqueKey] = element;
+      }
     }
-}
-getCanBuy()
-function isAvailableState(vegetables: Vegetables, vegeName: string, uniqueKey: string): boolean {
-  // 指定された vegeName と uniqueKey が存在するか確認
-  if (vegetables[vegeName] && vegetables[vegeName][uniqueKey]) {
-    // state が "Available" かを判定
-    return vegetables[vegeName][uniqueKey].state === VegeState.Available;
   }
-  return false; // 存在しない場合や "Available" でない場合は false
+
+  return filteredVegetables;
 }
-function formatDate(input:string) {
-  // 入力をスプリットして配列に変換
-  const [year, month, day] = input.split('-');
-  // フォーマットを `YYYY/MM/DD` に変換
-  return `${year}年${month}月${day}日`;
-}
-watch(() => userStore.currentUser, (newUser) => {
-  currentUser.value = newUser;
-});
-watch(() => fireOrderStore.OrderAllData, (newUser) => {
-  orderAllData.value = newUser;
-  initData()
-}); 
+
+ 
+
 watch(() => vegeStore.VegeAllData, (newUser) => {
   vegeAllData.value = newUser;
 });
 function onPushBack(){
   router.back();
 }
-function changeState(){
-  
-  if(data.value){
-    data.value.state=nowState.value
-    fireOrderStore.updateOrderState(data.value,uidStr,uniqueStr)
-  }
-
-  
-}
 </script>
 <template>
-  <article class="road" v-if="isOrderAllDataEmpty">
+  <article class="road" v-if="Object.keys(filteredData).length==0">
     <div class="three-quarter-spinner"></div>
   </article >
-    <article class="orderelement_card" v-if="!isOrderAllDataEmpty">
+    <article class="orderelement_card" v-if="Object.keys(filteredData).length!=0">
       <div class="title_order">
         <i class="bi bi-chevron-left" v-on:click="onPushBack"></i>
-        <h2>注文内容の確認</h2>
+        <h2>出品内容の確認</h2>
     </div>
-        <div class="orderinfo">
-          <div class="orderinfoelement"><h5>注文日</h5><p>{{orderTime}}</p></div>
-          <div class="orderinfoelement"><h5>配送希望日</h5><p>{{selectDate}}</p></div>
-          <div class="orderinfoelement"><h5>小計</h5><p>￥{{data?.totalMoney}}</p></div>
-          <div class="orderinfoelement"><h5>届け先</h5><p>{{data?.place}}</p></div>
-          <div class="orderinfoelement"><h5>ステータス</h5><select class="form-select" v-model="nowState" v-on:click="changeState" style="width: 180px;" aria-label="Default select example">
-            <option :value="OrderStete.Uncontacted">{{OrderStete.Uncontacted}} </option>
-            <option :value="OrderStete.contacted">{{OrderStete.contacted}} </option>
-            <option :value="OrderStete.Completed"> {{OrderStete.Completed}} </option>
-            <option :value="OrderStete.cancel">{{OrderStete.cancel}}</option>
-          </select></div>
-        </div>
+        <h2>{{name}}様</h2>
         <h3>購入物品</h3>
-        <div v-for="(Data,index) in vegeData" v-bind:key="index">
-          <article class="buyitem_card">
-            <div class="img_name">
-              <div class="cart_img">
-                <img :src="Data.photo" class="card-img-top" alt="..." v-if="Data.photo!='none'">
-                <img src="../../../assets/Noimage.jpeg" class="card-img-top" alt="..." v-if="Data.photo=='none'">
+        <div v-for="(Data,vegeName,index) in filteredData" v-bind:key="index">
+          <div v-for="(VegeData,unique) in Data" v-bind:key="unique">
+            <article class="buyitem_card">
+              <div class="img_name">
+                <div class="cart_img">
+                  <img :src="VegeData.photo" class="card-img-top" alt="..." v-if="VegeData.photo!='none'">
+                  <img src="../../../assets/Noimage.jpeg" class="card-img-top" alt="..." v-if="VegeData.photo=='none'">
+                </div>
+                <div class="vegeinfo">
+                  <p>【{{VegeData.farmer}}産】</p>
+                  <h2>{{vegeName}}</h2>
+                </div>
               </div>
-              <div class="vegeinfo">
-                <p>【{{Data.farmer}}産】</p>
-                <h2>{{Data.VegeName}}</h2>
+              
+              <p v-for="(Wholesaler,index) in VegeData.roadStation" v-bind:key="index" class="Wholesaler">
+                【{{ Wholesaler }}】
+              </p>
+              <div class="select_money">
+                <div class="selectnumber">
+                </div>
+                <div class="price">
+                  <p class="unit">{{VegeData.unit}}</p>
+                  <p class="money">￥{{VegeData.en}}</p>
+                </div>
               </div>
-            </div>
-            
-            <p v-for="(Wholesaler,index) in Data.roadStation" v-bind:key="index" class="Wholesaler">
-              【{{ Wholesaler }}】
-            </p>
-            <div class="select_money">
-              <div class="selectnumber">
-              </div>
-              <div class="price">
-                <p class="unit">{{Data.unit}}</p>
-                <p class="money">￥{{Data.en}}</p>
-              </div>
-            </div>
-            
-          </article>
+              
+            </article>
+          </div>
+          
         </div>
     </article>
 </template>

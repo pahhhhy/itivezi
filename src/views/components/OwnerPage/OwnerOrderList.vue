@@ -226,7 +226,8 @@ function onpushfilter(){
       
       </div>
     </article>
-    <article class="dataList">
+    <article v-if="Object.keys(titleData).length==0">データがありません</article>
+    <article class="dataList" v-if="Object.keys(titleData).length!=0">
       <div v-for="(element,index) in titleData" :key="index" >
         <OwnerOrderListElements
         v-bind:title-data="element"

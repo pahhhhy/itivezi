@@ -192,6 +192,8 @@ p{
     font-size: 16px;
     width: 50px;
   }
-
+  .chack_data{
+    width: 340px;
+  }
 }
 </style>

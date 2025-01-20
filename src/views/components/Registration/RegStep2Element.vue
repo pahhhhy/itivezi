@@ -49,7 +49,7 @@ interface Emits {
 defineExpose({
   CheckError
 })
-const roadStationUnitTempList = ref<string[]>(useRoadStationStore().roadStationTemp)
+const roadStationUnitTempList = ref<string[]>(["川崎","室根","その他"])
 const emit = defineEmits<Emits>()
 const props = defineProps<Props>()
   const Index =ref<number>(props.index)
@@ -295,7 +295,7 @@ p{
     font-size: 16px;
   }
   .form_check_element{
-    width: 60px;
+    width: 70px;
   }
 }
 </style>

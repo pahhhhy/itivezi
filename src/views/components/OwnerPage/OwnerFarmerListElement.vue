@@ -7,15 +7,9 @@ const navigateToDetail = (name: string |number,roadStation:string) => {
       roadStation
     } })
 }
-interface FarmerListElement{
-    [VegeName:string]:{
-    unit:string
-    en:number
-  }
-}
 interface Props {
-  VegeData:FarmerListElement
-  FarmerName:string|number
+  count:number
+  FarmerName:string
   roadStation:string
 }
 const props = defineProps<Props>()
@@ -23,7 +17,7 @@ const props = defineProps<Props>()
 <template>
     <div class="farmerList-group" @click="navigateToDetail(props.FarmerName,props.roadStation)">
         <h4>{{props.FarmerName}}</h4>
-        <p>件数：{{ Object.keys(props.VegeData).length }}件</p>
+        <p>件数：{{ props.count }}件</p>
       <button><i class="bi bi-chevron-right"></i></button>
       </div>
 </template>

@@ -21,13 +21,9 @@ interface vegeElementTables{
   unit:string
   photo:string
 }
-interface FarmerList{
-  [farmerName:string]:{
-    [VegeName:string]:{
-    unit:string
-    en:number
-  }
-  };
+interface CountTable{
+  farmer:string,
+  count:number
 }
 const vegeStore=useVegeStore()
 const vegeAllData = ref<Vegetables>(vegeStore.VegeAllData)
@@ -37,7 +33,7 @@ const roadStationUnitTempList = ref<string[]>(useRoadStationStore().roadStationT
 }
   
 const selectedRoadStation = ref<string>(roadStationUnitTempList.value[0])
-const groupByFarmerList = ref<FarmerList>({})
+const AllfarmerCount = ref<CountTable[]>([])
 const isfliter=ref<boolean>(false)
   watch(() => vegeStore.VegeAllData, (newUser) => {
   vegeAllData.value = newUser;
@@ -54,7 +50,7 @@ async function initData() {
     fliterOrderData= filterByRoadStation(vegeAllData.value,selectedRoadStation.value)
   }
   //農家ごとのデータを作成する
-  groupByFarmerList.value  = classifyVegetablesByFarmer(fliterOrderData)
+  AllfarmerCount.value  = countAllFarmers(fliterOrderData)
 }
 
 initData()
@@ -106,76 +102,66 @@ function removeDiscontinuedVegetables(vegetables: Vegetables): Vegetables {
     return filteredVegetables;
 }
 
-function classifyVegetablesByFarmer(vegeTables: Vegetables): FarmerList {
-    const farmerList: FarmerList = {};
+function countAllFarmers(vegeTables: Vegetables): CountTable[] {
+  const farmerCounts: { [farmer: string]: number } = {};
 
-    for (const vegeName in vegeTables) {
-        const uniqueKeys = vegeTables[vegeName];
+  for (const vegeName in vegeTables) {
+    const uniqueKeys = vegeTables[vegeName];
 
-        for (const uniqueKey in uniqueKeys) {
-            const element = uniqueKeys[uniqueKey];
-            const farmerName = element.farmer;
+    for (const uniqueKey in uniqueKeys) {
+      const element = uniqueKeys[uniqueKey];
+      const farmerName = element.farmer;
 
-            // 農家がリストにない場合、初期化
-            if (!farmerList[farmerName]) {
-                farmerList[farmerName] = {};
-            }
-
-            // 野菜名が農家にまだ登録されていない場合、追加
-            if (!farmerList[farmerName][vegeName]) {
-                farmerList[farmerName][vegeName] = {
-                    unit: element.unit,
-                    en: element.en
-                };
-            } else {
-                // もしすでに同じ野菜が存在する場合、enを合計する（必要に応じて）
-                farmerList[farmerName][vegeName].en += element.en;
-            }
-        }
+      // 農家名をキーにしてカウント
+      farmerCounts[farmerName] = (farmerCounts[farmerName] || 0) + 1;
     }
+  }
 
-    return farmerList;
+  // CountTable形式に変換して返す
+  return Object.entries(farmerCounts).map(([farmer, count]) => ({ farmer, count }));
 }
 
-function pushExport() {
-  let CSVfile = convertToCSV(groupByFarmerList.value)
-  const now = new Date()
-  const currentTime = now.toLocaleString()
-  let fileName = "出品者リスト_" + selectedRoadStation.value + "_" + currentTime
-  downloadCSV(CSVfile, fileName)
-}
 
-const convertToCSV = (data: FarmerList): string => {
-  // CSVのヘッダー
-  const headers = ["名前", "野菜", "値段", "単位"];
-  const rows: string[] = [];
 
-  // データをフラット化してCSV用に整形
-  Object.entries(data).forEach(([farmer, vegetables]) => {
-    Object.entries(vegetables).forEach(([vegetable, details]) => {
-      rows.push([farmer, vegetable, details.en.toString(), details.unit].join(","));
-    });
-  });
+// function pushExport() {
+//   let CSVfile = convertToCSV(groupByFarmerList.value)
+//   const now = new Date()
+//   const currentTime = now.toLocaleString()
+//   let fileName = "出品者リスト_" + selectedRoadStation.value + "_" + currentTime
+//   downloadCSV(CSVfile, fileName)
+// }
 
-  // ヘッダーとデータを結合
-  return [headers.join(","), ...rows].join("\n");
-};
+// const convertToCSV = (data: FarmerList): string => {
+//   // CSVのヘッダー
+//   const headers = ["名前", "野菜", "値段", "単位"];
+//   const rows: string[] = [];
+
+//   // データをフラット化してCSV用に整形
+//   Object.entries(data).forEach(([farmer, vegetables]) => {
+//     Object.entries(vegetables).forEach(([vegetable, details]) => {
+//       rows.push([farmer, vegetable, details.en.toString(), details.unit].join(","));
+//     });
+//   });
+
+//   // ヘッダーとデータを結合
+//   return [headers.join(","), ...rows].join("\n");
+// };
 
 
 // ブラウザでCSVファイルをダウンロードさせる関数
 // ブラウザでCSVファイルをダウンロードさせる関数
-const downloadCSV = (csv: string, filename: string) => {
-  const bom = "\uFEFF"; // BOMを追加
-  const blob = new Blob([bom + csv], {type: "text/csv;charset=utf-8;"});
-  const link = document.createElement("a");
-  const url = URL.createObjectURL(blob);
-  link.setAttribute("href", url);
-  link.setAttribute("download", filename);
-  link.style.visibility = "hidden";
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-};
+// const downloadCSV = (csv: string, filename: string) => {
+//   const bom = "\uFEFF"; // BOMを追加
+//   const blob = new Blob([bom + csv], {type: "text/csv;charset=utf-8;"});
+//   const link = document.createElement("a");
+//   const url = URL.createObjectURL(blob);
+//   link.setAttribute("href", url);
+//   link.setAttribute("download", filename);
+//   link.style.visibility = "hidden";
+//   document.body.appendChild(link);
+//   link.click();
+//   document.body.removeChild(link);
+// };
 function onpushfilter(){
   isfliter.value=!isfliter.value
 }
@@ -206,14 +192,19 @@ function onpushfilter(){
       </div>
       
       </div>
+      
     </article>
-    <div v-for="(element,farmer) in groupByFarmerList" :key="farmer">
-    <OwnerFarmerListElement
-    v-bind:-farmer-name="farmer"
-    v-bind:road-station="selectedRoadStation"
-    v-bind:-vege-data="element"></OwnerFarmerListElement>
-  </div>
-    <button class="export-button" v-on:click="pushExport()">出力する</button>
+    <article v-if="Object.keys(AllfarmerCount).length==0">データがありません</article>
+    <article v-if="Object.keys(AllfarmerCount).length!=0">
+      <div v-for="(element,farmer) in AllfarmerCount" :key="farmer" >
+        <OwnerFarmerListElement
+        v-bind:-farmer-name="element.farmer"
+        v-bind:road-station="selectedRoadStation"
+        v-bind:count="element.count"></OwnerFarmerListElement>
+      </div>
+        <!-- <button class="export-button" v-on:click="pushExport()">出力する</button> -->
+    </article>
+    
   </article>
   
 </template>
