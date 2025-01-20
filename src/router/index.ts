@@ -11,6 +11,7 @@ import Addinfo from '../views/AddInfo.vue'
 import Owner from '../views/OwnerPage.vue'
 import Cart from '../views/CartPage.vue'
 import Chat from '../views/ChatPage.vue'
+import OwnerFarmerCheck from '@/views/components/OwnerPage/OwnerFarmerCheck.vue'
 import Announcements from "@/views/AnnouncementsPage.vue";
 import ResetPasswordPage from '@/views/ResetPasswordPage.vue'
 import verifyPage from '@/views/VerifyPage.vue'
@@ -83,6 +84,11 @@ const router = createRouter({
       path: '/Owner-order',
       name: 'Owner-order',
       component: OwnerOrderCheck
+    },
+    {
+      path: '/Owner-farmer',
+      name: 'Owner-farmer',
+      component: OwnerFarmerCheck
     },
     {
       path: '/cart',

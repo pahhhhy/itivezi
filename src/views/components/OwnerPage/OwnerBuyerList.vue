@@ -266,7 +266,28 @@ function parseOrderTime(orderTime: string | undefined): Date  {
 }
 </script>
 <template>
-  <h1>購入者リスト</h1>
+  <article class="UserList-card">
+    <h1>購入者リスト</h1>
+    <p>※取引完了の総額です。</p>
+    <table>
+        <caption>購入者のデータ</caption>
+        <thead>
+          <tr>
+            <th scope="col" class="name">名前</th>
+            <th scope="col" class="role">件数</th>
+            <th scope="col" class="phone">総額</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(element,uid) in orderNumList" :key="uid">
+              <th>{{ element.orderName }}</th>
+              <th>{{ element.count }}件</th>
+              <th>{{ element.totalMoney }}円</th>
+          </tr>
+        </tbody>
+      </table>
+      <button v-on:click="pushExport" class="buyer-button">出力する</button>
+  </article>
   <h3>フィルター</h3>
   <!-- {{ orderAllData }} -->
   <select class="form-select" aria-label="roadsideStationSelect" v-model="selectedRoadStation" @change="initData">
@@ -300,25 +321,7 @@ function parseOrderTime(orderTime: string | undefined): Date  {
     </select>
     <p>月</p>
   </div>
-
-  <h2>実際のデータ</h2>
-  <div class="buyer-group">
-    <h3>注文者名</h3>
-    <h3>件数</h3>
-    <h3>総額</h3>
-  </div>
-  <div v-for="(element,index) in orderNumList" :key="index">
-    <!-- <p>{{element}}</p> -->
-    <!-- <p>{{index}}</p> -->
-
-    <div class="buyer-group">
-      <h3>{{ element.orderName }}</h3>
-      <h3>{{ element.count }}件</h3>
-      <h3>{{ element.totalMoney }}円</h3>
-    </div>
-  </div>
-  <p>※取引完了の総額です。</p>
-  <button v-on:click="pushExport" class="buyer-button">出力する</button>
+  {{ orderAllData }}
 </template>
 <style>
 .buyer-group {
@@ -342,5 +345,93 @@ function parseOrderTime(orderTime: string | undefined): Date  {
 
 .selectDate p {
   width: 50px;
+}
+.UserList-card{
+  width: 340px;
+  height: 600px;
+  margin: 0 auto;
+  border: 10px;
+  background-color: white;
+  margin-top: 20px;
+  overflow: scroll;
+  padding: 10px;
+}
+.UserList-card h1{
+  border-bottom: 1px solid black;
+  padding-bottom: 2px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 16px;
+  text-align: left;
+  table-layout: fixed; /* 各列の幅を固定 */
+}
+
+th, td {
+  border: 1px solid #ddd;
+  text-align: center;
+  
+}
+/* 各列の幅調整 */
+th.name, td.name {
+  width: 85px;
+  height: 30px!important;
+}
+
+th.role, td.role {
+  width: 50px; 
+}
+
+th.phone, td.phone {
+  width: 100px; }
+
+th.email, td.email {
+  width: 200px; 
+}
+
+th.aff, td.aff {
+  width: 150px; 
+}
+
+th.place, td.place {
+  width: 300px; 
+}
+
+th.uid, td.uid {
+  width: 300px; 
+}
+
+th.delete, td.delete {
+  width: 50px; 
+  text-align: center;
+}
+
+/* ホバーエフェクト */
+tbody tr:hover {
+  background-color: #f1f1f1;
+}
+th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+tbody tr:hover {
+  background-color: #f1f1f1;
+}
+
+thead th {
+  border-bottom: 2px solid #ddd;
+}
+
+.caption {
+  margin-bottom: 10px;
+  font-size: 18px;
+  font-weight: bold;
 }
 </style>

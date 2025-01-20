@@ -2,7 +2,7 @@
 import router from '@/router'
 // クエリdataを持ったページに異動する
 const navigateToDetail = (name: string |number,roadStation:string) => {
-  router.push({ name: 'Owner-order',  query: {
+  router.push({ name: 'Owner-farmer',  query: {
       name,
       roadStation
     } })
