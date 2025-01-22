@@ -114,9 +114,9 @@ button {
 
 .wrapper {
   position: fixed;
-  height: 100vh;
+  height: 100dvh;
   width: 100vw;
-  padding: calc(80px + 20px) 30px 0; /* headerの分 + 余白 */
+  padding: calc(60px + 20px) 30px 0; /* headerの分 + 余白 */
   z-index: 2;
   bottom: 0;
   display: flex;
@@ -161,6 +161,7 @@ button {
 }
 
 .categories {
+
   padding: 0 16px;
   display: flex;
   flex-direction: column;
