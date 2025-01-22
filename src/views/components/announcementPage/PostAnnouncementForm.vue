@@ -198,8 +198,15 @@ defineExpose({ // 外部から参照できるようにする
 
   .announce-editor {
     max-height: 100%;
+    max-width: 100%;
     display: flex;
     flex-direction: column;
+
+    & .fullscreen {
+      margin-top: 60px; /* ヘッダー */
+      max-height: calc(100% - 60px);
+
+    }
 
     .title {
       p {
