@@ -43,7 +43,7 @@ interface BuyerListTable {
   totalMoney: number;
 };
 const roadStationUnitTempList = ref<string[]>(useRoadStationStore().roadStationTemp)
-if(roadStationUnitTempList.value.includes("全て")){
+if(!roadStationUnitTempList.value.includes("全て")){
   roadStationUnitTempList.value.unshift("全て");
 }
 
@@ -54,12 +54,13 @@ const orderAllData = ref<Ordertables>(fireOrderStore.OrderAllData)
 const fliterOrderData=ref<Ordertables>(orderAllData.value)
 const orderNumList = ref<BuyerListTable[]>([])
 const yearList = ref<number[]>([])
-const selectStartYear = ref<number>(2024)
+const selectStartYear = ref<number>(2025)
 const selectStartMonth = ref<number>(1)
-const selectEndYear = ref<number>(2024)
+const selectEndYear = ref<number>(2025)
 const selectEndMonth = ref<number>(12)
+const isfliter =ref<boolean>(false)
 const startDate = ref<Date>(new Date(2024, 3, 1));  // 4月 (0ベースなので3月が4月を指す)
-const endDate = ref<Date>(new Date(2025, 9, 31));   // 10月 (0ベースなので9月が10月を指す)
+const endDate = ref<Date>(new Date(2100, 9, 31));   // 10月 (0ベースなので9月が10月を指す)
 watch(() => fireOrderStore.OrderAllData, (newUser) => {
   orderAllData.value = newUser;
   initData()
@@ -77,7 +78,6 @@ async function initData() {
   yearList.value = extractUniqueYears(fliterOrderData.value)
   //全体のデータからある範囲のデータに抽出する
   fliterOrderData.value= filterOrdersByDateRange(fliterOrderData.value,startDate.value,endDate.value)
-  console.log(fliterOrderData.value)
   //抽出したデータからBuyerListの作成
   orderNumList.value = generateBuyerListTable(fliterOrderData.value)
 }
@@ -283,18 +283,74 @@ function parseOrderTime(orderTime: string | undefined): Date  {
 
   return new Date(Number(year), Number(month) - 1, Number(day));
 }
+function onpushfilter(){
+  isfliter.value=!isfliter.value
+}
 </script>
 <template>
   <article class="UserList-card">
     <h1>購入者リスト</h1>
     <p>※取引完了の総額です。</p>
+    <button v-on:click="onpushfilter" class="filter-button">
+      フィルター
+      <i class="bi bi-chevron-down" v-if="!isfliter"></i>
+      <i class="bi bi-chevron-up" v-if="isfliter"></i>
+    </button>
+    <article class="filter-tab" v-if="isfliter">
+      <h3>ステータス</h3>
+      <div class="fliter-button-group">
+        <div v-for="(element,index) in roadStationUnitTempList" v-bind:key="index" class="filter_button">
+          <input
+            class="form-check-input"
+            type="radio"
+            :value="element"
+            v-model="selectedRoadStation"
+            v-on:click="initData()"
+            :id="'flexCheckIndeterminate' + index"
+          />
+          <label class="form-check-label" :for="'flexCheckIndeterminate' + index">
+            {{ element }}
+          </label>
+          
+      </div>
+      <p></p>
+     
+      </div>
+      <h3>期間</h3>
+      <div class="selectDate">
+        <select class="form-select" aria-label="select-startyear" v-model="selectStartYear"
+                v-on:change="changeDate({startYear:selectStartYear})">
+          <option v-for="year in yearList" :key="year">{{ year }}</option>
+        </select>
+        <p>年</p>
+        <select class="form-select" aria-label="select-startmonth" v-model="selectStartMonth"
+                v-on:change="changeDate({startMonth:selectStartMonth})">
+          <option v-for="month in 12" :key="month">{{ month }}</option>
+        </select>
+        <p>月</p>
+        
+      </div>
+      <p style="margin: auto;">↓</p>
+      <div class="selectDate">
+        <select class="form-select" aria-label="select-startyear" v-model="selectEndYear"
+                v-on:change="changeDate({endYear:selectEndYear})">
+          <option v-for="year in yearList" :key="year">{{ year }}</option>
+        </select>
+        <p>年</p>
+        <select class="form-select" aria-label="select-startmonth" v-model="selectEndMonth"
+                v-on:change="changeDate({endMonth:selectEndMonth})">
+          <option v-for="month in 12" :key="month">{{ month }}</option>
+        </select>
+        <p>月</p>
+      </div>
+    </article>
     <table>
         <caption>購入者のデータ</caption>
         <thead>
           <tr>
             <th scope="col" class="name">名前</th>
-            <th scope="col" class="role">件数</th>
-            <th scope="col" class="phone">総額</th>
+            <th scope="col" class="number">件数</th>
+            <th scope="col" class="money">総額</th>
           </tr>
         </thead>
         <tbody>
@@ -307,46 +363,18 @@ function parseOrderTime(orderTime: string | undefined): Date  {
       </table>
       <button v-on:click="pushExport" class="buyer-button">出力する</button>
   </article>
-  <h3>フィルター</h3>
-  <!-- {{ orderAllData }} -->
-  <select class="form-select" aria-label="roadsideStationSelect" v-model="selectedRoadStation" @change="initData">
-    <option selected v-bind:value="roadStation" v-for="roadStation in roadStationUnitTempList" :key=roadStation>
-      {{ roadStation }}
-    </option>
-  </select>
-  <div class="selectDate">
-    <select class="form-select" aria-label="select-startyear" v-model="selectStartYear"
-            v-on:change="changeDate({startYear:selectStartYear})">
-      <option v-for="year in yearList" :key="year">{{ year }}</option>
-    </select>
-    <p>年</p>
-    <select class="form-select" aria-label="select-startmonth" v-model="selectStartMonth"
-            v-on:change="changeDate({startMonth:selectStartMonth})">
-      <option v-for="month in 12" :key="month">{{ month }}</option>
-    </select>
-    <p>月</p>
-
-  </div>
-  <p style="margin: auto;">↓</p>
-  <div class="selectDate">
-    <select class="form-select" aria-label="select-startyear" v-model="selectEndYear"
-            v-on:change="changeDate({endYear:selectEndYear})">
-      <option v-for="year in yearList" :key="year">{{ year }}</option>
-    </select>
-    <p>年</p>
-    <select class="form-select" aria-label="select-startmonth" v-model="selectEndMonth"
-            v-on:change="changeDate({endMonth:selectEndMonth})">
-      <option v-for="month in 12" :key="month">{{ month }}</option>
-    </select>
-    <p>月</p>
-  </div>
-  {{ orderAllData }}
-  <p></p>
-  {{ fliterOrderData.value }}
-  <p></p>
-  {{ orderNumList }}
 </template>
 <style>
+.filter-button{
+  height: 40px;
+  width: 100px;
+  border-radius: 5px;
+  color: white;
+  text-align: center;
+  background-color: var(--other-color);
+  border: none;
+  margin: 10px 10px;
+}
 .buyer-group {
   display: flex;
   width: 600px;
@@ -355,8 +383,13 @@ function parseOrderTime(orderTime: string | undefined): Date  {
 }
 
 .buyer-button {
-  background-color: white;
-  margin: 1%;
+  font-size: 1.2rem;
+    padding: 15px 30px;
+    margin: 5px;
+    border-radius: 30px;
+    border: none;
+    color: white;
+    background-color: var(--main-color);
 }
 
 .selectDate {
@@ -368,6 +401,7 @@ function parseOrderTime(orderTime: string | undefined): Date  {
 
 .selectDate p {
   width: 50px;
+  margin: 0 10px;
 }
 .UserList-card{
   width: 340px;
@@ -403,33 +437,12 @@ th.name, td.name {
   height: 30px!important;
 }
 
-th.role, td.role {
+th.number, td.number {
   width: 50px; 
 }
 
-th.phone, td.phone {
+th.money, td.money {
   width: 100px; }
-
-th.email, td.email {
-  width: 200px; 
-}
-
-th.aff, td.aff {
-  width: 150px; 
-}
-
-th.place, td.place {
-  width: 300px; 
-}
-
-th.uid, td.uid {
-  width: 300px; 
-}
-
-th.delete, td.delete {
-  width: 50px; 
-  text-align: center;
-}
 
 /* ホバーエフェクト */
 tbody tr:hover {
