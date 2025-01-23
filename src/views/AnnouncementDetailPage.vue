@@ -265,7 +265,9 @@ const postAnnouncementFormRef = ref<null | InstanceType<typeof PostAnnouncementF
 </script>
 <template>
   <SlideMenu title="投稿の編集" v-if="editMode" @close="editMode = false">
-    <template #header-button>
+    <template #header-button >
+      <div class="slide-buttons-wrapper">
+      <div class="slide-buttons">
       <SimpleTextButton
           bold fontSize="1em"
           @click="deleteAnnounce"
@@ -286,6 +288,8 @@ const postAnnouncementFormRef = ref<null | InstanceType<typeof PostAnnouncementF
       >
         適用
       </SimpleTextButton>
+      </div>
+      </div>
     </template>
     <template #default>
       <PostAnnouncementForm
@@ -408,6 +412,7 @@ button {
   border-bottom: 1px solid var(--text-color);
   position: sticky;
   top: 0;
+  background-color: var(--background-color);
 }
 
 .announcement-title {
@@ -486,6 +491,26 @@ p {
 
 .scroll-style {
   background-color: white !important;
+}
+
+@media (max-width: 530px) {
+  .slide-buttons-wrapper {
+    position: relative;
+    height: 1em;
+    width: 100%;
+    margin: 2em 0;
+  }
+  .slide-buttons {
+    position: absolute;
+    top: 1em;
+    right: -10px;
+    width: calc(100vw - 60px);
+    display: flex;
+    justify-content: space-around;
+
+
+  }
+
 }
 
 

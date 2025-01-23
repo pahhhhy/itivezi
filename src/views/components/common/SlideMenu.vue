@@ -92,9 +92,9 @@ button {
 
 .slide-wrapper {
   position: fixed;
-  height: 100vh;
+  height: 100dvh;
   width: 100vw;
-  padding: calc(80px + 20px) 30px 0; /* headerの分 + 余白 */
+  padding: calc(60px + 20px) 30px 0; /* headerの分 + 余白 */
   z-index: 2;
   bottom: 0;
   display: flex;
@@ -119,24 +119,38 @@ button {
 }
 
 .top-bar {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
+  display: flex;
+  justify-content: center;
+  align-items: start;
   width: 100%;
   padding: 8px;
   border-bottom: 1px solid var(--text-color);
   margin-bottom: 8px;
+  flex-wrap: nowrap;
+
 
   & > *:first-child { /* 左端の要素 */
-    margin-right: auto;
+    margin-top: 0.25em;
+    flex-basis: 100%;
+    display: flex;
+    justify-content: start;
   }
 
   & > *:nth-child(2) { /* 中央の要素 */
-    margin: 0;
+    flex-basis: fit-content;
+    min-width: fit-content;
+
   }
 
   & > *:nth-child(3) { /* 右端の要素 */
-    margin-left: auto;
+    flex-basis: 100%;
+    display: flex;
+    justify-content: end;
+    flex-wrap: nowrap;
+      & > * {
+        min-width: fit-content;
+
+      }
   }
 }
 

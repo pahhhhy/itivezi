@@ -87,8 +87,9 @@ button {
   align-items: center;
   width: 100%;
   height: max-content;
-  margin: 0 0 16px;
   padding-top: 16px;
+  padding-bottom:16px;
+
 }
 
 textarea {

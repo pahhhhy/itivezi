@@ -79,12 +79,13 @@ const isShowAlert = computed(() => {
   position: sticky;
   bottom: 0;
 
-  padding:4px 0 0;
-  background: white;
+  padding:12px 0 0;
   border-top: 1px solid gray;
+  background: var(--background-color);
 
   .input-area {
     padding-top:0;
+    padding-bottom:0;
   }
 }
 
@@ -94,7 +95,7 @@ const isShowAlert = computed(() => {
   justify-content: start;
   align-items: center;
   gap: 1em;
-  background: white;
+  background: var(--background-color);
 
   p {
     margin: 0;

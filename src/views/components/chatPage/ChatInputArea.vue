@@ -1,29 +1,27 @@
 <script lang="ts" setup>
-import type {ChatFile, ChatMessage} from '@/types/chat/chat'
-import {serverTimestamp} from 'firebase/database'
-import {ref} from 'vue'
-import {v4 as uuidv4} from 'uuid'
-import {getDownloadURL, getStorage, ref as storageRef, uploadBytes} from 'firebase/storage'
-import {useChatMessageHook} from '@/utils/chat/useChatMessageHook'
-import type {User} from 'firebase/auth'
-import type HTMLInputEvent from "@/types/common/HTMLInputEvent";
-import SmallTextInputField from "@/views/components/common/SmallTextInputField.vue";
+import type { ChatFile, ChatMessage } from '@/types/chat/chat'
+import { serverTimestamp } from 'firebase/database'
+import { ref } from 'vue'
+import { v4 as uuidv4 } from 'uuid'
+import { getDownloadURL, getStorage, ref as storageRef, uploadBytes } from 'firebase/storage'
+import { useChatMessageHook } from '@/utils/chat/useChatMessageHook'
+import type { User } from 'firebase/auth'
+import type HTMLInputEvent from '@/types/common/HTMLInputEvent'
+import SmallTextInputField from '@/views/components/common/SmallTextInputField.vue'
 
-
-const {roomId, user, beforeSendMessage, afterSendMessage} = defineProps<{
+const { roomId, user, beforeSendMessage, afterSendMessage } = defineProps<{
   roomId: string
   user: User
   beforeSendMessage?: () => void
   afterSendMessage?: () => void
 }>()
 
-const {sendMessage} = useChatMessageHook(roomId, user, () => {
-});
+const { sendMessage } = useChatMessageHook(roomId, user, () => {})
 
 const sendMessageCallback = async () => {
   if (!message.value && !attachmentFiles.value.length) return
   isSending.value = true
-  if (beforeSendMessage) beforeSendMessage();
+  if (beforeSendMessage) beforeSendMessage()
   const createdAt = serverTimestamp()
   // 画像をアップロード
   let files: ChatFile[] = []
@@ -63,7 +61,7 @@ const sendMessageCallback = async () => {
   message.value = ''
   attachmentFiles.value = []
   attachmentFilesAsDataUrl.value = []
-  if (afterSendMessage) afterSendMessage();
+  if (afterSendMessage) afterSendMessage()
   isSending.value = false
 }
 
@@ -115,24 +113,24 @@ const onFileChange = (e: HTMLInputEvent | DragEvent) => {
 // ファイルのサイズをチェック
 const checkFile = (file: File) => {
   const SIZE_LIMIT = 5 * 1024 * 1024 // 5MB
-  return file.size <= SIZE_LIMIT;
+  return file.size <= SIZE_LIMIT
 }
 
 const mediaType = (file: File) => {
   const extension = file.name.split('.').pop()
   if (
-      extension === 'jpg' ||
-      extension === 'jpeg' ||
-      extension === 'png' ||
-      extension === 'gif' ||
-      extension === 'svg' ||
-      extension === 'webp' ||
-      extension === 'JPG' ||
-      extension === 'JPEG' ||
-      extension === 'PNG' ||
-      extension === 'GIF' ||
-      extension === 'SVG' ||
-      extension === 'WEBP'
+    extension === 'jpg' ||
+    extension === 'jpeg' ||
+    extension === 'png' ||
+    extension === 'gif' ||
+    extension === 'svg' ||
+    extension === 'webp' ||
+    extension === 'JPG' ||
+    extension === 'JPEG' ||
+    extension === 'PNG' ||
+    extension === 'GIF' ||
+    extension === 'SVG' ||
+    extension === 'WEBP'
   ) {
     return 'image'
   }
@@ -140,12 +138,12 @@ const mediaType = (file: File) => {
     return 'video'
   }
   if (
-      extension === 'mp3' ||
-      extension === 'wav' ||
-      extension === 'ogg' ||
-      extension === 'MP3' ||
-      extension === 'WAV' ||
-      extension === 'OGG'
+    extension === 'mp3' ||
+    extension === 'wav' ||
+    extension === 'ogg' ||
+    extension === 'MP3' ||
+    extension === 'WAV' ||
+    extension === 'OGG'
   ) {
     return 'audio'
   }
@@ -196,9 +194,8 @@ const deleteFile = (index: number): void => {
   attachmentFilesAsDataUrl.value = attachmentFilesAsDataUrl.value.filter((_, i) => i !== index)
 }
 
-
 const message = ref<string>('')
-const isSending = ref<boolean>(false);
+const isSending = ref<boolean>(false)
 </script>
 <template>
   <div>
@@ -208,37 +205,37 @@ const isSending = ref<boolean>(false);
         <div class="image-preview" v-if="mediaType(attachmentFiles[index]) === 'image'">
           <!--          削除ボタン-->
           <button @click="deleteFile(index)" class="delete">
-            <IconDelete/>
+            <IconDelete />
           </button>
           <img
-              v-if="mediaType(attachmentFiles[index]) === 'image'"
-              :src="url"
-              alt="attached file"
+            v-if="mediaType(attachmentFiles[index]) === 'image'"
+            :src="url"
+            alt="attached file"
           />
         </div>
         <div v-else-if="mediaType(attachmentFiles[index]) === 'video'" class="video-preview">
           <video controls>
-            <source :src="url" type="video/mp4">
+            <source :src="url" type="video/mp4" />
             このブラウザはvideoタグをサポートしていません。
           </video>
           <button @click="deleteFile(index)" class="delete">
-            <IconDelete/>
+            <IconDelete />
           </button>
         </div>
         <div v-else-if="mediaType(attachmentFiles[index]) === 'audio'" class="audio-preview">
           <audio controls>
-            <source :src="url" type="audio/mpeg">
+            <source :src="url" type="audio/mpeg" />
             このブラウザはaudioタグをサポートしていません。
           </audio>
           <button @click="deleteFile(index)" class="delete">
-            <IconDelete/>
+            <IconDelete />
           </button>
         </div>
         <div v-else class="file-preview">
-          <IconFile/>
+          <IconFile />
           <a :href="url" target="_blank" download>{{ attachmentFiles[index].name }}</a>
           <button @click="deleteFile(index)" class="delete">
-            <IconDelete/>
+            <IconDelete />
           </button>
         </div>
       </div>
@@ -246,12 +243,12 @@ const isSending = ref<boolean>(false);
 
     <!--    ここからインプットフィールド-->
     <SmallTextInputField
-        v-model:message="message"
-        v-model:isSending="isSending"
-        v-model:attachmentFiles="attachmentFiles"
-        @fileChange="onFileChange"
-        @send="sendMessageCallback"
-        placeholder="メッセージを入力"
+      v-model:message="message"
+      v-model:isSending="isSending"
+      v-model:attachmentFiles="attachmentFiles"
+      @fileChange="onFileChange"
+      @send="sendMessageCallback"
+      placeholder="メッセージを入力"
     />
   </div>
 </template>
@@ -310,7 +307,6 @@ button {
     max-width: 256px;
     max-height: 256px;
   }
-
 }
 
 .video-preview {
@@ -321,7 +317,6 @@ button {
     max-width: 256px;
     max-height: 256px;
   }
-
 }
 
 .audio-preview {
@@ -332,7 +327,6 @@ button {
     max-width: 256px;
     max-height: 256px;
   }
-
 }
 
 .file-preview {
@@ -344,19 +338,6 @@ button {
     color: var(--text-color);
     text-decoration: none;
   }
-
-}
-
-
-.input-area {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  height: max-content;
-  margin: 0 0 16px;
-  padding-top: 16px;
 }
 
 textarea {
@@ -368,8 +349,7 @@ textarea {
   max-height: 160px;
   field-sizing: content;
   border-radius: 20px;
-  padding: .4em 1em;
-
+  padding: 0.4em 1em;
 
   & [disabled] {
     background-color: #f0f0f0;
