@@ -239,8 +239,9 @@ function onpushfilter(){
 </template>
 <style>
 .orderList-card{
-  width: 340px;
-  padding: 10px;
+  width: 512px;
+  padding: 20px;
+  min-height: 600px;
   border-radius: 10px;
   background-color: white;
   margin: 0 auto;
@@ -281,6 +282,23 @@ function onpushfilter(){
 }
 .dataList{
   margin-top: 10px;
+  height: 450px;
+  overflow-y: scroll;
+  overflow-x:hidden ;
 }
-
+.dataList::-webkit-scrollbar {
+  width:0px;
+}
+.dataList::-webkit-scrollbar-thumb {
+  background: var(--line-color);
+  width: 6px;
+  height: 1px;
+  border-radius: 5px;
+}
+@media (max-width: 575.98px) { 
+  .orderList-card{
+      width: 340px;
+      padding: 10px;
+  }
+}
 </style>

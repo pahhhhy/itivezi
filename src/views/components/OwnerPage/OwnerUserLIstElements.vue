@@ -49,7 +49,5 @@ async function onPushDelete(){
   border: none;
   margin: 0 10px;
 }
-th, td{
-  overflow: scroll;
-}
+
 </style>

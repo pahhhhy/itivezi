@@ -58,7 +58,8 @@ async function onPushYes(){
 <template>
   <article class="UserList-card">
     <h1>利用者リスト</h1>
-    <table>
+    <article class="table-area">
+      <table>
         <caption>利用者の個人データ</caption>
         <thead>
           <tr>
@@ -81,6 +82,8 @@ async function onPushYes(){
           </tr>
         </tbody>
       </table>
+    </article>
+    
         <div class="card popup" style="width: 30rem" v-show="isPopup">
           <div class="card-body">
             <h5 class="card-title">確認</h5>
@@ -94,14 +97,13 @@ async function onPushYes(){
 </template>
 <style scoped>
 .UserList-card{
-  width: 340px;
+  width: 512px;
   height: 600px;
   margin: 0 auto;
   border: 10px;
   background-color: white;
   margin-top: 20px;
-  overflow: scroll;
-  padding: 10px;
+  padding: 20px;
 }
 .UserList-card h1{
   border-bottom: 1px solid black;
@@ -115,15 +117,27 @@ table {
   text-align: left;
   table-layout: fixed; /* 各列の幅を固定 */
 }
-
+.table-area{
+  width: 100%;
+  overflow: scroll;
+}
+.table-area::-webkit-scrollbar {
+  width:0px;
+}
+.table-area::-webkit-scrollbar-thumb {
+  background: var(--line-color);
+  width: 6px;
+  height: 1px;
+  border-radius: 5px;
+}
 th, td {
   border: 1px solid #ddd;
   text-align: center;
-  
+  overflow: hidden;
 }
 /* 各列の幅調整 */
 th.name, td.name {
-  width: 85px;
+  width: 120px;
   height: 30px!important;
 }
 
@@ -143,7 +157,7 @@ th.aff, td.aff {
 }
 
 th.place, td.place {
-  width: 300px; 
+  width: 350px; 
 }
 
 th.uid, td.uid {
@@ -195,5 +209,11 @@ thead th {
 
 .btn {
   margin: 10px 5px;
+}
+@media (max-width: 575.98px) { 
+  .UserList-card{
+      width: 340px;
+      padding: 10px;
+  }
 }
 </style>

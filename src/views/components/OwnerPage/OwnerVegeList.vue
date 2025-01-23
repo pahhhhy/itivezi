@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref,watch} from 'vue'
+import { ref,watch,computed} from 'vue'
 import { type User} from 'firebase/auth'
 import { useVegeStore } from '@/stores/vege'
 import { useUserStore } from '@/stores/userData';
@@ -40,18 +40,22 @@ enum Role{
     Kawasaki="川崎",
     None=""
   }
+  interface VegeList{
+     [key: string]: string[] ;
+  }
 const vegeStore=useVegeStore()
 const vegeAllData = ref<Vegetables>(vegeStore.VegeAllData)
   const userStore=useUserStore()
 const unavailableVegeList = ref<string[]>([])
 const AvailableVegeLIst=ref<Vegetables>(filterVegetablesByState(vegeAllData.value))
-const farmerVegeList = ref<any>([])
-const uniqueVegeList = ref<any>([])
+const farmerVegeList = ref<VegeList>({})
+const uniqueVegeList = ref<VegeList>({})
 const deleteVegeName = ref<string>("")
 const isPopup = ref<boolean>(false)
 const fireUseStore=usefireUserStore()
 const currentUser = ref<User|null>(userStore.currentUser);
 const myUserData=ref<Usertables>(fireUseStore.myUserData)
+const deleteVegeNum=ref<number>(0)
 watch(() => fireUseStore.myUserData, (newUser) => {
   myUserData.value = newUser;
 });
@@ -101,49 +105,52 @@ function filterVegetablesByState(vegetables: Vegetables) {
 
   // unavailableVegeList.value に string[] を代入
   unavailableVegeList.value = unavailableVegeNames;
-  console.log(unavailableVegeList.value)
   return available;
 }
 
-function extractVegetableInfo(data: any): { [key: string]: string[] } {
-  const result: { [key: string]: string[] } = {};
-  const uidResult: { [key: string]: string[] } = {};
+function extractVegetableInfo(data: Vegetables): VegeList {
+  const result: VegeList = {};
+  const uidResult: VegeList = {};
 
   for (const vegetable in data) {
-    const farmers = Object.entries(data[vegetable]);
+    const farmers = Object.entries(data[vegetable]); // farmers: [uniqueKey, farmerInfo][]
 
-    // 複数の農家がある場合
     if (farmers.length > 1) {
       const uniqueFarmers = new Set<string>();
       const uniqueUIDs = new Set<string>();
 
       for (const [uid, farmerInfo] of farmers) {
-        uniqueFarmers.add((farmerInfo as any).farmer);
-        uniqueUIDs.add(uid);
+        uniqueFarmers.add(farmerInfo.farmer); // farmer を追加
+        uniqueUIDs.add(uid); // UID を追加
       }
 
-      result[vegetable] = Array.from(uniqueFarmers); // キーが野菜、値が生産者名のリスト
-      uidResult[vegetable] = Array.from(uniqueUIDs); // キーが野菜、値がUIDのリスト
-    } else {
-      // 単一の農家がある場合
+      result[vegetable] = Array.from(uniqueFarmers); // 生産者名リスト
+      uidResult[vegetable] = Array.from(uniqueUIDs); // UID リスト
+    } else if (farmers.length === 1) {
       const [uid, farmerInfo] = farmers[0];
-      result[vegetable] = [(farmerInfo as any).farmer]; // キーが野菜、値が生産者名のリスト
-      uidResult[vegetable] = [uid]; // キーが野菜、値がUIDのリスト
+      result[vegetable] = [farmerInfo.farmer]; // 生産者名を配列に
+      uidResult[vegetable] = [uid]; // UID を配列に
     }
   }
 
+  // uidResult をリアクティブ変数に保存
   uniqueVegeList.value = uidResult;
   return result;
 }
-
+const ComponentUpdate=ref<boolean>(false)
 async function initData() {
+  
+  //それぞれの道の駅のデータに抽出する
   if(myUserData.value.role==Role.Kawasaki){
       vegeAllData.value=filterByRoadStation(vegeAllData.value,Role.Kawasaki)
     }else if(myUserData.value.role==Role.Murone){
       vegeAllData.value=filterByRoadStation(vegeAllData.value,Role.Murone)
   }
+  //野菜のデータからstateがAvailbleのものを取り出す
   AvailableVegeLIst.value=filterVegetablesByState(vegeAllData.value)
-  farmerVegeList.value = extractVegetableInfo(vegeAllData.value)
+  //野菜のデータから農家の名前を取り出す。
+  farmerVegeList.value = extractVegetableInfo(AvailableVegeLIst.value)
+  ComponentUpdate.value=true
 }
 
 initData()
@@ -151,11 +158,15 @@ initData()
 function pushDeleteIcon(vegeName: string) {
   deleteVegeName.value = vegeName
   isPopup.value = true
+  deleteVegeNum.value=farmerVegeList.value[deleteVegeName.value].length
 }
 
 async function pushDelete() {
-  isPopup.value = false
+  ComponentUpdate.value=false
   await vegeStore.deleteAllVegeData(deleteVegeName.value)
+  await vegeStore.roadData()
+  initData()
+  isPopup.value = false
 }
 
 function pushBack() {
@@ -164,16 +175,9 @@ function pushBack() {
 
 </script>
 <template>
-  <!-- {{ vegeAllData }} -->
-  <!-- {{ farmerVegeList }}
-  {{uniqueVegeList}} -->
-  <!-- {{ CSVfile }} -->
-    <!-- 管理者は全てのリストを選択したときの注文の並び順を変更できる。
-    道の駅はそのところを選択したときの注文の並び順を変更できる。 -->
-    <!-- {{ AvailableVegeLIst }}
-      {{ unavailableVegeList }} -->
     <article >
       <OwnerVegeOwnerPage 
+      v-if="ComponentUpdate"
       v-bind:current-user="currentUser"
       v-bind:data="AvailableVegeLIst"
       v-bind:unavailable-vege-list="unavailableVegeList"
@@ -182,7 +186,7 @@ function pushBack() {
     </article>
   <div class="owner-popup" v-if="isPopup">
     <h3>{{ deleteVegeName }}は以下の{{
-        farmerVegeList[deleteVegeName].length
+        deleteVegeNum
     }}人が出品しています。<br>本当に削除しますか？</h3>
     <div style="font-size: 18px;" v-for="farmerName in farmerVegeList[deleteVegeName]" :key="farmerName">
       ・{{ farmerName }}
@@ -194,7 +198,7 @@ function pushBack() {
 <style>
 .owner-popup {
   position: fixed;
-  width: 340px;
+  width: 512px;
 
   z-index: 10;
   border: 1px solid gray;
@@ -263,5 +267,11 @@ function pushBack() {
 .vegeList-unit-active {
   display: flex;
   justify-content: space-between;
+}
+@media (max-width: 575.98px) { 
+  .owner-popup{
+      width: 340px;
+      padding: 10px;
+  }
 }
 </style>

@@ -404,14 +404,13 @@ function onpushfilter(){
   margin: 0 10px;
 }
 .UserList-card{
-  width: 340px;
-  height: 600px;
+  width: 512px;
+  min-height: 600px;
   margin: 0 auto;
   border: 10px;
   background-color: white;
   margin-top: 20px;
-  overflow: scroll;
-  padding: 10px;
+  padding: 20px;
 }
 .UserList-card h1{
   border-bottom: 1px solid black;
@@ -425,7 +424,10 @@ table {
   text-align: left;
   table-layout: fixed; /* 各列の幅を固定 */
 }
-
+tbody{
+  overflow-y: scroll;
+  height: 200px;
+}
 th, td {
   border: 1px solid #ddd;
   text-align: center;
@@ -469,5 +471,11 @@ thead th {
   margin-bottom: 10px;
   font-size: 18px;
   font-weight: bold;
+}
+@media (max-width: 575.98px) { 
+  .UserList-card{
+      width: 340px;
+      padding: 10px 15px;
+  }
 }
 </style>

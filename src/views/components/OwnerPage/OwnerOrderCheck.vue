@@ -249,6 +249,7 @@ margin: auto;}
   border-top: 3px solid transparent;
   border-radius: 50%;
   animation: spin .5s linear 0s infinite;
+
 }
 p{
   margin: 0;
@@ -267,6 +268,7 @@ p{
   margin: 0 auto;
   margin-top: 20px;
   border-radius: 5px;
+  padding: 20px;
 }
 .orderelement_card h2{
   margin: 20px;
@@ -320,7 +322,7 @@ p{
   object-fit: contain;
 }
 .buyitem_card{
-  width: 512px;
+  width: 470px;
   height: 135px;
   padding: 5px;
   background-color: white;
@@ -389,6 +391,7 @@ p{
   @media (max-width: 575.98px) { 
     .orderelement_card{
       width: 340px;
+      padding: 0;
     }
     .buyitem_card{
       width: 300px;

@@ -105,7 +105,7 @@ function countFarmers  (allUserTables: AllUserTables): number  {
   let farmerCount = 0;
 
   Object.values(allUserTables).forEach(user => {
-    if (user.role === "農家") {
+    if (user.role === Role.Farmer) {
       farmerCount++;
     }
   });
@@ -115,23 +115,36 @@ function countFarmers  (allUserTables: AllUserTables): number  {
 function filterRoadStationByRoomne(orderTables: Ordertables, roadStation: string): Ordertables {
   // Create a deep copy of orderTables
   const filteredOrderTables: Ordertables = JSON.parse(JSON.stringify(orderTables));
+
   // Loop through each user's uid
   Object.entries(filteredOrderTables).forEach(([uid, uniqueEntries]) => {
     // Loop through each uniqueKey
     Object.entries(uniqueEntries).forEach(([uniqueKey, orderElement]) => {
-      let fliterKey = Object.keys(orderElement);
-      let fliternum = fliterKey.length - 6;
+      const fliterKey = Object.keys(orderElement);
+      const fliternum = fliterKey.length - 6;
 
       for (let i: number = 0; i < fliternum; i++) {
-        if (!orderElement[Number(fliterKey[i])].roadStation.includes(roadStation)) {
+        const entry = orderElement[Number(fliterKey[i])];
+// entry が undefined の場合はスキップ
+        if (!entry) {
+          continue;
+        }
+        // roadStation が存在しない場合は無視
+        if (!entry.roadStation) {
+          continue;
+        }
+
+        // roadStation が一致しない場合に削除
+        if (!entry.roadStation.includes(roadStation)) {
           delete filteredOrderTables[uid][uniqueKey][Number(fliterKey[i])];
         }
       }
 
-      let afterfliterKey = Object.keys(filteredOrderTables[uid][uniqueKey]);
-      let afterfilternum = afterfliterKey.length - 6;
+      // フィルタ後に要素が 0 個なら uniqueKey を削除
+      const afterFilterKey = Object.keys(filteredOrderTables[uid][uniqueKey]);
+      const afterFilterNum = afterFilterKey.length - 6;
 
-      if (afterfilternum == 0) {
+      if (afterFilterNum === 0) {
         delete filteredOrderTables[uid][uniqueKey];
       }
     });
@@ -139,6 +152,7 @@ function filterRoadStationByRoomne(orderTables: Ordertables, roadStation: string
 
   return filteredOrderTables;
 }
+
 async function initData() {
   userAllData.value=await fireUseStore.AllroadFireUseData()
   //道の駅ごとにフィルターをやって
@@ -158,10 +172,15 @@ async function initData() {
 
 initData()
 //ALLUserTalbeから道の駅ごとにフィルターをする
-const filterByAffiliation = (userTables: AllUserTables,roadStation:string): AllUserTables => {
+const filterByAffiliation = (userTables: AllUserTables, roadStation: string): AllUserTables => {
   const filtered: AllUserTables = {};
 
   Object.entries(userTables).forEach(([uid, userData]) => {
+    // `affiliation` が存在しない場合は無視
+    if (!userData.affiliation) {
+      return;
+    }
+
     if (userData.affiliation.includes(roadStation)) {
       filtered[uid] = userData;
     }
@@ -169,6 +188,7 @@ const filterByAffiliation = (userTables: AllUserTables,roadStation:string): AllU
 
   return filtered;
 };
+
 //取引完了のものの総額を計算する
 function getTotalMoney(data: Ordertables) {
   let totalCompletedMoney = 0;
@@ -221,8 +241,9 @@ function getTotalMoney(data: Ordertables) {
         <i class="bi bi-person-fill-check"></i>
         <p>{{totalOrderHuman}}</p>
       </div>
-      <p>※合計金額は取引完了したものの総額です。</p>
+      
     </article>
+    <p>※合計金額は取引完了したものの総額です。</p>
   </article>
   
 </template>
@@ -230,12 +251,13 @@ function getTotalMoney(data: Ordertables) {
 .Data-card-group{
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
 }
 .Data-card{
   border-radius: 10px;
   border: 3px solid var(--main-color);
   padding: 10px 20px;
-  width: 140px;
+  width: 170px;
   margin: 10px 15px 10px 0;
   text-align: center;
 }
@@ -252,7 +274,7 @@ function getTotalMoney(data: Ordertables) {
   margin: 0;
 }
 .onwerData-card{
-  width: 340px;
+  width: 512px;
   height: 740px;
   border-radius: 10px;
   background-color: white;
@@ -262,5 +284,14 @@ function getTotalMoney(data: Ordertables) {
 }
 .onwerData-card h1{
   border-bottom: 1px solid black;
+}
+@media (max-width: 575.98px) { 
+  .onwerData-card{
+      width: 340px;
+      padding: 15px;
+  }
+  .Data-card{
+    width: 140px;
+  }
 }
 </style>

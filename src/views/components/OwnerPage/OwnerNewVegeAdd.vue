@@ -87,13 +87,13 @@ function inputVege(){
   border-bottom: 1px solid black;
 }
 .newVege-card{
-  width: 340px;
+  width: 512px;
   height: 600px;
   margin: 0 auto;
   border: 10px;
   background-color: white;
   margin-top: 20px;
-  padding: 10px;
+  padding: 20px;
 }
 .newVege-card button{
   font-size: 1.2rem;
@@ -104,5 +104,10 @@ function inputVege(){
     color: white;
     background-color: var(--main-color);
 }
-
+@media (max-width: 575.98px) { 
+  .newVege-card{
+      width: 340px;
+      padding: 10px;
+  }
+}
 </style>

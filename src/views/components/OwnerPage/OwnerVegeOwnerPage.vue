@@ -179,7 +179,7 @@ function pushOrder(){
 </template>
 <style scoped>
 .ownerVege_card{
-  width: 340px;
+  width: 512px;
   height: 740px;
   border-radius: 10px;
   background-color: white;
@@ -239,5 +239,11 @@ function pushOrder(){
 }
 .Update_popup p{
   font-size: 20px;
+}
+@media (max-width: 575.98px) { 
+  .ownerVege_card{
+      width: 340px;
+      padding: 10px;
+  }
 }
 </style>

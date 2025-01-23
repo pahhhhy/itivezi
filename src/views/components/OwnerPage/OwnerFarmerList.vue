@@ -195,7 +195,7 @@ function onpushfilter(){
       
     </article>
     <article v-if="Object.keys(AllfarmerCount).length==0">データがありません</article>
-    <article v-if="Object.keys(AllfarmerCount).length!=0">
+    <article v-if="Object.keys(AllfarmerCount).length!=0" class="data-List">
       <div v-for="(element,farmer) in AllfarmerCount" :key="farmer" >
         <OwnerFarmerListElement
         v-bind:-farmer-name="element.farmer"
@@ -210,12 +210,13 @@ function onpushfilter(){
 </template>
 <style>
 .farmerList-card{
-  width: 340px;
-  padding: 10px;
+  width: 512px;
+  padding: 20px;
   border-radius: 10px;
   background-color: white;
   margin: 0 auto;
   margin-top: 20px;
+  min-height: 600px;
 }
 .farmerList-card h1{
   border-bottom: 1px solid black;
@@ -231,11 +232,24 @@ function onpushfilter(){
   margin: 10px 10px;
 
 }
+.data-List{
+  overflow-y: scroll;
+  height: 450px;
+}
+.data-List::-webkit-scrollbar {
+  width:0px;
+}
+.data-List::-webkit-scrollbar-thumb {
+  background: var(--line-color);
+  width: 6px;
+  height: 1px;
+  border-radius: 5px;
+}
 .filter-tab{
   border-radius: 10px;
   border: 1px solid var(--line-color);
   padding: 10px;
-  margin: 10px 0;;
+  margin: 10px 0;
 }
 .filter-tab h3{
   border-bottom: 1px solid black;
@@ -259,5 +273,11 @@ function onpushfilter(){
   margin: 10px;
   border-radius: 20px;
   padding: 10px;
+}
+@media (max-width: 575.98px) { 
+  .farmerList-card{
+      width: 340px;
+      padding: 10px;
+  }
 }
 </style>
