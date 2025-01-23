@@ -59,29 +59,50 @@ function inputVege(){
 </script>
 
 <template>
-    <!-- {{uproadVegeData}} -->
-  <div class="title">
-    <h1>新しい野菜の追加</h1>
-  </div>
-  <article v-if="stepNum==0">
-    <div class="mb-3">
-        <label for="VegeNameInput" class="form-label">新しい野菜名</label>
-        <input type="text" class="form-control" id="VegeNameInput" placeholder="野菜名" v-model="vegeName" v-on:change="inputVege">
+    <article class="newVege-card">
+      <div class="title">
+        <h1>新しい野菜の追加</h1>
       </div>
-      <div v-for="(element,vegeName) in uproadVegeData" :key="vegeName">
-        <p>{{vegeName}}</p>
-      </div>
-      <h1 style="color: red" v-show="step1Error">
-        野菜を入力してください
-      </h1>
-      <h1 style="color:green" v-if="uproadName!=''">{{uproadName}}を追加しました</h1>
-      <button v-on:click="changeVege" class="btn btn-primary">追加</button>
-      <button v-on:click="pushReg()" class="btn btn-primary" >登録画面へ</button>
-  </article>
+      <article v-if="stepNum==0">
+        <div class="mb-3">
+            <label for="VegeNameInput" class="form-label">新しい野菜名</label>
+            <input type="text" class="form-control" id="VegeNameInput" placeholder="野菜名" v-model="vegeName" v-on:change="inputVege">
+          </div>
+          <div v-for="(element,vegeName) in uproadVegeData" :key="vegeName">
+            <p>{{vegeName}}</p>
+          </div>
+          <h1 style="color: red" v-show="step1Error">
+            野菜を入力してください
+          </h1>
+          <h1 style="color:green" v-if="uproadName!=''">{{uproadName}}を追加しました</h1>
+          <button v-on:click="changeVege" class="btn btn-primary">追加</button>
+          <button v-on:click="pushReg()" class="btn btn-primary" >登録画面へ</button>
+      </article>
+    </article>
+  
 </template>
 <style>
 .title {
   text-align: center;
+  border-bottom: 1px solid black;
+}
+.newVege-card{
+  width: 340px;
+  height: 600px;
+  margin: 0 auto;
+  border: 10px;
+  background-color: white;
+  margin-top: 20px;
+  padding: 10px;
+}
+.newVege-card button{
+  font-size: 1.2rem;
+    padding: 15px 30px;
+    margin: 5px;
+    border-radius: 30px;
+    border: none;
+    color: white;
+    background-color: var(--main-color);
 }
 
 </style>

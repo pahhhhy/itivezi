@@ -66,7 +66,10 @@ const fireUseStore=usefireUserStore()
 const userAllData=ref<AllUserTables>({})
 const filterAllUserData=ref<AllUserTables>({})
 const roadStationUnitTempList = ref<string[]>(useRoadStationStore().roadStationTemp)
+if(!roadStationUnitTempList.value.includes("全て")){
   roadStationUnitTempList.value.unshift("全て");
+}
+  
 const selectedRoadStation = ref<string>(roadStationUnitTempList.value[0])
 const totalUser = ref<number>(0)
 const fliterOrderData=ref<Ordertables>(orderAllData.value)
@@ -185,21 +188,79 @@ function getTotalMoney(data: Ordertables) {
 }
 </script>
 <template>
-  <!-- {{ orderAllData }} -->
-    <!-- {{ fliterOrderData }} -->
-  <h1>各種データ</h1>
-  <select class="form-select" aria-label="roadsideStationSelect" v-model="selectedRoadStation" @change="initData">
-    <option selected v-bind:value="roadStation" v-for="roadStation in roadStationUnitTempList" :key=roadStation>
-      {{ roadStation }}
-    </option>
-  </select>
-  <!-- {{ orderAllData }} -->
-  <!-- <p>{{userAllData}}</p> -->
-  <h2>利用数：{{ totalUser }}</h2>
-  <h2>注文数:{{ totalOrderNum }}</h2>
-  <h2>農家数:{{ totalFarmer }}</h2>
-  <h2>合計金額:{{ totalMoney }}円</h2>
-  <h2>購入者数:{{ totalOrderHuman }}</h2>
-  <p>※合計金額は取引完了したものの総額です。</p>
+  <article class="onwerData-card">
+    <h1>各種データ</h1>
+    <select class="form-select" aria-label="roadsideStationSelect" v-model="selectedRoadStation" @change="initData">
+      <option selected v-bind:value="roadStation" v-for="roadStation in roadStationUnitTempList" :key=roadStation>
+        {{ roadStation }}
+      </option>
+    </select>
+    <article class="Data-card-group">
+      <div class="Data-card">
+        <h3>利用者数</h3>
+        <i class="bi bi-bar-chart-line-fill"></i>
+        <p>{{totalUser}}</p>
+      </div>
+      <div class="Data-card">
+        <h3>注文数</h3>
+        <i class="bi bi-cart"></i>
+        <p>{{totalOrderNum}}</p>
+      </div>
+      <div class="Data-card">
+        <h3>農家数</h3>
+        <i class="bi bi-people"></i>
+        <p>{{totalFarmer}}</p>
+      </div>
+      <div class="Data-card">
+        <h3>合計金額</h3>
+        <i class="bi bi-currency-dollar"></i>
+        <p>{{totalMoney}}</p>
+      </div>
+      <div class="Data-card">
+        <h3>購入者数</h3>
+        <i class="bi bi-person-fill-check"></i>
+        <p>{{totalOrderHuman}}</p>
+      </div>
+      <p>※合計金額は取引完了したものの総額です。</p>
+    </article>
+  </article>
+  
 </template>
-<style></style>
+<style>
+.Data-card-group{
+  display: flex;
+  flex-wrap: wrap;
+}
+.Data-card{
+  border-radius: 10px;
+  border: 3px solid var(--main-color);
+  padding: 10px 20px;
+  width: 140px;
+  margin: 10px 15px 10px 0;
+  text-align: center;
+}
+.Data-card h3{
+  border-bottom: 3px solid var(--main-color);
+  padding-bottom: 2px;
+}
+.Data-card i{
+  font-size: 36px;
+  color: var(--main-color);
+}
+.Data-card p{
+  font-size: 24px;
+  margin: 0;
+}
+.onwerData-card{
+  width: 340px;
+  height: 740px;
+  border-radius: 10px;
+  background-color: white;
+  margin: 0 auto;
+  padding: 15px;
+  margin-top: 20px;
+}
+.onwerData-card h1{
+  border-bottom: 1px solid black;
+}
+</style>

@@ -188,7 +188,7 @@ function pushOrder(){
   margin-top: 20px;
 }
 .ownerVege_title{
-  text-align: center;
+  
   border-bottom: 1px solid black;
   padding-bottom: 5px;
 }

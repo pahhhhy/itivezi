@@ -43,7 +43,10 @@ interface BuyerListTable {
   totalMoney: number;
 };
 const roadStationUnitTempList = ref<string[]>(useRoadStationStore().roadStationTemp)
-roadStationUnitTempList.value.unshift("全て");
+if(roadStationUnitTempList.value.includes("全て")){
+  roadStationUnitTempList.value.unshift("全て");
+}
+
 const selectedRoadStation = ref<string>(roadStationUnitTempList.value[0])
 
 const fireOrderStore=useFireOrderStore()
@@ -56,7 +59,7 @@ const selectStartMonth = ref<number>(1)
 const selectEndYear = ref<number>(2024)
 const selectEndMonth = ref<number>(12)
 const startDate = ref<Date>(new Date(2024, 3, 1));  // 4月 (0ベースなので3月が4月を指す)
-const endDate = ref<Date>(new Date(2024, 9, 31));   // 10月 (0ベースなので9月が10月を指す)
+const endDate = ref<Date>(new Date(2025, 9, 31));   // 10月 (0ベースなので9月が10月を指す)
 watch(() => fireOrderStore.OrderAllData, (newUser) => {
   orderAllData.value = newUser;
   initData()
@@ -69,10 +72,12 @@ async function initData() {
   }else{
     fliterOrderData.value=filterRoadStationByRoomne(orderAllData.value,selectedRoadStation.value)
   }
+  
   //全体のデータから年代の種類を取得する
   yearList.value = extractUniqueYears(fliterOrderData.value)
   //全体のデータからある範囲のデータに抽出する
   fliterOrderData.value= filterOrdersByDateRange(fliterOrderData.value,startDate.value,endDate.value)
+  console.log(fliterOrderData.value)
   //抽出したデータからBuyerListの作成
   orderNumList.value = generateBuyerListTable(fliterOrderData.value)
 }
@@ -168,14 +173,27 @@ function generateBuyerListTable(orders: Ordertables): BuyerListTable[] {
 
   // ユーザーIDごとにループ
   for (const uid in orders) {
+    // 空文字キーをスキップ
+    if (!uid) continue;
+
     const uniqueKeyOrders = orders[uid];
 
     // uniqueKey ごとに注文情報を集計
     for (const uniqueKey in uniqueKeyOrders) {
       const order = uniqueKeyOrders[uniqueKey];
 
+      // 必須フィールドと型を確認
+      if (
+        typeof order !== "object" ||
+        typeof order.orderName !== "string" ||
+        typeof order.totalMoney !== "number" ||
+        typeof order.state !== "string"
+      ) {
+        continue; // 型が正しくない場合は無視
+      }
+
       // state が OrderStete.Completed の場合のみ処理する
-      if (order.state === OrderStete.Completed) {
+      if (order.state === "取引完了") { // `OrderStete.Completed` に対応
         const { orderName, totalMoney } = order;
 
         // 既に orderName が buyerList に存在するか確認
@@ -186,7 +204,7 @@ function generateBuyerListTable(orders: Ordertables): BuyerListTable[] {
 
         // 注文件数をカウントし、総額を加算
         buyerList[orderName].count += 1;
-        buyerList[orderName].totalMoney += totalMoney; // Use totalMoney from the order
+        buyerList[orderName].totalMoney += totalMoney;
       }
     }
   }
@@ -198,6 +216,7 @@ function generateBuyerListTable(orders: Ordertables): BuyerListTable[] {
     totalMoney: buyerList[orderName].totalMoney
   }));
 }
+
 
 
 type Order = {
@@ -322,6 +341,10 @@ function parseOrderTime(orderTime: string | undefined): Date  {
     <p>月</p>
   </div>
   {{ orderAllData }}
+  <p></p>
+  {{ fliterOrderData.value }}
+  <p></p>
+  {{ orderNumList }}
 </template>
 <style>
 .buyer-group {
