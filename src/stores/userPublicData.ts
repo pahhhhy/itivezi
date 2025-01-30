@@ -5,7 +5,7 @@ import {ref} from "vue";
 
 
 // ユーザーidからそのユーザーのユーザー名, アイコン等を保持するストア。もしキャッシュがあればそこから返し, なければ都度取得するようにする.
-export const useUserDataStore = defineStore("userData", () => {
+export const useUserDataStore = defineStore("testuserData", () => {
         const usersPublicData = ref<Record<string, UserPublicData>>({});
 
         const getUserPublicData = async (userId: string) => {

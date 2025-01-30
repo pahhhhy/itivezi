@@ -35,7 +35,7 @@ export const usefireUserStore = defineStore({
     actions:{
         async roadFireUseData(uid:string) {
             return new Promise((resolve, reject) => {
-              const countRef = fireRef(getDatabase(), 'UserData/'+uid)
+              const countRef = fireRef(getDatabase(), 'testUser/'+uid)
               onValue(countRef, (snapshot) => {
                 const data = snapshot.val()
                 if (data) {
@@ -50,7 +50,7 @@ export const usefireUserStore = defineStore({
             });
           },async AllroadFireUseData():Promise<AllUserTables> {
             return new Promise((resolve, reject) => {
-              const countRef = fireRef(getDatabase(), 'UserData/')
+              const countRef = fireRef(getDatabase(), 'testUser/')
               onValue(countRef, (snapshot) => {
                 const data:AllUserTables = snapshot.val()
                 if (data) {
@@ -65,7 +65,7 @@ export const usefireUserStore = defineStore({
           },async update(data: Usertables,uid:string): Promise<void> {
             const db = getDatabase();
             return new Promise((resolve, reject) => {
-              set(fireRef(db, `UserData/${uid}`), data)
+              set(fireRef(db, `testUser/${uid}`), data)
                 .then(() => {
                   resolve(); // 成功した場合に resolve を呼び出す
                 })
@@ -77,7 +77,7 @@ export const usefireUserStore = defineStore({
           },async delete(uid:string|number): Promise<void> {
             const db = getDatabase();
             return new Promise((resolve, reject) => {
-              remove(fireRef(db, `UserData/${uid}`))
+              remove(fireRef(db, `testUser/${uid}`))
                 .then(() => {
                   resolve(); // 成功した場合に resolve を呼び出す
                 })

@@ -45,7 +45,7 @@ export const useFireOrderStore = defineStore({
     actions:{
         async roadData() {
             return new Promise((resolve, reject) => {
-              const countRef = fireRef(getDatabase(), `Orders/`)
+              const countRef = fireRef(getDatabase(), `testOrders/`)
               onValue(countRef, (snapshot) => {
                 const data = snapshot.val()
                 if (data) {
@@ -62,7 +62,7 @@ export const useFireOrderStore = defineStore({
           async updateCartData(data: OrdertablesElement,uid:string ): Promise<boolean> {
             const db = getDatabase();
             try {
-              await push(fireRef(db, `Orders/${uid}`), data);
+              await push(fireRef(db, `testOrders/${uid}`), data);
               return true; // 成功したら true を返す
             } catch (error) {
               console.error('Error updating data:', error);
@@ -71,7 +71,7 @@ export const useFireOrderStore = defineStore({
           },async updateOrderState(data: OrdertablesElement,uid:string,unique:string ): Promise<boolean> {
             const db = getDatabase();
             try {
-              await update(fireRef(db, `Orders/${uid}/${unique}`), data);
+              await update(fireRef(db, `testOrders/${uid}/${unique}`), data);
               return true; // 成功したら true を返す
             } catch (error) {
               console.error('Error updating data:', error);
