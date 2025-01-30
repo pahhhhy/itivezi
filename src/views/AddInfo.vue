@@ -134,7 +134,7 @@ function inputdata(mode:CheckList){
 <template>
   <article class="addinfo-card">
     <div class="title">
-      <h1>追加情報</h1>
+      <h1>個人設定</h1>
     </div>
     <div class="mb-3">
       <h4 for="exampleFormControlInput1" class="form-label">屋号・店名</h4>
