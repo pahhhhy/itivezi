@@ -167,8 +167,8 @@ p{
   flex-direction: column;
 }
 .card-body h5{
-  font-size: 20px;
-  font-weight: bolder;
+  font-size: 20px!important;
+  font-weight: bolder!important;
   padding: 0;
   text-align: left;
   color: var(--other-color);

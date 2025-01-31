@@ -142,7 +142,7 @@ function onPushChange(){
 <template>
   <article  class="myvege_popup">
     <h1>{{props.vegedata.VegeName}}</h1>
-    <div class="form">
+    <div class="myvege_form">
       <p>単位</p>
       <div class="unit" v-if="vegeunit">
         <input
@@ -171,7 +171,7 @@ function onPushChange(){
         </select>
       </div>
     </div>
-    <div class="form">
+    <div class="myvege_form">
       <p>値段</p>
       <input
         class="form-control"
@@ -182,7 +182,7 @@ function onPushChange(){
         @input="updateVegeMoney(vegeMoney, Mode.Money)"
       />
     </div>
-    <div class="form">
+    <div class="myvege_form">
       <p>画像</p>
       <RegStep2image
       v-bind:index="0"
@@ -192,7 +192,7 @@ function onPushChange(){
       v-bind:photo="props.vegedata.photo"
       v-on:uproad-image="uproadImage"></RegStep2image>
     </div>
-    <div class="form">
+    <div class="myvege_form">
       <p>卸先</p>
       <article class="form_check">
         <div  v-for="(element, index) in roadStationUnitTempList" :key="element" class="form_check_element">
@@ -250,7 +250,7 @@ p{
   z-index: 5;
   background-color: rgba(3,3,3,0.5);;
 }
-.form{
+.myvege_form{
   display: flex;
   margin-top: 10px;
 }
@@ -258,7 +258,7 @@ p{
   display: flex;
 }
 .form_check_element{
-  width: 60px;
+  width: 70px;
 }
 .form>p{
   font-size: 20px;
