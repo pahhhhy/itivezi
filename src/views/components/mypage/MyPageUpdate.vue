@@ -337,7 +337,7 @@ function filterOrdersByOrderName(orders: Ordertables, orderName: string): Ordert
   <article class="myacount_card">
     <div v-if="!modeBoolList[Mode.icon]" v-on:click="pushUpdate(Mode.icon,true)">
       <div v-if="iconURL != null&&iconURL != '' " class="icon-image"><img v-bind:src="iconURL" alt=""></div>
-      <div v-if="iconURL == null||iconURL == '' "><img src="../../../assets/icon.png" alt="" class="aicon-image"></div>
+      <div v-if="iconURL == null||iconURL == '' " class="aicon-image"><img src="../../../assets/icon.png" alt="" ></div>
     </div>
     <div v-if="modeBoolList[Mode.icon]" class="changeicon">
       <div v-if="iconURL != null&&iconURL != '' " class="icon-image" v-on:click="pushUpdate(Mode.icon,false)"><img v-bind:src="iconURL" alt=""></div>
