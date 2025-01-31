@@ -31,8 +31,10 @@ const RoadStationString =ref<string>(RoadStation.value ? String(RoadStation.valu
 const vegeStore=useVegeStore()
 const vegeAllData = ref<Vegetables>(vegeStore.VegeAllData)
 const filteredData=ref<Vegetables>({})
-function initData(){
-   filteredData.value= filterVegetablesByFarmerAndRoadStation(vegeAllData.value,nameString.value,RoadStationString.value)
+const filteredVegeData=ref<Vegetables>({})
+function initData(){  
+  filteredVegeData.value=removeDiscontinuedVegetables(vegeAllData.value)
+   filteredData.value= filterVegetablesByFarmerAndRoadStation(filteredVegeData.value,nameString.value,RoadStationString.value)
     
     
 }
@@ -49,7 +51,32 @@ onMounted(() => {
     { immediate: true }
   );
 });
+function removeDiscontinuedVegetables(vegetables: Vegetables): Vegetables {
+    const filteredVegetables: Vegetables = {};
 
+    // 各野菜名ごとにループ
+    for (const vegeName in vegetables) {
+        const vegeEntries = vegetables[vegeName];
+        const filteredEntries: { [uniqueKey: string]: vegeElementTables } = {};
+
+        // uniqueKey ごとにループ
+        for (const uniqueKey in vegeEntries) {
+            const vegeEntry = vegeEntries[uniqueKey];
+
+            // state が Discontinued でない場合にのみフィルタリング
+            if (vegeEntry.state !== VegeState.Discontinued) {
+                filteredEntries[uniqueKey] = vegeEntry;
+            }
+        }
+
+        // フィルタリング後にエントリがある場合にのみ追加
+        if (Object.keys(filteredEntries).length > 0) {
+            filteredVegetables[vegeName] = filteredEntries;
+        }
+    }
+
+    return filteredVegetables;
+}
 function filterVegetablesByFarmerAndRoadStation(
   vegetables: Vegetables,
   farmerName: string,

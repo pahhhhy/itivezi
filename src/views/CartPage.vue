@@ -300,7 +300,7 @@ p{
 }
 .cart_popup{
   position: fixed;
-  width: 340px;
+  width: 400px;
   height: 200px;
   z-index: 10;
   border: 1px solid gray;

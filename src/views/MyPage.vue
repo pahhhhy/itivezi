@@ -7,10 +7,19 @@ import MyPageUpdate from './components/mypage/MyPageUpdate.vue'
 import MyPageMyVege from './components/mypage/MyPageMyVege.vue'
 import { useUserStore } from '@/stores/userData';
 import { useVegeStore } from '@/stores/vege'
+import { usefireUserStore } from '@/stores/fireUserdata';
 enum VegeState{
   Discontinued="Discontinued",
   Available="Available"
 }
+enum Role{
+    Onwer="管理者",
+    Buyer="飲食店",
+    Farmer="農家",
+    Murone="室根",
+    Kawasaki="川崎",
+    None=""
+  }
 interface Vegetables{
     [vegeName:string]:{
         [uniqueKey:string]:vegeElementTables
@@ -25,10 +34,21 @@ interface vegeElementTables{
   unit:string
   photo:string
 }
+interface Usertables{
+    affiliation:String[]
+   
+    name:string
+    phoneNumber:number
+    place:string
+    role:Role
+    email:string
+}
 const vegeStore=useVegeStore()
 const vegeAllData = ref<Vegetables>(vegeStore.VegeAllData)
 const userStore=useUserStore()
 const currentUser = ref<User|null>(userStore.currentUser);
+  const fireUseStore=usefireUserStore()
+  const myUserData=ref<Usertables>(fireUseStore.myUserData)
 watch(() => userStore.currentUser, (newUser) => {
   currentUser.value = newUser;
 });
@@ -42,7 +62,7 @@ watch(() => vegeStore.VegeAllData, (newUser) => {
   <my-page-update v-bind:current-user="currentUser" v-bind:vege-all-data="vegeAllData" v-if="currentUser != null"></my-page-update>
   <my-page-my-vege
     v-bind:current-user="currentUser"
-    v-if="currentUser != null "
+    v-if="currentUser != null && myUserData.role!=Role.Buyer"
   ></my-page-my-vege>
   <my-page-order v-bind:current-user="currentUser" v-if="currentUser != null"></my-page-order>
 </template>
