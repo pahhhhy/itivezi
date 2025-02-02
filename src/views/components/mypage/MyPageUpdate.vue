@@ -67,6 +67,14 @@ enum Mode{
   role="役職",
   icon="アイコン"
 }
+enum Role{
+  Onwer="管理者",
+  Buyer="飲食店",
+  Farmer="農家",
+  Murone="室根",
+  Kawasaki="川崎",
+  None=""
+}
 const iconStore = (useIconStore())
 const userStore=useUserStore()
 const currentUser = ref(userStore.currentUser);
@@ -99,6 +107,7 @@ const modeBoolList = ref<Record<Mode, boolean>>({
   [Mode.role]: false,
   [Mode.icon]: false,
 });
+
 const vegeStore=useVegeStore()
 const vegeAllData = ref<Vegetables>(vegeStore.VegeAllData)
   watch(() => userStore.currentUser, (newUser) => {
@@ -119,6 +128,11 @@ watchEffect(() => {
     onValue(countRef, (snapshot) => {
       myData.value = snapshot.val()
       myRole.value = myData.value.role
+      if(myRole.value==Role.Buyer){
+        myRole.value="飲食店・ホテル"
+      }else if(myRole.value==Role.Farmer){
+        myRole.value="加工業"
+      }
       myPlace.value = myData.value.place
       myGender.value = myData.value.gender
       if(myData.value.gender=="men")myGender.value=Gender.men
@@ -337,7 +351,7 @@ function filterOrdersByOrderName(orders: Ordertables, orderName: string): Ordert
   <article class="myacount_card">
     <div v-if="!modeBoolList[Mode.icon]" v-on:click="pushUpdate(Mode.icon,true)">
       <div v-if="iconURL != null&&iconURL != '' " class="icon-image"><img v-bind:src="iconURL" alt=""></div>
-      <div v-if="iconURL == null||iconURL == '' " class="aicon-image"><img src="../../../assets/icon.png" alt="" ></div>
+      <div v-if="iconURL == null||iconURL == '' " style="text-align: center;" ><img src="../../../assets/icon.png" alt="" class="aicon-image"></div>
     </div>
     <div v-if="modeBoolList[Mode.icon]" class="changeicon">
       <div v-if="iconURL != null&&iconURL != '' " class="icon-image" v-on:click="pushUpdate(Mode.icon,false)"><img v-bind:src="iconURL" alt=""></div>

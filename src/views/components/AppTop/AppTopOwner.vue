@@ -98,7 +98,10 @@ onMounted(() => {
 });
 </script>
 <template>
-<div class="card_group">
+  <article class="road" v-if="myUserData.role==''">
+    <div class="three-quarter-spinner"></div>
+  </article >
+<div class="card_group" v-if="myUserData.role!=''">
   <div class="card">
     <h2>注文</h2>
     <p>野菜の注文ができます</p>
@@ -132,6 +135,22 @@ onMounted(() => {
 </div>
 </template>
 <style scoped>
+@keyframes spin {
+  from {
+    transform: rotate(0);
+  }
+  to{
+    transform: rotate(359deg);
+  }
+}
+.three-quarter-spinner {
+  width: 50px;
+  height: 50px;
+  border: 3px solid var(--main-color);
+  border-top: 3px solid transparent;
+  border-radius: 50%;
+  animation: spin .5s linear 0s infinite;
+}
 .link{
     text-decoration: none;
     color: white;

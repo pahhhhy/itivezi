@@ -1,18 +1,26 @@
 <script setup lang="ts">
-import {ref,watch} from 'vue'
+import {ref,watch,onMounted} from 'vue'
 import {RouterLink} from 'vue-router'
 import AppTopOwner from './components/AppTop/AppTopOwner.vue';
 import { useUserStore } from '@/stores/userData';
 const userStore=useUserStore()
 const currentUser = ref(userStore.currentUser);
+const loadtime=ref<boolean>(true)
 watch(() => userStore.currentUser, (newUser) => {
   currentUser.value = newUser;
+});
+onMounted(() => {
+  setTimeout(() => {
+    loadtime.value=false;
+  }, 1000);
 });
 </script>
 
 <template>
-
-  <article v-if="currentUser == null">
+  <article class="road" v-if="loadtime">
+    <div class="three-quarter-spinner"></div>
+  </article >
+  <article v-if="currentUser == null&&!loadtime">
 
     <div class="login-form">
       <h3>ログインすることでこのアプリを使うことができます。</h3>
@@ -22,11 +30,28 @@ watch(() => userStore.currentUser, (newUser) => {
       </button>
     </div>
   </article>
-  <article v-if="currentUser != null">
+  <article v-if="currentUser != null&&!loadtime">
+
     <AppTopOwner ></AppTopOwner>
   </article>
 </template>
 <style>
+@keyframes spin {
+  from {
+    transform: rotate(0);
+  }
+  to{
+    transform: rotate(359deg);
+  }
+}
+.three-quarter-spinner {
+  width: 50px;
+  height: 50px;
+  border: 3px solid var(--main-color);
+  border-top: 3px solid transparent;
+  border-radius: 50%;
+  animation: spin .5s linear 0s infinite;
+}
 .login-form h3{
   margin-top:24px ;
 }

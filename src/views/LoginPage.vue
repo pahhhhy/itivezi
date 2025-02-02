@@ -9,7 +9,7 @@ import {
   sendPasswordResetEmail,
   type User
 } from 'firebase/auth'
-import { ref, watch } from 'vue'
+import { ref, watch ,computed} from 'vue'
 import LoginForm from './components/LoginForm.vue'
 import { getStorage, ref as storageRef, getMetadata } from 'firebase/storage';
 import '../assets/main.css'
@@ -60,6 +60,14 @@ const sortVegeStore=useSortVegeStore()
 const FireOrderStore=useFireOrderStore()
 const CartStore=useCartStore()
 const auth = getAuth();
+const myData = computed(() => {
+  if(currentUser.value){
+    return userData.value[currentUser.value.uid];
+  }
+  else{
+    return {}
+  }
+});
 const isPopup=ref<Boolean>(false)
   async function roadData(){
   await userStore.roadUserData()
@@ -71,9 +79,6 @@ const isPopup=ref<Boolean>(false)
   if(currentUser.value){
     await fireUseStore.roadFireUseData(currentUser.value.uid)
   }
-  
-else
-console.log("error")
 }
   watch(() => userStore.currentUser, (newUser) => {
   currentUser.value = newUser;
@@ -100,16 +105,7 @@ async function checkMyData() {
       }
       if (
         userData.value[currentUser.value.uid].phoneNumber == null ||
-        userData.value[currentUser.value.uid].phoneNumber == 0||
-        userData.value[currentUser.value.uid].affiliation == null||
-        userData.value[currentUser.value.uid].affiliation.length == 0
-      ) {
-        isOk = false
-      }
-      if (
-        currentUser.value.photoURL==null||
-        currentUser.value.photoURL==undefined||
-        currentUser.value.photoURL==''
+        userData.value[currentUser.value.uid].phoneNumber == 0
       ) {
         isOk = false
       }
@@ -133,12 +129,14 @@ async function signin(email: string, password: string) {
     .then(async (userCredential) => {
       // 成功時処理
       const user = userCredential.user
+      
       if (user.emailVerified) {
         // メールアドレスが認証済みの場合の処理
-        
+        await initData()
         errorMes.value = ''
         if (currentUser.value != null) {
           if (!await checkMyData()) {
+            console.log(userData.value[currentUser.value.uid])
             router.push('/add-info')
           } else {
             window.scrollTo({
@@ -148,6 +146,7 @@ async function signin(email: string, password: string) {
             router.push('/')
           }
         } else {
+          console.log("カレントユーザーなし")
           router.push('/add-info')
         }
       } else {
