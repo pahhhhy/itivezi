@@ -60,21 +60,20 @@ const isfliter=ref<boolean>(false)
     sortVegeOrder.value=sortVegeStore.sortbyVege
     vegeAllData.value=vegeStore.VegeAllData
     vegeAllData.value = filterAvailableVegetables(vegeAllData.value);
-    filterVegeData.value=vegeAllData.value
-    filterVegeData.value=makeSortData(filterVegeData.value,sortVegeOrder.value)
+
 })
 vegeAllData.value=filterAvailableVegetables(vegeAllData.value)
-const filterVegeData=ref<Vegetables>(vegeAllData.value)
+const filterVegeData=ref<Vegetables>({})
 watch(() => sortVegeStore.sortbyVege, (newUser) => {
   sortVegeOrder.value = newUser;
+  filterVegeData.value=makeSortData(vegeAllData.value,sortVegeOrder.value)
 });
 watch(() => cartStore.cartData, (newUser) => {
   cartData.value = newUser;
 });
 watch(() => vegeStore.VegeAllData, (newUser) => {
   vegeAllData.value = filterAvailableVegetables(newUser);
-  filterVegeData.value=vegeAllData.value
-  filterVegeData.value=makeSortData(filterVegeData.value,sortVegeOrder.value)
+  filterVegeData.value=makeSortData(vegeAllData.value,sortVegeOrder.value)
 });
 watch(() => orderStore.orderData, (newUser) => {
   orderData.value = newUser;
@@ -141,22 +140,27 @@ function filterByRoadStation(vegetables: Vegetables, role: SortMode) {
     return result;
 }
 function makeSortData(data: Vegetables, order: string[]): Vegetables {
-  // 指定された順番で並べ替え、他の野菜を最後に追加
-  const sortedData = Object.keys(data)
-    .sort((a, b) => {
-      const indexA = order.indexOf(a);
-      const indexB = order.indexOf(b);
-      if (indexA === -1) return 1; // orderにない場合は後ろに
-      if (indexB === -1) return -1;
-      return indexA - indexB;
-    })
-    .reduce((acc, key) => {
-      acc[key] = data[key];
-      return acc;
-    }, {} as Vegetables);
+  // 野菜の名前リスト
+  const vegeNames = Object.keys(data);
+
+  // 指定された順番に基づいてソート
+  const sortedNames = vegeNames.sort((a, b) => {
+    const indexA = order.indexOf(a);
+    const indexB = order.indexOf(b);
+    if (indexA === -1) return 1; // orderにないものは後ろ
+    if (indexB === -1) return -1;
+    return indexA - indexB;
+  });
+
+  // 新しいオブジェクトを作成
+  const sortedData: Vegetables = {};
+  sortedNames.forEach((vegeName) => {
+    sortedData[vegeName] = data[vegeName];
+  });
 
   return sortedData;
 }
+
 function onpushhistory(){
   router.push("/my-allorder")
 }
@@ -165,7 +169,10 @@ function onpushfilter(){
 }
 </script>
 <template>
-  <article class="module">
+  <article v-if="Object.keys(filterVegeData).length==0" style="text-align: center;">
+    <div class="three-quarter-spinner"></div>
+  </article>
+  <article class="module" v-if="Object.keys(filterVegeData).length!=0">
     <button v-on:click="onpushfilter">
       フィルター
       <i class="bi bi-chevron-down" v-if="!isfliter"></i>
@@ -208,6 +215,22 @@ function onpushfilter(){
 
 </template>
 <style scoped>
+@keyframes spin {
+  from {
+    transform: rotate(0);
+  }
+  to{
+    transform: rotate(359deg);
+  }
+}
+.three-quarter-spinner {
+  width: 50px;
+  height: 50px;
+  border: 3px solid var(--main-color);
+  border-top: 3px solid transparent;
+  border-radius: 50%;
+  animation: spin .5s linear 0s infinite;
+}
 .module{
   margin: auto;
   width: 800px;

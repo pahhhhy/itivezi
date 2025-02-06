@@ -226,6 +226,10 @@ function pushOrder(){
   font-size: 20px;
   margin: 10px;
 }
+.TAB_Body_Vege{
+  height: 460px;
+  overflow-x: auto;
+}
 .Update_popup{
   position: fixed;
   width: 340px;

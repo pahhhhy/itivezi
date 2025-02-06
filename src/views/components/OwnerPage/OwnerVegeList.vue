@@ -175,7 +175,7 @@ function pushBack() {
 
 </script>
 <template>
-    <article >
+    <article class="onwerVegeList">
       <OwnerVegeOwnerPage 
       v-if="ComponentUpdate"
       v-bind:current-user="currentUser"
@@ -196,6 +196,9 @@ function pushBack() {
   </div>
 </template>
 <style>
+.onwerVegeList{
+  
+}
 .owner-popup {
   position: fixed;
   width: 512px;
