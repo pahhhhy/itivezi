@@ -169,7 +169,7 @@ function onpushfilter(){
 }
 </script>
 <template>
-  <article v-if="Object.keys(filterVegeData).length==0" style="text-align: center;">
+  <article v-if="Object.keys(filterVegeData).length==0" class="animetion">
     <div class="three-quarter-spinner"></div>
   </article>
   <article class="module" v-if="Object.keys(filterVegeData).length!=0">
@@ -222,6 +222,11 @@ function onpushfilter(){
   to{
     transform: rotate(359deg);
   }
+}
+.animetion{
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 .three-quarter-spinner {
   width: 50px;
