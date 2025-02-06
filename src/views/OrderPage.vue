@@ -60,7 +60,7 @@ const isfliter=ref<boolean>(false)
     sortVegeOrder.value=sortVegeStore.sortbyVege
     vegeAllData.value=vegeStore.VegeAllData
     vegeAllData.value = filterAvailableVegetables(vegeAllData.value);
-
+    filterVegeData.value=makeSortData(vegeAllData.value,sortVegeOrder.value)
 })
 vegeAllData.value=filterAvailableVegetables(vegeAllData.value)
 const filterVegeData=ref<Vegetables>({})
