@@ -426,7 +426,7 @@ table {
 }
 tbody{
   overflow-y: scroll;
-  height: 200px;
+  height: 100px;
 }
 th, td {
   border: 1px solid #ddd;

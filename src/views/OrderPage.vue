@@ -55,7 +55,7 @@ const cartStore=useCartStore()
 const cartData=ref<CartTables>(cartStore.cartData)
 const selectedFilter=ref<SortMode>(SortMode.All)
 const isfliter=ref<boolean>(false)
-  const roles = ref<SortMode[]>(Object.values(SortMode).filter((item): item is SortMode => item !== SortMode.All));
+  const roles = ref<SortMode[]>(Object.values(SortMode));
   onMounted(() => {
     sortVegeOrder.value=sortVegeStore.sortbyVege
     vegeAllData.value=vegeStore.VegeAllData
@@ -194,8 +194,11 @@ function onpushfilter(){
             v-on:click="onPushfilter(element)"
             :id="'flexCheckIndeterminate' + index"
           />
-          <label class="form-check-label" :for="'flexCheckIndeterminate' + index">
+          <label class="form-check-label" :for="'flexCheckIndeterminate' + index" v-if="element!='all'">
             {{ element }}
+          </label>
+          <label class="form-check-label" :for="'flexCheckIndeterminate' + index" v-if="element=='all'">
+            全て
           </label>
         </div>
       </div>
@@ -273,6 +276,7 @@ function onpushfilter(){
 }
 .filter_button_group{
   display: flex;
+  flex-wrap: wrap;
 }
 .filter_button label{
   font-size: 18px;

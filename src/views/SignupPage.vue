@@ -283,6 +283,11 @@ body {
   .form_card{
     width: 340px!important;
   }
+  .popup_signup{
+    width: 340px;
+    left: calc(50% - 170px)!important;
+    top: calc(50% - 140px)!important;
+  }
  }
 
 </style>

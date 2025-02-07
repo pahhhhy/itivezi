@@ -188,6 +188,7 @@ function changeState(){
         <h2>注文内容の確認</h2>
     </div>
         <div class="orderinfo">
+          <div class="orderinfoelement"><h5>注文者名</h5><p>{{data?.orderName}}</p></div>
           <div class="orderinfoelement"><h5>注文日</h5><p>{{orderTime}}</p></div>
           <div class="orderinfoelement"><h5>配送希望日</h5><p>{{selectDate}}</p></div>
           <div class="orderinfoelement"><h5>小計</h5><p>￥{{data?.totalMoney}}</p></div>

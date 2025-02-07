@@ -238,6 +238,11 @@ body {
   .form_card{
     width: 340px!important;
   }
+  .popup_reset{
+    width: 340px;
+    left: calc(50% - 170px);
+    top:calc(50% - 140px)
+  }
  }
 
 </style>

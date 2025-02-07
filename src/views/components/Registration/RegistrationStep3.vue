@@ -180,6 +180,7 @@ p{
 }
 .chack_data{
   display: flex;
+  flex-wrap: wrap;
   width: 900px;
   margin: 0 auto;
 }
