@@ -404,7 +404,7 @@ function filterOrdersByOrderName(orders: Ordertables, orderName: string): Ordert
       </button>
     </div>
     <div class="myacount_element">
-      <p class="head">役職</p>
+      <p class="head">事業種</p>
       <p class="element">{{myRole}}</p>
     </div>
   </article>
