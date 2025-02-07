@@ -3,6 +3,7 @@ import { ref,watch} from 'vue'
 import { useUserStore } from '@/stores/userData';
 import { useCartStore } from '@/stores/cart';
 import { useOrderDataStore } from '@/stores/orderData';
+import router from '@/router'
 enum VegeState{
   Discontinued="Discontinued",
   Available="Available"
@@ -41,7 +42,7 @@ const userStore=useUserStore()
 const currentUser = ref(userStore.currentUser);
 const CartStore=ref(useCartStore())
 const isPopup=ref<boolean>(false)
-  
+  const IsPopup=ref<boolean>(false)
 watch(() => userStore.currentUser, (newUser) => {
   currentUser.value = newUser;
 });
@@ -67,6 +68,7 @@ watch(() => userStore.currentUser, (newUser) => {
         vegeCount.value=0
         totalMoney.value=0
         isPopup.value=false
+        IsPopup.value=true
     }
 }
 function OnpushElement(){
@@ -83,6 +85,13 @@ function changeNumber(isplus:boolean,money: number){
     vegeCount.value=vegeCount.value-1
   }
   totalMoney.value = vegeCount.value* money
+}
+function onGoCart(){
+    router.push('/cart')
+}
+function onPushOk(){
+    IsPopup.value=false
+    isPopup.value=false
 }
 </script>
 <template>
@@ -124,7 +133,12 @@ function changeNumber(isplus:boolean,money: number){
     <button class="btn btn-success" v-on:click="onPushCart()" v-bind:class="{disable:totalMoney==0}">カートに入れる</button>
 
 </article >
-<div class="blackback" v-if="isPopup"></div>
+<article v-if="IsPopup" class="Toggle_popup">
+  <h2>カードに入れました</h2>
+      <button v-on:click="onPushOk" class="btn btn-success">買い物を続ける</button>
+      <button v-on:click="onGoCart" class="btn btn-success">カートへ</button>
+</article>
+<div class="blackback" v-if="isPopup||IsPopup"></div>
 </template>
 <style scoped>
 p{
@@ -223,6 +237,22 @@ p{
   padding: 20px;
   background-color: white;
 }
+.Toggle_popup{
+  position: fixed;
+  z-index: 10;
+  width: 512px;
+  border: 1px solid gray;
+  border-radius: 20px;
+  top: calc(50% - 150px);
+  left: calc(50% - 256px);
+  padding: 20px;
+  background-color: white;
+}
+.Toggle_popup button{
+  font-size: 16px;
+  margin: 0 5px;
+  font-weight: bolder;
+}
 .popup_order label{
   font-weight: bolder;
 }
@@ -258,6 +288,10 @@ p{
 }
 @media (max-width: 575.98px) { 
   .popup_order{
+    width: 340px;
+    left: calc(50% - 170px);
+  }
+  .Toggle_popup{
     width: 340px;
     left: calc(50% - 170px);
   }
