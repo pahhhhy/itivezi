@@ -5,7 +5,6 @@ interface AllUserTables{
 }
 interface Usertables{
     affiliation:String[]
-   
     name:string
     phoneNumber:number
     place:string
@@ -33,6 +32,7 @@ export const usefireUserStore = defineStore({
         }
     },
     actions:{
+      //データを更新する
         async roadFireUseData(uid:string) {
             return new Promise((resolve, reject) => {
               const countRef = fireRef(getDatabase(), 'UserData/'+uid)
@@ -48,7 +48,9 @@ export const usefireUserStore = defineStore({
                 reject(error)
               });
             });
-          },async AllroadFireUseData():Promise<AllUserTables> {
+          },
+          //全てのデータを取得する。
+          async AllroadFireUseData():Promise<AllUserTables> {
             return new Promise((resolve, reject) => {
               const countRef = fireRef(getDatabase(), 'UserData/')
               onValue(countRef, (snapshot) => {
@@ -62,7 +64,9 @@ export const usefireUserStore = defineStore({
                 reject(error)
               });
             });
-          },async update(data: Usertables,uid:string): Promise<void> {
+          },
+          //uidのデータを更新する。
+          async update(data: Usertables,uid:string): Promise<void> {
             const db = getDatabase();
             return new Promise((resolve, reject) => {
               set(fireRef(db, `UserData/${uid}`), data)
@@ -74,7 +78,9 @@ export const usefireUserStore = defineStore({
                   reject(error); // エラーが発生した場合は reject を呼び出す
                 });
             });
-          },async delete(uid:string|number): Promise<void> {
+          },
+          //特定のuidのデータを消す。
+          async delete(uid:string|number): Promise<void> {
             const db = getDatabase();
             return new Promise((resolve, reject) => {
               remove(fireRef(db, `UserData/${uid}`))
