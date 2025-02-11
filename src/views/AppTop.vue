@@ -3,14 +3,49 @@ import {ref,watch,onMounted} from 'vue'
 import {RouterLink} from 'vue-router'
 import AppTopOwner from './components/AppTop/AppTopOwner.vue';
 import { useUserStore } from '@/stores/userData';
+import { usefireUserStore } from '@/stores/fireUserdata';
+import { useVegeStore } from '@/stores/vege';
+import { useCartStore } from '@/stores/cart';
+import { useFireOrderStore } from '@/stores/fireOrder';
+import { useSortVegeStore } from '@/stores/sortByVege';
 const userStore=useUserStore()
 const currentUser = ref(userStore.currentUser);
 const loadtime=ref<boolean>(true)
+const vegeStore=useVegeStore()
+const sortVegeStore=useSortVegeStore()
+const FireOrderStore=useFireOrderStore()
+const fireUseStore=usefireUserStore()
+const CartStore=useCartStore()
+enum SortMode{
+    All="all",
+    Kawasaki="川崎",
+    Murone="室根",
+    Other="その他"
+}
+async function initData(){
+  await userStore.roadUserData()
+  await vegeStore.roadData()
+  await FireOrderStore.roadData()
+  await sortVegeStore.roadData(SortMode.All)
+  CartStore.roadData()
+  currentUser.value=userStore.currentUser
+  if(currentUser.value){
+    await fireUseStore.roadFireUseData(currentUser.value.uid)
+  }
+  else{
+    console.log("error")
+  }
+  
+}
 watch(() => userStore.currentUser, (newUser) => {
   currentUser.value = newUser;
 });
 onMounted(() => {
-  setTimeout(() => {
+  
+  setTimeout(async () => {
+    if(currentUser.value){
+      await initData()
+    }
     loadtime.value=false;
   }, 1000);
 });
