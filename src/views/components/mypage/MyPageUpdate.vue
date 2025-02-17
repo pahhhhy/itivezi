@@ -124,7 +124,7 @@ watch(() => fireOrderStore.OrderAllData, (newUser) => {
 watchEffect(() => {
   // currentUserがnullでない場合のみデータを読み込む
   if (currentUser.value) {
-    const countRef = fireRef(getDatabase(), `UserData/${currentUser.value.uid}`)
+    const countRef = fireRef(getDatabase(), `testUser/${currentUser.value.uid}`)
     onValue(countRef, (snapshot) => {
       myData.value = snapshot.val()
       myRole.value = myData.value.role
@@ -188,7 +188,7 @@ async function writeVege(
 ) {
   const db = getDatabase();
   try {
-    await update(fireRef(db, 'Vegetable/' + vege + "/" + unique), {
+    await update(fireRef(db, 'testVege/' + vege + "/" + unique), {
       farmer: farmerVege,
     });
     console.log(`${vege} (${unique}) のfarmerを ${farmerVege} に更新しました`);
@@ -200,7 +200,7 @@ async function writeOrder(unique: string, newName: string) {
   const db = getDatabase();
   if (currentUser.value != null) {
     try {
-      await update(fireRef(db, 'Orders/' + currentUser.value.uid + "/" + unique), {
+      await update(fireRef(db, 'testOrders/' + currentUser.value.uid + "/" + unique), {
         orderName: newName,
       });
       console.log(`注文 ${unique} の名義を ${newName} に更新しました`);
@@ -300,7 +300,7 @@ function writeUserdata(
 
   // いずれかのデータがあればデータベースに書き込む
   if (Object.keys(updates).length > 0) {
-    update(fireRef(db, 'UserData/' + uid), updates)
+    update(fireRef(db, 'testUser/' + uid), updates)
   }
 }
 function filterByFarmerName(vegetables: Vegetables, farmerName: string): Vegetables {

@@ -16,7 +16,7 @@ export const useSortVegeStore = defineStore({
     actions:{
         async roadData(mode:SortMode) {
             return new Promise((resolve, reject) => {
-              const countRef = fireRef(getDatabase(), `/sortByVege/${mode}`)
+              const countRef = fireRef(getDatabase(), `/testsortByVege/${mode}`)
               onValue(countRef, (snapshot) => {
                 const data = snapshot.val()
                 if (data) {
@@ -33,7 +33,7 @@ export const useSortVegeStore = defineStore({
           async update(data: string[], mode: SortMode): Promise<void> {
             const db = getDatabase();
             return new Promise((resolve, reject) => {
-              set(fireRef(db, `sortByVege/${mode}`), data)
+              set(fireRef(db, `testsortByVege/${mode}`), data)
                 .then(() => {
                   resolve(); // 成功した場合に resolve を呼び出す
                 })

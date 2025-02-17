@@ -402,5 +402,8 @@ p{
   .item_group{
     width: 340px;
   }
+  .cart_popup{
+    width: 340px;
+  }
 }
 </style>

@@ -24,7 +24,7 @@ const input = ref<HTMLInputElement | null>(null);
 const searchResult = ref<searchResultUsers[] | null>(null);
 const {usersPublicData, getUserPublicData} = useUserDataStore()
 const db = getDatabase()
-const usersRef = fireRef(db, 'UserData/')
+const usersRef = fireRef(db, 'testUser/')
 
 
 const searchUser = async () => {
@@ -32,7 +32,7 @@ const searchUser = async () => {
   if (!input.value) return;
   const searchWord = input.value.value;
 
-  // /UserData/<uid>/nameにユーザー名がある
+  // /testUser/<uid>/nameにユーザー名がある
   // 技術的に前方一致検索 uf8ffはUnicodeの最後の方の文字
   const q = query(usersRef, orderByChild('name'), startAt(searchWord), endAt(searchWord + '\uf8ff'));
   const snapshot = await get(q);

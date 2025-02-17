@@ -28,7 +28,7 @@ export const useVegeStore = defineStore({
     actions:{
         async roadData() {
             return new Promise((resolve, reject) => {
-              const countRef = fireRef(getDatabase(), 'Vegetable/')
+              const countRef = fireRef(getDatabase(), 'testVege/')
               onValue(countRef, (snapshot) => {
                 const data = snapshot.val()
                 if (data) {
@@ -47,13 +47,13 @@ export const useVegeStore = defineStore({
           },
           getUniqueKey(){
             const db = getDatabase();
-            const newRef = fireRef(db, 'Vegetable/');
+            const newRef = fireRef(db, 'testVege/');
             const uniqueKey = push(newRef).key;
             return uniqueKey
           },
           async updateNewVegeData(name: string) {
             const db = getDatabase();
-            const path =`Vegetable/`
+            const path =`testVege/`
             const updateData = { [name]: ""};  // オブジェクト形式に変換
             await update(fireRef(db, path), updateData);
           },
@@ -69,7 +69,7 @@ export const useVegeStore = defineStore({
           
               uniqueKeys.forEach((uniqueKey) => {
                 const updatePromise = set(
-                  fireRef(db, `Vegetable/${vegeKey}/${uniqueKey}`),
+                  fireRef(db, `testVege/${vegeKey}/${uniqueKey}`),
                   data[vegeKey][uniqueKey]
                 );
                 updatePromises.push(updatePromise);
@@ -83,7 +83,7 @@ export const useVegeStore = defineStore({
           },
           async deleteVegeData(vegeName:string,unique:string|number){
             const db = getDatabase();
-            const path = `Vegetable/${vegeName}/${unique}`
+            const path = `testVege/${vegeName}/${unique}`
             // 更新するデータを指定
             const updates = {
               state: "Discontinued"
@@ -98,7 +98,7 @@ export const useVegeStore = defineStore({
           },
           async deleteAllVegeData(vegeName: string) {
             const db = getDatabase();
-            const path = `Vegetable/${vegeName}`;
+            const path = `testVege/${vegeName}`;
             
             try {
               // まず、指定された vegeName に対応するすべての uniqueKey を取得する
