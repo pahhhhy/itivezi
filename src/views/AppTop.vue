@@ -66,7 +66,7 @@ onMounted(() => {
     </div>
   </article>
   <article v-if="currentUser != null&&!loadtime">
-
+    <h1>ログインしました</h1>
     <AppTopOwner ></AppTopOwner>
   </article>
 </template>
